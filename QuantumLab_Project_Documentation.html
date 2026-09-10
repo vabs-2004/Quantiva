@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quantiva — Technical Project Documentation</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    :root {
+      --primary: #0f172a;
+      --accent: #3b82f6;
+      --accent-dark: #1d4ed8;
+      --surface: #f8fafc;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --code-bg: #1e293b;
+      --code-text: #e2e8f0;
+      --table-header: #0f172a;
+      --table-alt: #f1f5f9;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --info: #06b6d4;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text);
+      line-height: 1.7;
+      background: #fff;
+      max-width: 210mm;
+      margin: 0 auto;
+      padding: 20mm 18mm;
+      font-size: 11pt;
+    }
+
+    /* ─── COVER PAGE ────────────────────────── */
+    .cover-page {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      text-align: center;
+      page-break-after: always;
+      border: 3px solid var(--primary);
+      padding: 40px;
+      position: relative;
+    }
+    .cover-page::before {
+      content: '';
+      position: absolute;
+      top: 8px; left: 8px; right: 8px; bottom: 8px;
+      border: 1px solid var(--border);
+    }
+    .cover-org { font-size: 13pt; color: var(--text-muted); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 15px; font-weight: 500; }
+    .cover-title { font-size: 32pt; font-weight: 800; color: var(--primary); line-height: 1.2; margin-bottom: 10px; }
+    .cover-subtitle { font-size: 14pt; color: var(--accent-dark); margin-bottom: 40px; font-weight: 500; }
+    .cover-line { width: 80px; height: 4px; background: linear-gradient(90deg, var(--accent), var(--accent-dark)); margin: 0 auto 40px; border-radius: 2px; }
+    .cover-meta { font-size: 10pt; color: var(--text-muted); line-height: 2; }
+    .cover-meta strong { color: var(--text); }
+    .cover-badge {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      padding: 6px 20px;
+      border-radius: 4px;
+      font-size: 9pt;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 30px;
+      font-weight: 600;
+    }
+
+    /* ─── HEADINGS ──────────────────────────── */
+    h1 {
+      font-size: 22pt;
+      font-weight: 800;
+      color: var(--primary);
+      border-bottom: 3px solid var(--accent);
+      padding-bottom: 8px;
+      margin: 40px 0 20px;
+      page-break-after: avoid;
+    }
+    h2 {
+      font-size: 15pt;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 30px 0 14px;
+      border-left: 4px solid var(--accent);
+      padding-left: 12px;
+      page-break-after: avoid;
+    }
+    h3 {
+      font-size: 12pt;
+      font-weight: 600;
+      color: var(--accent-dark);
+      margin: 22px 0 10px;
+      page-break-after: avoid;
+    }
+    h4 {
+      font-size: 11pt;
+      font-weight: 600;
+      color: var(--text);
+      margin: 16px 0 8px;
+    }
+
+    /* ─── PARAGRAPHS ───────────────────────── */
+    p { margin-bottom: 12px; text-align: justify; }
+    
+    /* ─── TABLES ────────────────────────────── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 24px;
+      font-size: 10pt;
+      page-break-inside: avoid;
+    }
+    thead { background: var(--table-header); }
+    th {
+      color: white;
+      text-align: left;
+      padding: 10px 12px;
+      font-weight: 600;
+      font-size: 9.5pt;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    td {
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tr:nth-child(even) { background: var(--table-alt); }
+
+    /* ─── CODE ──────────────────────────────── */
+    code {
+      font-family: 'JetBrains Mono', 'Consolas', monospace;
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 9.5pt;
+      color: #0f172a;
+    }
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 16px 18px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9pt;
+      line-height: 1.6;
+      margin: 12px 0 20px;
+      page-break-inside: avoid;
+    }
+    pre code { background: none; padding: 0; color: inherit; }
+
+    /* ─── LISTS ─────────────────────────────── */
+    ul, ol { margin: 8px 0 16px 24px; }
+    li { margin-bottom: 5px; }
+
+    /* ─── CALLOUT BOXES ─────────────────────── */
+    .callout {
+      padding: 14px 18px;
+      border-radius: 6px;
+      margin: 16px 0;
+      border-left: 4px solid;
+      page-break-inside: avoid;
+    }
+    .callout-info { background: #eff6ff; border-color: var(--accent); }
+    .callout-warning { background: #fffbeb; border-color: var(--warning); }
+    .callout-danger { background: #fef2f2; border-color: var(--danger); }
+    .callout-success { background: #f0fdf4; border-color: var(--success); }
+    .callout-title { font-weight: 700; margin-bottom: 4px; font-size: 10pt; }
+    .callout p { margin-bottom: 4px; font-size: 10pt; }
+
+    /* ─── BADGES ────────────────────────────── */
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 8.5pt;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    .badge-free { background: #dcfce7; color: #166534; }
+    .badge-paid { background: #fef3c7; color: #92400e; }
+    .badge-critical { background: #fee2e2; color: #991b1b; }
+
+    /* ─── SECTION DIVIDER ──────────────────── */
+    .section-break {
+      border: none;
+      border-top: 2px solid var(--border);
+      margin: 30px 0;
+    }
+
+    /* ─── TOC ───────────────────────────────── */
+    .toc {
+      page-break-after: always;
+    }
+    .toc ul { list-style: none; margin-left: 0; }
+    .toc > ul > li { margin-bottom: 8px; font-weight: 600; }
+    .toc > ul > li > ul > li { font-weight: 400; margin-bottom: 3px; font-size: 10pt; color: var(--text-muted); }
+    .toc a { text-decoration: none; color: var(--text); }
+    .toc a:hover { color: var(--accent); }
+    .toc-num { color: var(--accent); margin-right: 6px; font-weight: 700; }
+
+    /* ─── ARCHITECTURE BOX ─────────────────── */
+    .arch-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 16px 0;
+    }
+
+    /* ─── PRINT ─────────────────────────────── */
+    @page { margin: 0; }
+    @media print {
+      body { padding: 15mm 15mm; font-size: 10pt; }
+      .cover-page { min-height: 95vh; }
+      h1 { page-break-before: always; }
+      h1:first-of-type { page-break-before: avoid; }
+    }
+
+    .watermark { position: fixed; bottom: 10px; right: 10px; font-size: 7pt; color: #ccc; }
+
+    /* File tree */
+    .file-tree { font-family: 'JetBrains Mono', monospace; font-size: 9pt; background: var(--surface); padding: 16px 20px; border-radius: 6px; border: 1px solid var(--border); line-height: 1.8; margin: 12px 0 20px; }
+    .file-tree .dir { color: var(--accent-dark); font-weight: 600; }
+    .file-tree .file { color: var(--text-muted); }
+    .file-tree .comment { color: #94a3b8; font-style: italic; }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      mermaid.initialize({ 
+        startOnLoad: true, 
+        theme: "base", 
+        themeVariables: { 
+          fontFamily: "Inter, sans-serif",
+          fontSize: "18px"
+        } 
+      });
+    });
+  </script>
+</head>
+<body>
+
+<!-- ═════════════════════════════════════════════════════ -->
+<!--                    COVER PAGE                       -->
+<!-- ═════════════════════════════════════════════════════ -->
+<div class="cover-page">
+  <div class="cover-org">GitHappens (GitHappens) — DRDO</div>
+  <div class="cover-title">Quantiva</div>
+  <div class="cover-subtitle">Technical Project Documentation</div>
+  <div class="cover-line"></div>
+  <div class="cover-meta">
+    <strong>Document Type:</strong> Comprehensive Technical Reference &amp; Deployment Guide<br>
+    <strong>Version:</strong> 1.0.0<br>
+    <strong>Classification:</strong> Internal — For Official Use<br>
+    <strong>Date:</strong> 30 July 2026<br>
+    <strong>Prepared By:</strong> QuantumLab Development Team<br>
+    <strong>Organization:</strong> DRDO — GitHappens<br><br>
+    <strong>Live URL:</strong> https://GitHappensqsim.vercel.app/<br>
+  </div>
+  <div class="cover-badge">CONFIDENTIAL — PRODUCTION GRADE</div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════ -->
+<!--                 TABLE OF CONTENTS                   -->
+<!-- ═════════════════════════════════════════════════════ -->
+<div class="toc">
+  <h1 style="border-bottom: 3px solid var(--accent);">Table of Contents</h1>
+  <ul>
+    <li><span class="toc-num">1.</span> <a href="#exec-summary">Executive Summary</a></li>
+    <li><span class="toc-num">2.</span> <a href="#tech-stack">Technology Stack</a>
+      <ul>
+        <li>2.1 Frontend Technologies</li>
+        <li>2.2 Backend Technologies</li>
+        <li>2.3 Quantum Execution Engine</li>
+        <li>2.4 Third-Party Services &amp; APIs</li>
+      </ul>
+    </li>
+    <li><span class="toc-num">3.</span> <a href="#architecture">System Architecture</a>
+      <ul>
+        <li>3.1 High-Level Architecture</li>
+        <li>3.2 Directory Structure</li>
+        <li>3.3 Data Flow</li>
+      </ul>
+    </li>
+    <li><span class="toc-num">4.</span> <a href="#features">Feature Catalogue</a></li>
+    <li><span class="toc-num">5.</span> <a href="#database">Database Design</a></li>
+    <li><span class="toc-num">6.</span> <a href="#api-reference">API Reference</a></li>
+    <li><span class="toc-num">7.</span> <a href="#security">Security Architecture</a></li>
+    <li><span class="toc-num">8.</span> <a href="#auth">Authentication System</a></li>
+    <li><span class="toc-num">9.</span> <a href="#deployment">Deployment Guide</a>
+      <ul>
+        <li>9.1 Local Development Setup</li>
+        <li>9.2 Production Deployment (Vercel + Render)</li>
+        <li>9.3 Cloudinary Configuration</li>
+        <li>9.4 Google OAuth Setup</li>
+        <li>9.5 GNews API Integration</li>
+        <li>9.6 Redis Cache (Optional)</li>
+      </ul>
+    </li>
+    <li><span class="toc-num">10.</span> <a href="#env-vars">Environment Variables Reference</a></li>
+    <li><span class="toc-num">11.</span> <a href="#pricing">Pricing &amp; Cost Analysis</a></li>
+    <li><span class="toc-num">12.</span> <a href="#migration">Server Migration Guide</a></li>
+    <li><span class="toc-num">13.</span> <a href="#scaling">Scaling &amp; Performance</a></li>
+    <li><span class="toc-num">14.</span> <a href="#theming">Theming System</a></li>
+    <li><span class="toc-num">15.</span> <a href="#quantum-engine">Quantum Execution Engine</a></li>
+    <li><span class="toc-num">16.</span> <a href="#admin-panel">Admin Panel</a></li>
+    <li><span class="toc-num">17.</span> <a href="#troubleshooting">Troubleshooting &amp; Known Issues</a></li>
+    <li><span class="toc-num">18.</span> <a href="#future">Future Roadmap</a></li>
+    <li><span class="toc-num">19.</span> <a href="#appendix">Appendix</a></li>
+  </ul>
+</div>
+
+<!-- ═════════════════════════════════════════════════════ -->
+<!--              1. EXECUTIVE SUMMARY                   -->
+<!-- ═════════════════════════════════════════════════════ -->
+<h1 id="exec-summary">1. Executive Summary</h1>
+
+<p><strong>Quantiva</strong> is a production-grade, full-stack web platform developed for the <strong>GitHappens (GitHappens), Defence Research and Development Organisation (DRDO)</strong>. It serves as an interactive research and education platform for quantum algorithm simulation, experimentation, and visualization.</p>
+
+<p>The platform bridges the gap between <strong>Quantum Engineers/Data Scientists</strong> (who write Jupyter Notebooks with Qiskit) and <strong>End Users</strong> (researchers, students, and analysts who interact via a modern web dashboard). Users can learn about quantum computing concepts, configure algorithm parameters through a UI, execute quantum circuits on an IBM Qiskit Aer simulator backend, and visualize results — including quantum circuits, histograms, Bloch spheres, and measurement probabilities — all within the browser.</p>
+
+<h2>Key Capabilities</h2>
+<ul>
+  <li><strong>Quantum Algorithm Execution:</strong> 12 pre-built quantum algorithms (Deutsch, Grover, Shor, QFT, VQE, etc.) runnable with custom parameters</li>
+  <li><strong>Python Sandbox:</strong> A full in-browser code editor for writing and executing arbitrary Python/Qiskit code</li>
+  <li><strong>3D Bloch Sphere Visualization:</strong> Interactive WebGL-based quantum state visualization using Three.js</li>
+  <li><strong>Circuit Simulator:</strong> Drag-and-drop quantum gate builder with real-time state vector computation</li>
+  <li><strong>Circuit Challenges:</strong> Gamified puzzle system for building circuits that match target output states</li>
+  <li><strong>Entanglement Lab:</strong> Bell State creation and measurement visualization</li>
+  <li><strong>Content Management System:</strong> Full CMS for Documentation, Blogs (with likes/comments), News, and Courses with video lectures</li>
+  <li><strong>Live News Feed:</strong> Real-time quantum computing news via GNews API integration</li>
+  <li><strong>Admin Dashboard:</strong> Comprehensive analytics, user management, and content management panel</li>
+  <li><strong>Google OAuth + JWT Authentication:</strong> Dual authentication with role-based access control</li>
+  <li><strong>Dark/Light Theme:</strong> Seamless theme toggling via CSS Variables</li>
+</ul>
+
+<hr class="section-break">
+
+<!-- ═════════════════════════════════════════════════════ -->
+<!--              2. TECHNOLOGY STACK                    -->
+<!-- ═════════════════════════════════════════════════════ -->
+<h1 id="tech-stack">2. Technology Stack</h1>
+
+<h2>2.1 Frontend Technologies</h2>
+<table>
+  <thead><tr><th>Technology</th><th>Version</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td>React</td><td>19.2.7</td><td>Core UI framework (latest with concurrent features)</td></tr>
+    <tr><td>Vite</td><td>8.1.1</td><td>Build tool &amp; dev server (HMR, ESBuild)</td></tr>
+    <tr><td>React Router</td><td>7.18.1</td><td>Client-side routing with nested routes</td></tr>
+    <tr><td>Tailwind CSS</td><td>4.3.2</td><td>Utility-first CSS framework</td></tr>
+    <tr><td>Framer Motion</td><td>12.42.2</td><td>Page transitions, micro-animations, scroll animations</td></tr>
+    <tr><td>Three.js / R3F</td><td>0.185.1</td><td>3D Bloch Sphere and Quantum Atom visualization</td></tr>
+    <tr><td>@react-three/drei</td><td>10.7.7</td><td>Three.js helpers (OrbitControls, etc.)</td></tr>
+    <tr><td>Axios</td><td>1.18.1</td><td>HTTP client with interceptors for JWT</td></tr>
+    <tr><td>React Quill (New)</td><td>3.8.3</td><td>Rich Text Editor for CMS content</td></tr>
+    <tr><td>KaTeX</td><td>0.17.0</td><td>LaTeX-style math formula rendering</td></tr>
+    <tr><td>PrismJS</td><td>1.30.0</td><td>Code syntax highlighting</td></tr>
+    <tr><td>Recharts</td><td>3.9.2</td><td>Analytics charts in Admin Panel</td></tr>
+    <tr><td>Lenis</td><td>1.3.25</td><td>Smooth scrolling library</td></tr>
+    <tr><td>Sonner</td><td>2.0.7</td><td>Toast notifications</td></tr>
+    <tr><td>@react-oauth/google</td><td>0.13.5</td><td>Google Sign-In button component</td></tr>
+    <tr><td>@dnd-kit</td><td>6.3.1</td><td>Drag-and-drop for circuit builder &amp; docs reordering</td></tr>
+    <tr><td>Marked / Turndown</td><td>18.0.6 / 7.2.4</td><td>Markdown ↔ HTML conversion</td></tr>
+  </tbody>
+</table>
+
+<h2>2.2 Backend Technologies</h2>
+<table>
+  <thead><tr><th>Technology</th><th>Version</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td>Node.js</td><td>18+ (LTS)</td><td>Server runtime</td></tr>
+    <tr><td>Express.js</td><td>5.1.0</td><td>Web framework (latest v5)</td></tr>
+    <tr><td>Mongoose</td><td>9.7.4</td><td>MongoDB ODM</td></tr>
+    <tr><td>JSON Web Token</td><td>9.0.3</td><td>JWT authentication</td></tr>
+    <tr><td>bcryptjs</td><td>3.0.3</td><td>Password hashing (bcrypt)</td></tr>
+    <tr><td>Helmet</td><td>8.2.0</td><td>HTTP security headers</td></tr>
+    <tr><td>express-rate-limit</td><td>8.5.2</td><td>DDoS/brute-force protection</td></tr>
+    <tr><td>express-mongo-sanitize</td><td>2.2.0</td><td>NoSQL injection prevention</td></tr>
+    <tr><td>DOMPurify + jsdom</td><td>3.4.12 / 29.1.1</td><td>Server-side HTML sanitization (XSS prevention)</td></tr>
+    <tr><td>Multer</td><td>2.2.0</td><td>File upload handling (multipart/form-data)</td></tr>
+    <tr><td>Cloudinary SDK</td><td>1.41.3</td><td>Cloud image storage (production)</td></tr>
+    <tr><td>google-auth-library</td><td>10.9.0</td><td>Google OAuth token verification</td></tr>
+    <tr><td>Redis</td><td>6.1.0</td><td>Response caching (optional)</td></tr>
+    <tr><td>CORS</td><td>2.8.5</td><td>Cross-Origin Resource Sharing</td></tr>
+    <tr><td>dotenv</td><td>17.4.2</td><td>Environment variable management</td></tr>
+  </tbody>
+</table>
+
+<h2>2.3 Quantum Execution Engine (Python)</h2>
+<table>
+  <thead><tr><th>Package</th><th>Version</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td>Qiskit</td><td>1.3.1</td><td>Quantum circuit construction &amp; execution</td></tr>
+    <tr><td>Qiskit Aer</td><td>0.15.1</td><td>High-performance quantum simulator</td></tr>
+    <tr><td>Papermill</td><td>2.6.0</td><td>Parameterized Jupyter Notebook execution</td></tr>
+    <tr><td>Jupyter</td><td>1.1.1</td><td>Notebook runtime kernel</td></tr>
+    <tr><td>Matplotlib</td><td>3.10.0</td><td>Circuit diagram &amp; histogram rendering</td></tr>
+    <tr><td>NumPy, SciPy, Pandas</td><td>latest</td><td>Scientific computation</td></tr>
+    <tr><td>Sympy, NetworkX</td><td>latest</td><td>Symbolic math &amp; graph algorithms</td></tr>
+    <tr><td>pylatexenc</td><td>latest</td><td>LaTeX rendering in circuit diagrams</td></tr>
+  </tbody>
+</table>
+
+<h2>2.4 Third-Party Services &amp; APIs</h2>
+<table>
+  <thead><tr><th>Service</th><th>Purpose</th><th>Current Tier</th></tr></thead>
+  <tbody>
+    <tr><td>MongoDB Atlas</td><td>Cloud database (NoSQL)</td><td><span class="badge badge-free">Free (M0 Cluster)</span></td></tr>
+    <tr><td>Vercel</td><td>Frontend hosting &amp; CDN</td><td><span class="badge badge-free">Free (Hobby)</span></td></tr>
+    <tr><td>Render</td><td>Backend hosting (Node.js)</td><td><span class="badge badge-free">Free Tier</span></td></tr>
+    <tr><td>Cloudinary</td><td>Image CDN &amp; storage</td><td><span class="badge badge-free">Free (25 credits/month)</span></td></tr>
+    <tr><td>Google Cloud Console</td><td>OAuth 2.0 (Sign In with Google)</td><td><span class="badge badge-free">Free</span></td></tr>
+    <tr><td>GNews API</td><td>Live quantum news feed</td><td><span class="badge badge-free">Free (100 req/day)</span></td></tr>
+    <tr><td>Redis (Optional)</td><td>Response caching</td><td><span class="badge badge-free">Disabled by default</span></td></tr>
+  </tbody>
+</table>
+
+<hr class="section-break">
+
+<!-- ═════════════════════════════════════════════════════ -->
+<!--              3. SYSTEM ARCHITECTURE                 -->
+<!-- ═════════════════════════════════════════════════════ -->
+<h1 id="architecture">3. System Architecture</h1>
+
+<h2>3.1 High-Level Architecture</h2>
+
+<style>
+.mermaid svg {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: auto !important;
+}
+.mermaid {
+    width: 100%;
+    padding: 20px 0;
+}
+</style>
+<div class="arch-box" style="border: none; background: transparent; padding: 0; display: flex; justify-content: center;">
+<pre class="mermaid">
+flowchart TD
+    %% Styling Classes\n    classDef default font-size:16px,padding:10px
+    classDef client fill:#f8fafc,stroke:#3b82f6,stroke-width:2px,color:#0f172a,rx:8px,ry:8px
+    classDef backend fill:#f8fafc,stroke:#10b981,stroke-width:2px,color:#0f172a,rx:8px,ry:8px
+    classDef database fill:#f8fafc,stroke:#f59e0b,stroke-width:2px,color:#0f172a,rx:8px,ry:8px
+    classDef python fill:#f8fafc,stroke:#8b5cf6,stroke-width:2px,color:#0f172a,rx:8px,ry:8px
+    classDef external fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,color:#0f172a,stroke-dasharray: 5 5,rx:8px,ry:8px
+    classDef component fill:#ffffff,stroke:#cbd5e1,stroke-width:1px,color:#334155,rx:4px,ry:4px,font-size:16px
+
+    subgraph Client[💻 CLIENT BROWSER - React 19 SPA Vite]
+        direction TB
+        UI[Pages: Dashboard, Algorithms, Sandbox, CMS]:::component
+        Ctx[Providers: Auth, Theme, Algorithm]:::component
+        UI -.- Ctx
+    end
+    class Client client
+
+    subgraph Backend[⚙️ EXPRESS.JS BACKEND - Node.js]
+        direction TB
+        Sec[Security Layer: Helmet, CORS, Rate Limit]:::component
+        API[API Routes: /api/algorithms, /api/auth...]:::component
+        Mid[Middleware: Caching, Auth Checks]:::component
+        Sec --> API --> Mid
+    end
+    class Backend backend
+
+    subgraph DB[🗄️ DATABASE]
+        Mongo[(MongoDB Atlas)]:::component
+    end
+    class DB database
+
+    subgraph QEngine[⚛️ QUANTUM EXECUTION ENGINE - Python]
+        direction TB
+        PM[Papermill + Qiskit Aer]:::component
+        NB[Jupyter Notebooks: 12 Algorithms]:::component
+        PM --> NB
+    end
+    class QEngine python
+
+    subgraph ExtServices[☁️ EXTERNAL APIs]
+        direction TB
+        Ext[Cloudinary, Google OAuth, GNews API]:::component
+    end
+    class ExtServices external
+
+    Client -- "HTTPS (Axios + JWT)" --> Backend
+    Backend --> DB
+    Backend -- "Spawns child process" --> QEngine
+    Backend --> ExtServices
+</pre>
+</div>
+
+<h2>3.2 Complete Directory Structure</h2>
+
+<div class="file-tree">
+<span class="dir">QuantumSimulationLab/</span><br>
+├── <span class="file">.env</span> <span class="comment"># All environment variables (secrets)</span><br>
+├── <span class="file">.env.production</span> <span class="comment"># Production API URLs (Vite bakes these at build time)</span><br>
+├── <span class="file">index.html</span> <span class="comment"># HTML entry point with SEO meta tags</span><br>
+├── <span class="file">package.json</span> <span class="comment"># Frontend dependencies &amp; scripts</span><br>
+├── <span class="file">vite.config.js</span> <span class="comment"># Vite config (React, Tailwind, COOP header)</span><br>
+├── <span class="file">vercel.json</span> <span class="comment"># Vercel SPA rewrite rules</span><br>
+├── <span class="dir">src/</span> <span class="comment"># ── Frontend Source Code ──</span><br>
+│&nbsp;&nbsp; ├── <span class="file">App.jsx</span> <span class="comment"># Root: Providers → Router → AppInner</span><br>
+│&nbsp;&nbsp; ├── <span class="file">main.jsx</span> <span class="comment"># React DOM entry point</span><br>
+│&nbsp;&nbsp; ├── <span class="file">index.css</span> <span class="comment"># Global styles, Theme System (CSS Vars)</span><br>
+│&nbsp;&nbsp; ├── <span class="dir">components/</span> <span class="comment"># 23 reusable UI components</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="dir">Navbar/</span>, <span class="dir">Sidebar/</span>, <span class="dir">Footer/</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="dir">BlochSphereViewer/</span> <span class="comment"># 3D WebGL Bloch Sphere</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="dir">QuantumAtom3D/</span> <span class="comment"># 3D quantum atom animation</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="dir">QuantumCircuitViewer/</span> <span class="comment"># Circuit image display</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="dir">RichTextEditor/</span> <span class="comment"># ReactQuill with 3 modes</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="dir">MathHTMLContainer/</span> <span class="comment"># KaTeX math rendering</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="dir">ProtectedRoute/</span> <span class="comment"># Auth guard component</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="dir">AnimatedPage/</span> <span class="comment"># Framer Motion page transition wrapper</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="dir">ThemeToggle/</span> <span class="comment"># Dark/Light mode switch</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; └── ... <span class="comment">(AlgorithmCard, Button, Loading, etc.)</span><br>
+│&nbsp;&nbsp; ├── <span class="dir">context/</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="file">AuthContext.jsx</span> <span class="comment"># JWT auth state + Google OAuth</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="file">AlgorithmContext.jsx</span> <span class="comment"># Algorithms list cache</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; └── <span class="file">ThemeContext.jsx</span> <span class="comment"># Dark/Light theme toggle</span><br>
+│&nbsp;&nbsp; ├── <span class="dir">hooks/</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="file">useAlgorithm.js</span> <span class="comment"># Algorithm data fetching hook</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="file">useSmoothScroll.js</span> <span class="comment"># Lenis smooth scrolling</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; └── <span class="file">usePageTracking.jsx</span> <span class="comment"># Analytics page visit tracker</span><br>
+│&nbsp;&nbsp; ├── <span class="dir">pages/</span> <span class="comment"># 17 page modules</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="dir">LandingPage/</span> <span class="comment"># Public marketing page</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="dir">LoginPage/</span> <span class="comment"># Login + Registration</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="dir">DashboardPage/</span> <span class="comment"># User home (algorithm grid)</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="dir">AlgorithmPage/</span> <span class="comment"># Algorithm execution + results</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="dir">SandboxPage/</span> <span class="comment"># Python code editor</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="dir">CircuitSimulatorPage/</span> <span class="comment"># Drag-and-drop circuit builder</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="dir">CircuitChallengesPage/</span> <span class="comment"># Circuit puzzles</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="dir">EntanglementLabPage/</span> <span class="comment"># Bell State experiments</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="dir">QuantumPlayground/</span> <span class="comment"># Playground hub</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="dir">BlochSphereFullScreenPage/</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="dir">DocsPage/</span>, <span class="dir">BlogsPage/</span>, <span class="dir">BlogViewerPage/</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="dir">NewsPage/</span> <span class="comment"># DB News + Live GNews</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="dir">CoursesPage/</span> <span class="comment"># Video courses catalog + viewer</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; └── <span class="dir">AdminPanel/</span> <span class="comment"># 10 admin pages (see Section 16)</span><br>
+│&nbsp;&nbsp; ├── <span class="dir">routes/</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; └── <span class="file">AppRoutes.jsx</span> <span class="comment"># All route definitions</span><br>
+│&nbsp;&nbsp; ├── <span class="dir">services/</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; └── <span class="file">api.js</span> <span class="comment"># Axios client + all API functions</span><br>
+│&nbsp;&nbsp; └── <span class="dir">utils/</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; └── <span class="file">constants.js</span> <span class="comment"># Algorithm series order, etc.</span><br>
+├── <span class="dir">backend/</span> <span class="comment"># ── Backend Source Code ──</span><br>
+│&nbsp;&nbsp; ├── <span class="file">server.js</span> <span class="comment"># Express entry point (port 8000)</span><br>
+│&nbsp;&nbsp; ├── <span class="file">package.json</span> <span class="comment"># Backend dependencies</span><br>
+│&nbsp;&nbsp; ├── <span class="file">requirements.txt</span> <span class="comment"># Python dependencies</span><br>
+│&nbsp;&nbsp; ├── <span class="dir">config/</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; └── <span class="file">db.js</span> <span class="comment"># MongoDB connection</span><br>
+│&nbsp;&nbsp; ├── <span class="dir">middleware/</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="file">auth.js</span> <span class="comment"># JWT authenticate + adminOnly</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; └── <span class="file">cache.js</span> <span class="comment"># Redis caching middleware</span><br>
+│&nbsp;&nbsp; ├── <span class="dir">models/</span> <span class="comment"># 10 Mongoose schemas</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="file">User.js</span>, <span class="file">Algorithm.js</span>, <span class="file">Blog.js</span>, <span class="file">Doc.js</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="file">News.js</span>, <span class="file">Course.js</span>, <span class="file">Challenge.js</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── <span class="file">PlaygroundItem.js</span>, <span class="file">PageVisit.js</span><br>
+│&nbsp;&nbsp; │&nbsp;&nbsp; └── <span class="file">EducationalContent.js</span><br>
+│&nbsp;&nbsp; ├── <span class="dir">controllers/</span> <span class="comment"># 10 controller files</span><br>
+│&nbsp;&nbsp; ├── <span class="dir">routes/</span> <span class="comment"># 11 route files</span><br>
+│&nbsp;&nbsp; ├── <span class="dir">notebooks/</span> <span class="comment"># 12 Qiskit Jupyter Notebooks</span><br>
+│&nbsp;&nbsp; ├── <span class="dir">scripts/</span> <span class="comment"># Seed scripts &amp; temp challenge scripts</span><br>
+│&nbsp;&nbsp; └── <span class="dir">uploads/</span> <span class="comment"># Local image uploads (dev mode)</span><br>
+└── <span class="dir">dist/</span> <span class="comment"># Production build output (Vite)</span>
+</div>
+
+<h2>3.3 Data Flow</h2>
+<p>The system follows a decoupled client-server architecture:</p>
+<ol>
+  <li><strong>Frontend (SPA)</strong> is served as static files from Vercel's CDN. All routes are rewritten to <code>index.html</code> via <code>vercel.json</code>.</li>
+  <li><strong>API Calls</strong> are made via Axios to the Express backend on Render. Every authenticated request includes a <code>Bearer &lt;JWT&gt;</code> header.</li>
+  <li><strong>Quantum Execution</strong>: When a user runs an algorithm, the backend spawns a Python child process using <code>child_process.exec()</code>, which runs <code>papermill</code> to execute the relevant <code>.ipynb</code> notebook with user-provided parameters. Output images and text are extracted from the executed notebook and returned as JSON.</li>
+  <li><strong>Image Uploads</strong>: In development, images are saved to <code>backend/uploads/</code>. In production, they are uploaded to Cloudinary via <code>multer-storage-cloudinary</code>.</li>
+</ol>
+
+<hr class="section-break">
+
+<!-- ═════════════════════════════════════════════════════ -->
+<!--              4. FEATURE CATALOGUE                   -->
+<!-- ═════════════════════════════════════════════════════ -->
+<h1 id="features">4. Feature Catalogue</h1>
+
+<table>
+  <thead><tr><th>#</th><th>Feature</th><th>Description</th><th>Access</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>Landing Page</td><td>Marketing page with 3D quantum atom animation, smooth scrolling (Lenis), and Framer Motion scroll-triggered animations</td><td>Public</td></tr>
+    <tr><td>2</td><td>Authentication</td><td>Registration (username/password) + Google OAuth Sign-In. JWT tokens with 7-day expiry. Role-based access (user/admin)</td><td>Public</td></tr>
+    <tr><td>3</td><td>Dashboard</td><td>Grid of all quantum algorithms with search, algorithm series ordering, and quick-run access</td><td>Logged In</td></tr>
+    <tr><td>4</td><td>Algorithm Execution</td><td>Configure parameters → Execute via Qiskit Aer → View circuit diagram, measurement histogram, Bloch sphere, and console output</td><td>Logged In</td></tr>
+    <tr><td>5</td><td>3D Bloch Sphere</td><td>Interactive WebGL Bloch sphere with real-time θ/φ angle display. Full-screen mode available</td><td>Logged In</td></tr>
+    <tr><td>6</td><td>Python Sandbox</td><td>Multi-cell code editor. Execute arbitrary Python code. Install packages via pip. View images and console output</td><td>Logged In</td></tr>
+    <tr><td>7</td><td>Circuit Simulator</td><td>Drag-and-drop quantum gate builder. Build circuits with H, X, Y, Z, S, T, CX, SWAP gates. Real-time state vector simulation</td><td>Logged In</td></tr>
+    <tr><td>8</td><td>Circuit Challenges</td><td>Gamified puzzles: build circuits to match target output probability distributions. Verified via Qiskit Statevector</td><td>Logged In</td></tr>
+    <tr><td>9</td><td>Entanglement Lab</td><td>Create Bell states, apply gates, measure and visualize entanglement</td><td>Logged In</td></tr>
+    <tr><td>10</td><td>Quantum Playground</td><td>Hub page for all interactive tools (Bloch Sphere, Circuit Sim, Entanglement Lab, Challenges)</td><td>Logged In</td></tr>
+    <tr><td>11</td><td>Documentation (CMS)</td><td>Hierarchical docs with sections, subsections, drag-and-drop reordering, Rich Text editor with KaTeX math support</td><td>Public</td></tr>
+    <tr><td>12</td><td>Blogs (CMS)</td><td>Blog posts with full rich text, likes, comments, search, pagination. Blog viewer page with social interactions</td><td>Public (interactions require login)</td></tr>
+    <tr><td>13</td><td>News (CMS + GNews)</td><td>Internal news articles (admin-created) + Live quantum news from GNews API. Category auto-tagging</td><td>Public</td></tr>
+    <tr><td>14</td><td>Courses (CMS)</td><td>Video course catalog with lecture playlists. Course viewer page with video player</td><td>Public</td></tr>
+    <tr><td>15</td><td>Educational Content</td><td>Per-algorithm educational tabs: Description, Problem, Algorithm, Geometric Proof, Algebraic Proof, Code, Applications</td><td>Logged In</td></tr>
+    <tr><td>16</td><td>Admin Dashboard</td><td>Overview with quick stats and navigation to all admin functions</td><td>Admin Only</td></tr>
+    <tr><td>17</td><td>Admin Analytics</td><td>User demographics (OS, Gender, Age), Page views with time filters, Recharts visualizations</td><td>Admin Only</td></tr>
+    <tr><td>18</td><td>User Management</td><td>List all users with search/pagination. Promote/demote admin roles</td><td>Admin Only</td></tr>
+    <tr><td>19</td><td>Dark/Light Theme</td><td>System-wide theme toggle via CSS Variables on the <code>&lt;html data-theme&gt;</code> attribute</td><td>All</td></tr>
+    <tr><td>20</td><td>Page Analytics</td><td>Automatic tracking of page visits per path per day, aggregated in admin panel</td><td>Background</td></tr>
+  </tbody>
+</table>
+
+<hr class="section-break">
+
+<!-- ═════════════════════════════════════════════════════ -->
+<!--              5. DATABASE DESIGN                     -->
+<!-- ═════════════════════════════════════════════════════ -->
+<h1 id="database">5. Database Design</h1>
+
+<p>The application uses <strong>MongoDB Atlas</strong> (cloud-hosted NoSQL) via the <strong>Mongoose ODM</strong>. The database name is <code>QuantumSimulationLab</code>. Below are all 10 collections and their schemas:</p>
+
+<h2>5.1 Users Collection</h2>
+<table>
+  <thead><tr><th>Field</th><th>Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>username</code></td><td>String</td><td>required, unique, trim, min 3 chars</td><td>Login identifier</td></tr>
+    <tr><td><code>name</code></td><td>String</td><td>required, trim</td><td>Display name</td></tr>
+    <tr><td><code>email</code></td><td>String</td><td>required, unique, lowercase</td><td>Also used for Google OAuth match</td></tr>
+    <tr><td><code>dob</code></td><td>Date</td><td>required</td><td>Used for age analytics</td></tr>
+    <tr><td><code>gender</code></td><td>String</td><td>enum: Male, Female, Other</td><td>Used for gender analytics</td></tr>
+    <tr><td><code>phone</code></td><td>String</td><td>required</td><td>Contact info</td></tr>
+    <tr><td><code>os</code></td><td>String</td><td>default: "Unknown"</td><td>User's OS (captured at registration)</td></tr>
+    <tr><td><code>password</code></td><td>String</td><td>required, min 6 chars</td><td>bcrypt-hashed (salt rounds: 10)</td></tr>
+    <tr><td><code>role</code></td><td>String</td><td>enum: user, admin (default: user)</td><td>RBAC</td></tr>
+    <tr><td><code>createdAt / updatedAt</code></td><td>Date</td><td>auto (timestamps: true)</td><td>Mongoose timestamps</td></tr>
+  </tbody>
+</table>
+<div class="callout callout-info">
+  <div class="callout-title">ℹ️ Password Hashing</div>
+  <p>Passwords are automatically hashed via a Mongoose <code>pre('save')</code> hook using <code>bcryptjs</code> with a salt factor of 10. Plaintext passwords are never stored.</p>
+</div>
+
+<h2>5.2 Algorithms Collection</h2>
+<table>
+  <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>id</code></td><td>String (unique, indexed)</td><td>Slug identifier (e.g., "grover-search")</td></tr>
+    <tr><td><code>name</code></td><td>String</td><td>Display name</td></tr>
+    <tr><td><code>shortDescription</code></td><td>String</td><td>Card description</td></tr>
+    <tr><td><code>description</code></td><td>String</td><td>Full description</td></tr>
+    <tr><td><code>formula</code></td><td>String</td><td>KaTeX formula string</td></tr>
+    <tr><td><code>timeComplexity / spaceComplexity</code></td><td>String</td><td>Big-O notation</td></tr>
+    <tr><td><code>reference</code></td><td>String</td><td>Academic reference link</td></tr>
+    <tr><td><code>category</code></td><td>String</td><td>Algorithm series category</td></tr>
+    <tr><td><code>parameters</code></td><td>Array of Objects</td><td>Each: {name, type, default, min, max, step, placeholder, options}</td></tr>
+  </tbody>
+</table>
+
+<h2>5.3 Other Collections (Summary)</h2>
+<table>
+  <thead><tr><th>Collection</th><th>Key Fields</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>blogs</code></td><td>title, excerpt, category, readTime, author, content, likes[], comments[]</td><td>Blog posts with social features</td></tr>
+    <tr><td><code>docs</code></td><td>section, subsection, title, sectionOrder, subsectionOrder, order, content</td><td>Hierarchical documentation</td></tr>
+    <tr><td><code>news</code></td><td>title, source, date, tag, excerpt, content, isFeatured</td><td>Internal news articles</td></tr>
+    <tr><td><code>courses</code></td><td>title, description, thumbnail, instructor, lectures[{title, videoUrl, duration}]</td><td>Video courses with lectures</td></tr>
+    <tr><td><code>challenges</code></td><td>title, desc, numQubits, targetState[], targetStr, allowedGates[], order</td><td>Circuit challenge puzzles</td></tr>
+    <tr><td><code>playgrounditems</code></td><td>icon, title, desc, status, path, order</td><td>Playground hub items</td></tr>
+    <tr><td><code>educationalcontents</code></td><td>algorithmId, description, problemDescription, algorithm, geometricProof, algebraicProof, code, applications[], limitations[]</td><td>Educational content per algorithm</td></tr>
+    <tr><td><code>pagevisits</code></td><td>path (indexed), date (indexed), count</td><td>Page visit analytics (unique per path+day)</td></tr>
+  </tbody>
+</table>
+
+<hr class="section-break">
+
+<!-- ═════════════════════════════════════════════════════ -->
+<!--              6. API REFERENCE                       -->
+<!-- ═════════════════════════════════════════════════════ -->
+<h1 id="api-reference">6. API Reference</h1>
+
+<p>The backend exposes a RESTful API at <code>https://quantumsimulationlab.onrender.com/api</code>. All authenticated endpoints require a <code>Bearer &lt;JWT&gt;</code> token in the <code>Authorization</code> header.</p>
+
+<h2>6.1 Authentication Endpoints</h2>
+<table>
+  <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>POST</code></td><td><code>/api/auth/register</code></td><td>Public</td><td>Create new user account</td></tr>
+    <tr><td><code>POST</code></td><td><code>/api/auth/login</code></td><td>Public</td><td>Login with username/password → returns JWT</td></tr>
+    <tr><td><code>POST</code></td><td><code>/api/auth/google-login</code></td><td>Public</td><td>Login/Register via Google ID Token</td></tr>
+    <tr><td><code>GET</code></td><td><code>/api/auth/me</code></td><td>JWT</td><td>Get current authenticated user info</td></tr>
+  </tbody>
+</table>
+
+<h2>6.2 Algorithm Endpoints</h2>
+<table>
+  <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>GET</code></td><td><code>/api/algorithms</code></td><td>Public</td><td>List all algorithms</td></tr>
+    <tr><td><code>GET</code></td><td><code>/api/algorithms/:id</code></td><td>Public</td><td>Get single algorithm by slug</td></tr>
+    <tr><td><code>POST</code></td><td><code>/api/algorithms</code></td><td>Admin</td><td>Create new algorithm</td></tr>
+    <tr><td><code>PUT</code></td><td><code>/api/algorithms/:id</code></td><td>Admin</td><td>Update algorithm</td></tr>
+    <tr><td><code>DELETE</code></td><td><code>/api/algorithms/:id</code></td><td>Admin</td><td>Delete algorithm</td></tr>
+    <tr><td><code>POST</code></td><td><code>/api/run</code></td><td>JWT</td><td>Execute algorithm via Papermill</td></tr>
+  </tbody>
+</table>
+
+<h2>6.3 Content Endpoints (Docs / Blogs / News)</h2>
+<table>
+  <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>GET</code></td><td><code>/api/docs</code></td><td>Public</td><td>Get all documentation pages</td></tr>
+    <tr><td><code>POST</code></td><td><code>/api/docs</code></td><td>Admin</td><td>Create doc page</td></tr>
+    <tr><td><code>PUT</code></td><td><code>/api/docs/reorder</code></td><td>Admin</td><td>Bulk reorder docs</td></tr>
+    <tr><td><code>PUT</code></td><td><code>/api/docs/:id</code></td><td>Admin</td><td>Update doc</td></tr>
+    <tr><td><code>DELETE</code></td><td><code>/api/docs/:id</code></td><td>Admin</td><td>Delete doc</td></tr>
+    <tr><td><code>GET</code></td><td><code>/api/blogs?page=&limit=&search=</code></td><td>Public</td><td>Get blogs (paginated)</td></tr>
+    <tr><td><code>POST</code></td><td><code>/api/blogs</code></td><td>Admin</td><td>Create blog</td></tr>
+    <tr><td><code>POST</code></td><td><code>/api/blogs/:id/like</code></td><td>JWT</td><td>Like/Unlike a blog</td></tr>
+    <tr><td><code>POST</code></td><td><code>/api/blogs/:id/comment</code></td><td>JWT</td><td>Add comment to blog</td></tr>
+    <tr><td><code>GET</code></td><td><code>/api/news?page=&limit=&search=</code></td><td>Public</td><td>Get internal news (paginated)</td></tr>
+    <tr><td><code>GET</code></td><td><code>/api/gnews/search?q=&page=&max=</code></td><td>Public</td><td>Search live GNews API</td></tr>
+    <tr><td><code>GET</code></td><td><code>/api/gnews/top-headlines?topic=</code></td><td>Public</td><td>GNews top headlines</td></tr>
+  </tbody>
+</table>
+
+<h2>6.4 Other Endpoints</h2>
+<table>
+  <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>POST</code></td><td><code>/api/sandbox/run</code></td><td>JWT</td><td>Execute Python code in sandbox</td></tr>
+    <tr><td><code>POST</code></td><td><code>/api/sandbox/install</code></td><td>JWT</td><td>Install Python packages</td></tr>
+    <tr><td><code>POST</code></td><td><code>/api/upload</code></td><td>Admin</td><td>Upload image (Cloudinary or local)</td></tr>
+    <tr><td><code>POST</code></td><td><code>/api/challenge/run</code></td><td>JWT</td><td>Evaluate circuit challenge</td></tr>
+    <tr><td><code>GET</code></td><td><code>/api/challenges</code></td><td>JWT</td><td>List all challenges</td></tr>
+    <tr><td><code>GET</code></td><td><code>/api/courses</code></td><td>Public</td><td>List all courses</td></tr>
+    <tr><td><code>GET</code></td><td><code>/api/courses/:id</code></td><td>Public</td><td>Get single course with lectures</td></tr>
+    <tr><td><code>GET</code></td><td><code>/api/playground</code></td><td>Public</td><td>Get playground items</td></tr>
+    <tr><td><code>GET</code></td><td><code>/api/users</code></td><td>Admin</td><td>List all users (paginated)</td></tr>
+    <tr><td><code>PUT</code></td><td><code>/api/users/:id/role</code></td><td>Admin</td><td>Update user role</td></tr>
+    <tr><td><code>POST</code></td><td><code>/api/analytics/track-page</code></td><td>Public</td><td>Track page visit</td></tr>
+    <tr><td><code>GET</code></td><td><code>/api/analytics/users</code></td><td>Admin</td><td>User demographic analytics</td></tr>
+    <tr><td><code>GET</code></td><td><code>/api/analytics/page-views</code></td><td>Admin</td><td>Page view analytics</td></tr>
+  </tbody>
+</table>
+
+<hr class="section-break">
+
+<!-- ═════════════════════════════════════════════════════ -->
+<!--              7. SECURITY ARCHITECTURE               -->
+<!-- ═════════════════════════════════════════════════════ -->
+<h1 id="security">7. Security Architecture</h1>
+
+<p>The platform implements multiple layers of security, making it production-ready:</p>
+
+<h2>7.1 Security Layers</h2>
+<table>
+  <thead><tr><th>Layer</th><th>Implementation</th><th>Details</th></tr></thead>
+  <tbody>
+    <tr><td><strong>HTTP Headers</strong></td><td>Helmet.js (v8)</td><td>Sets X-Content-Type-Options, X-Frame-Options, Strict-Transport-Security, Content-Security-Policy, etc. Cross-Origin-Resource-Policy set to "cross-origin" for image loading.</td></tr>
+    <tr><td><strong>CORS</strong></td><td>Whitelist-based</td><td>Only <code>localhost:5173</code>, <code>localhost:5174</code>, <code>127.0.0.1:5173/5174</code>, and <code>FRONTEND_URL</code> are allowed. All other origins are rejected with 403.</td></tr>
+    <tr><td><strong>Rate Limiting</strong></td><td>express-rate-limit</td><td>Global: 200 req/15 min. Auth endpoints: 15 req/15 min (production), 1000 (development). Returns 429 on excess.</td></tr>
+    <tr><td><strong>NoSQL Injection</strong></td><td>express-mongo-sanitize</td><td>Strips <code>$</code> and <code>.</code> operators from <code>req.body</code> and <code>req.params</code> before they reach MongoDB queries.</td></tr>
+    <tr><td><strong>XSS Prevention</strong></td><td>DOMPurify (server-side)</td><td>All user-submitted HTML (blogs, docs, news) is sanitized through DOMPurify before database storage. Whitelist of safe HTML tags and attributes maintained.</td></tr>
+    <tr><td><strong>Password Security</strong></td><td>bcryptjs (10 rounds)</td><td>Passwords are hashed with bcrypt before storage. Plaintext is never persisted. Comparison uses timing-safe methods.</td></tr>
+    <tr><td><strong>JWT Authentication</strong></td><td>jsonwebtoken</td><td>256-bit secret key. Token contains user ID, username, and role. 7-day expiry. Transmitted via Bearer token in Authorization header.</td></tr>
+    <tr><td><strong>Google OAuth</strong></td><td>google-auth-library</td><td>Server-side verification of Google ID tokens against the registered Client ID. Prevents token forgery.</td></tr>
+    <tr><td><strong>File Upload Security</strong></td><td>Multer + type checking</td><td>Only image files (jpeg, jpg, png, gif, webp, svg) allowed. 20 MB size limit. File type validated by both extension and MIME type.</td></tr>
+    <tr><td><strong>Command Injection</strong></td><td>Input sanitization</td><td>Sandbox package installs sanitize input to allow only <code>[a-zA-Z0-9_\-\.=&lt;&gt; ]</code>. Challenge circuits use whitelisted gate types only.</td></tr>
+    <tr><td><strong>Error Handling</strong></td><td>Global error handler</td><td>In production, internal error details are never leaked to the client. Generic "Internal Server Error" is returned.</td></tr>
+    <tr><td><strong>COOP Header</strong></td><td>Vite config</td><td><code>Cross-Origin-Opener-Policy: same-origin-allow-popups</code> is set to allow Google OAuth popup to communicate back.</td></tr>
+  </tbody>
+</table>
+
+<div class="callout callout-danger">
+  <div class="callout-title">⚠️ Critical Security Note</div>
+  <p>The <code>.env</code> file contains all secrets (MongoDB URI, JWT secret, Cloudinary credentials, API keys). This file must <strong>NEVER</strong> be committed to version control or shared publicly. It is included in <code>.gitignore</code>.</p>
+</div>
+
+<hr class="section-break">
+
+<!-- ═════════════════════════════════════════════════════ -->
+<!--              8. AUTHENTICATION SYSTEM               -->
+<!-- ═════════════════════════════════════════════════════ -->
+<h1 id="auth">8. Authentication System</h1>
+
+<h2>8.1 Authentication Flow</h2>
+<h3>Traditional Login (Username + Password)</h3>
+<ol>
+  <li>User submits username &amp; password to <code>POST /api/auth/login</code></li>
+  <li>Backend finds user by username, compares password via <code>bcrypt.compare()</code></li>
+  <li>If valid, generates JWT containing <code>{id, username, role}</code> with 7-day expiry</li>
+  <li>Frontend stores JWT in <code>localStorage</code> under key <code>qsl_token</code></li>
+  <li>Axios interceptor attaches <code>Bearer &lt;token&gt;</code> to all subsequent API requests</li>
+  <li>On page refresh, <code>AuthContext</code> calls <code>GET /api/auth/me</code> to re-validate the token</li>
+</ol>
+
+<h3>Google OAuth Flow</h3>
+<ol>
+  <li>User clicks "Sign in with Google" → Google popup opens</li>
+  <li>User authenticates with Google → Google returns an ID Token (credential)</li>
+  <li>Frontend sends the ID Token to <code>POST /api/auth/google-login</code></li>
+  <li>Backend verifies the token using <code>google-auth-library</code> against the registered <code>GOOGLE_CLIENT_ID</code></li>
+  <li>If user email exists in DB → login. If not → create new user with a random password and default placeholders</li>
+  <li>Returns JWT same as traditional flow</li>
+</ol>
+
+<h2>8.2 Role-Based Access Control (RBAC)</h2>
+<table>
+  <thead><tr><th>Role</th><th>Permissions</th></tr></thead>
+  <tbody>
+    <tr><td><code>user</code></td><td>View dashboard, run algorithms, use sandbox, view content, like/comment blogs, take challenges</td></tr>
+    <tr><td><code>admin</code></td><td>All user permissions + Create/Edit/Delete algorithms, docs, blogs, news, courses, challenges, playground items. View analytics. Manage users. Upload images.</td></tr>
+  </tbody>
+</table>
+
+<div class="callout callout-warning">
+  <div class="callout-title">⚠️ Admin Creation</div>
+  <p>Admin accounts can only be created via the database seed script or by another admin promoting a user through the Admin Users Manager. The registration endpoint always creates users with <code>role: "user"</code>.</p>
+</div>
+
+<hr class="section-break">
+
+<!-- ═════════════════════════════════════════════════════ -->
+<!--              9. DEPLOYMENT GUIDE                    -->
+<!-- ═════════════════════════════════════════════════════ -->
+<h1 id="deployment">9. Deployment Guide</h1>
+
+<h2>9.1 Local Development Setup</h2>
+
+<h3>Prerequisites</h3>
+<ul>
+  <li><strong>Node.js</strong> v18+ (LTS recommended)</li>
+  <li><strong>Python</strong> 3.9+ (with pip)</li>
+  <li><strong>Git</strong> (for version control)</li>
+</ul>
+
+<h3>Step-by-Step</h3>
+<pre><code># 1. Clone the repository
+git clone https://github.com/your-repo/quantum-sim-lab.git
+cd quantum-sim-lab
+
+# 2. Install frontend dependencies
+npm install
+
+# 3. Install backend dependencies
+cd backend
+npm install
+
+# 4. Install Python dependencies
+pip install -r requirements.txt
+
+# 5. Configure environment variables
+# Copy .env.example to .env and fill in your values (see Section 10)
+
+# 6. Start the application (from root directory)
+cd ..
+npm run dev
+# This runs BOTH frontend (port 5173) and backend (port 8000) concurrently</code></pre>
+
+<h2>9.2 Production Deployment (Vercel + Render)</h2>
+
+<h3>Frontend → Vercel</h3>
+<ol>
+  <li>Push code to GitHub</li>
+  <li>Go to <a href="https://vercel.com">vercel.com</a> → Import Git Repository</li>
+  <li>Framework Preset: <strong>Vite</strong></li>
+  <li>Build Command: <code>npm run build</code> (auto-detected)</li>
+  <li>Output Directory: <code>dist</code> (auto-detected)</li>
+  <li>Add Environment Variables:
+    <ul>
+      <li><code>VITE_API_BASE_URL</code> = <code>https://your-backend.onrender.com/api</code></li>
+      <li><code>VITE_GOOGLE_CLIENT_ID</code> = Your Google OAuth Client ID</li>
+    </ul>
+  </li>
+  <li>Deploy. The <code>vercel.json</code> file handles SPA rewrites automatically.</li>
+</ol>
+
+<div class="callout callout-warning">
+  <div class="callout-title">⚠️ Vite Environment Variables</div>
+  <p>Vite <strong>bakes</strong> <code>VITE_*</code> environment variables into the JavaScript bundle at build time. Any change to these variables requires a <strong>redeployment</strong> to take effect. They are NOT read at runtime.</p>
+</div>
+
+<h3>Backend → Render</h3>
+<ol>
+  <li>Go to <a href="https://render.com">render.com</a> → New Web Service</li>
+  <li>Connect your GitHub repo</li>
+  <li>Root Directory: <code>backend</code></li>
+  <li>Build Command: <code>npm install</code></li>
+  <li>Start Command: <code>node server.js</code></li>
+  <li>Add ALL environment variables from your <code>.env</code> (see Section 10)</li>
+  <li>Set <code>NODE_ENV=production</code></li>
+  <li>Set <code>FRONTEND_URL</code> = Your Vercel URL (e.g., <code>https://GitHappensqsim.vercel.app</code>)</li>
+</ol>
+
+<div class="callout callout-danger">
+  <div class="callout-title">⚠️ Render Free Tier — Cold Start</div>
+  <p>On Render's free tier, the backend service spins down after 15 minutes of inactivity. The first request after inactivity takes 30-60 seconds to "cold start." For production use, upgrade to the paid tier ($7/month) to keep the service always running.</p>
+</div>
+
+<h2>9.3 Cloudinary Configuration</h2>
+<p>Cloudinary is used in production for persistent image storage. In development, images are stored locally in <code>backend/uploads/</code>.</p>
+<ol>
+  <li>Sign up at <a href="https://cloudinary.com">cloudinary.com</a></li>
+  <li>Get your <strong>Cloud Name</strong>, <strong>API Key</strong>, and <strong>API Secret</strong> from the Dashboard</li>
+  <li>Set them in the backend environment variables</li>
+  <li>Images are automatically uploaded to the <code>quantum-sim-lab</code> folder with auto quality and format optimization</li>
+</ol>
+
+<h2>9.4 Google OAuth Setup</h2>
+<ol>
+  <li>Go to <a href="https://console.cloud.google.com">Google Cloud Console</a></li>
+  <li>Create/select a project</li>
+  <li>Navigate to <strong>APIs &amp; Services → OAuth consent screen</strong> → Configure → Set User Type to "External" → Publish the app</li>
+  <li>Navigate to <strong>APIs &amp; Services → Credentials</strong> → Create OAuth Client ID → Web Application</li>
+  <li>Add <strong>Authorized JavaScript Origins</strong>:
+    <ul>
+      <li><code>http://localhost:5173</code> (development)</li>
+      <li><code>https://GitHappensqsim.vercel.app</code> (production)</li>
+    </ul>
+  </li>
+  <li>Copy the Client ID and set it as <code>GOOGLE_CLIENT_ID</code> (backend) and <code>VITE_GOOGLE_CLIENT_ID</code> (frontend)</li>
+</ol>
+
+<h2>9.5 GNews API Integration</h2>
+<ol>
+  <li>Sign up at <a href="https://gnews.io">gnews.io</a></li>
+  <li>Get your API key from the dashboard</li>
+  <li>Set <code>GNEWS_API_KEY</code> in the backend environment</li>
+  <li>The backend proxies GNews requests to keep the API key server-side</li>
+  <li>An in-memory cache (15 min TTL) minimizes API calls</li>
+</ol>
+
+
+
+<hr class="section-break">
+
+<!-- ═════════════════════════════════════════════════════ -->
+<!--              10. ENVIRONMENT VARIABLES              -->
+<!-- ═════════════════════════════════════════════════════ -->
+<h1 id="env-vars">10. Environment Variables Reference</h1>
+
+<h2>10.1 Root <code>.env</code> File (All Secrets)</h2>
+<table>
+  <thead><tr><th>Variable</th><th>Required</th><th>Description</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td><code>MONGO_URI</code></td><td><span class="badge badge-critical">Required</span></td><td>MongoDB Atlas connection string</td><td><code>mongodb+srv://user:pass@cluster.mongodb.net/QuantumSimulationLab</code></td></tr>
+    <tr><td><code>JWT_SECRET</code></td><td><span class="badge badge-critical">Required</span></td><td>Secret key for JWT signing (256-bit hex)</td><td><code>dac85118f37ab09...</code> (128 char hex)</td></tr>
+    <tr><td><code>NODE_ENV</code></td><td><span class="badge badge-critical">Required</span></td><td>Environment mode</td><td><code>development</code> or <code>production</code></td></tr>
+    <tr><td><code>FRONTEND_URL</code></td><td><span class="badge badge-critical">Required</span></td><td>Frontend URL for CORS whitelist</td><td><code>https://GitHappensqsim.vercel.app</code></td></tr>
+    <tr><td><code>PYTHON_PATH</code></td><td>Optional</td><td>Absolute path to Python executable</td><td><code>python</code> or <code>c:\python\python.exe</code></td></tr>
+    <tr><td><code>CLOUDINARY_CLOUD_NAME</code></td><td>Prod Only</td><td>Cloudinary cloud name</td><td><code>GitHappens</code></td></tr>
+    <tr><td><code>CLOUDINARY_API_KEY</code></td><td>Prod Only</td><td>Cloudinary API key</td><td><code>941388319486432</code></td></tr>
+    <tr><td><code>CLOUDINARY_API_SECRET</code></td><td>Prod Only</td><td>Cloudinary API secret</td><td><code>qF1OnrxPoByOvveRn79UB78hFDA</code></td></tr>
+    <tr><td><code>GOOGLE_CLIENT_ID</code></td><td><span class="badge badge-critical">Required</span></td><td>Google OAuth Client ID (backend verification)</td><td><code>878678...apps.googleusercontent.com</code></td></tr>
+    <tr><td><code>VITE_GOOGLE_CLIENT_ID</code></td><td><span class="badge badge-critical">Required</span></td><td>Same Google Client ID (frontend — Vite bakes it)</td><td>Same as above</td></tr>
+    <tr><td><code>GNEWS_API_KEY</code></td><td>Optional</td><td>GNews API key for live news</td><td><code>5752e7f6b3b39905...</code></td></tr>
+    <tr><td><code>REDIS_URL</code></td><td>Optional</td><td>Redis connection URL</td><td><code>redis://default:pass@host:6379</code></td></tr>
+  </tbody>
+</table>
+
+<h2>10.2 <code>.env.production</code> (Vite Build-Time Variables)</h2>
+<table>
+  <thead><tr><th>Variable</th><th>Value</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>VITE_API_BASE_URL</code></td><td><code>https://quantumsimulationlab.onrender.com/api</code></td><td>API base URL with <code>/api</code> suffix</td></tr>
+    <tr><td><code>VITE_API_SERVER_URL</code></td><td><code>https://quantumsimulationlab.onrender.com</code></td><td>Server root (for image URLs)</td></tr>
+  </tbody>
+</table>
+
+<hr class="section-break">
+
+<!-- ═════════════════════════════════════════════════════ -->
+<!--              11. PRICING & COST ANALYSIS            -->
+<!-- ═════════════════════════════════════════════════════ -->
+<h1 id="pricing">11. Pricing &amp; Cost Analysis</h1>
+
+<p>The project currently operates on <strong>100% free tiers</strong>. Below is a comprehensive breakdown of current uGitHappense and what paid upgrades would cost for longer-term production use.</p>
+
+<h2>11.1 Current Free Tier UGitHappense</h2>
+<table>
+  <thead><tr><th>Service</th><th>Free Tier Limits</th><th>Current UGitHappense</th><th>Risk of Exceeding</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Vercel</strong> (Frontend)</td><td>100 GB bandwidth/month, 6000 build mins/month, 1 project, hobby use only</td><td>Low</td><td><span class="badge badge-free">Low Risk</span></td></tr>
+    <tr><td><strong>Render</strong> (Backend)</td><td>750 free instance hours/month, 512 MB RAM, spins down after 15 min inactivity</td><td>Moderate</td><td><span class="badge badge-paid">Medium Risk (cold starts)</span></td></tr>
+    <tr><td><strong>MongoDB Atlas</strong></td><td>512 MB storage, shared cluster (M0), 100 connections</td><td>Low</td><td><span class="badge badge-free">Low Risk</span></td></tr>
+    <tr><td><strong>Cloudinary</strong></td><td>25 credits/month (~25,000 transformations or 25 GB bandwidth)</td><td>Low</td><td><span class="badge badge-free">Low Risk</span></td></tr>
+    <tr><td><strong>GNews API</strong></td><td>100 requests/day, 10 articles per request</td><td>Low (cached 15 min)</td><td><span class="badge badge-free">Low Risk</span></td></tr>
+    <tr><td><strong>Google OAuth</strong></td><td>Free (unlimited)</td><td>—</td><td><span class="badge badge-free">No Risk</span></td></tr>
+  </tbody>
+</table>
+
+<h2>11.2 Paid Tier Pricing (Long-Term Production)</h2>
+<table>
+  <thead><tr><th>Service</th><th>Free Tier</th><th>Recommended Paid Tier</th><th>Monthly Cost</th><th>Key Benefits</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Vercel</strong></td>
+      <td>Hobby (Free)</td>
+      <td>Pro</td>
+      <td><strong>$20/month</strong> per team member</td>
+      <td>1 TB bandwidth, 24,000 build mins, commercial use allowed, team features, analytics, password protection</td>
+    </tr>
+    <tr>
+      <td><strong>Render</strong></td>
+      <td>Free</td>
+      <td>Starter</td>
+      <td><strong>$7/month</strong></td>
+      <td>No cold starts (always on), 512 MB RAM, custom domains, better SLA</td>
+    </tr>
+    <tr>
+      <td><strong>Render</strong></td>
+      <td>—</td>
+      <td>Standard (if more load)</td>
+      <td><strong>$25/month</strong></td>
+      <td>2 GB RAM, auto-scaling, more compute power</td>
+    </tr>
+    <tr>
+      <td><strong>MongoDB Atlas</strong></td>
+      <td>M0 (Free)</td>
+      <td>M10 (Dedicated)</td>
+      <td><strong>$57/month</strong></td>
+      <td>10 GB storage, dedicated cluster, backups, performance advisor, monitoring</td>
+    </tr>
+    <tr>
+      <td><strong>MongoDB Atlas</strong></td>
+      <td>—</td>
+      <td>Serverless</td>
+      <td><strong>~$0.10/million reads</strong></td>
+      <td>Pay-per-use, auto-scales, good for variable traffic</td>
+    </tr>
+    <tr>
+      <td><strong>Cloudinary</strong></td>
+      <td>Free (25 credits)</td>
+      <td>Plus</td>
+      <td><strong>$89/month</strong></td>
+      <td>225 credits, more bandwidth, advanced transformations, video support</td>
+    </tr>
+    <tr>
+      <td><strong>GNews API</strong></td>
+      <td>Free (100 req/day)</td>
+      <td>Basic</td>
+      <td><strong>$17.99/month</strong></td>
+      <td>10,000 req/day, 100 articles per request, historical search</td>
+    </tr>
+    <tr>
+      <td><strong>GNews API</strong></td>
+      <td>—</td>
+      <td>Professional</td>
+      <td><strong>$59.99/month</strong></td>
+      <td>30,000 req/day, full archive access</td>
+    </tr>
+    <tr>
+      <td><strong>Redis (Upstash)</strong></td>
+      <td>Free (10,000 commands/day)</td>
+      <td>Pay-as-you-go</td>
+      <td><strong>$0.20 per 100K commands</strong></td>
+      <td>Serverless Redis, auto-scale, no management</td>
+    </tr>
+    <tr>
+      <td><strong>Custom Domain</strong></td>
+      <td>—</td>
+      <td>.com/.in domain</td>
+      <td><strong>$10-15/year</strong></td>
+      <td>Professional branding, SSL included on Vercel</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>11.3 Recommended Budget for Production</h2>
+<table>
+  <thead><tr><th>Scenario</th><th>Services</th><th>Monthly Cost</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Minimum Viable Production</strong></td><td>Vercel Free + Render Starter ($7) + Atlas Free + Cloudinary Free + GNews Free</td><td><strong>~$7/month</strong></td></tr>
+    <tr><td><strong>Recommended Production</strong></td><td>Vercel Pro ($20) + Render Starter ($7) + Atlas M10 ($57) + Cloudinary Free + GNews Basic ($18)</td><td><strong>~$102/month</strong></td></tr>
+    <tr><td><strong>Full Scale Production</strong></td><td>Vercel Pro ($20) + Render Standard ($25) + Atlas M10 ($57) + Cloudinary Plus ($89) + GNews Pro ($60) + Redis ($5) + Domain ($1)</td><td><strong>~$257/month</strong></td></tr>
+  </tbody>
+</table>
+
+<hr class="section-break">
+
+<!-- ═════════════════════════════════════════════════════ -->
+<!--              12. SERVER MIGRATION GUIDE             -->
+<!-- ═════════════════════════════════════════════════════ -->
+<h1 id="migration">12. Server Migration Guide</h1>
+
+<p>If you need to move the application to a different server or hosting provider, follow this comprehensive guide.</p>
+
+<h2>12.1 What Needs to Change</h2>
+<table>
+  <thead><tr><th>Item</th><th>Where to Change</th><th>Details</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Backend URL</strong></td><td><code>.env.production</code> (frontend) + Vercel env vars</td><td>Update <code>VITE_API_BASE_URL</code> and <code>VITE_API_SERVER_URL</code> to new backend URL. <strong>Redeploy frontend</strong> after change.</td></tr>
+    <tr><td><strong>Frontend URL</strong></td><td><code>FRONTEND_URL</code> in backend env</td><td>Update to new frontend URL for CORS whitelist</td></tr>
+    <tr><td><strong>Google OAuth Origins</strong></td><td>Google Cloud Console → Credentials</td><td>Add new frontend URL to "Authorized JavaScript Origins"</td></tr>
+    <tr><td><strong>MongoDB Connection</strong></td><td><code>MONGO_URI</code> in backend env</td><td>If changing DB cluster, update connection string. If keeping same Atlas cluster, no change needed.</td></tr>
+    <tr><td><strong>Cloudinary</strong></td><td>No change needed</td><td>Cloudinary is a CDN — works from any server. Just set the same credentials.</td></tr>
+    <tr><td><strong>Redis</strong></td><td><code>REDIS_URL</code> in backend env</td><td>If using a different Redis instance, update the URL</td></tr>
+    <tr><td><strong>Python Environment</strong></td><td>New server</td><td>Install Python 3.9+ and all packages from <code>requirements.txt</code>. Update <code>PYTHON_PATH</code> if needed.</td></tr>
+    <tr><td><strong>Notebooks</strong></td><td>Copy <code>backend/notebooks/</code></td><td>All <code>.ipynb</code> files must be present on the new server</td></tr>
+  </tbody>
+</table>
+
+<h2>12.2 Migration to AWS / Azure / GCP</h2>
+<p>For enterprise-grade hosting:</p>
+<ul>
+  <li><strong>Frontend:</strong> Deploy to AWS S3 + CloudFront, Azure Static Web Apps, or GCP Cloud Storage + CDN</li>
+  <li><strong>Backend:</strong> Deploy to AWS EC2/ECS/Lambda, Azure App Service, or GCP Cloud Run</li>
+  <li><strong>Database:</strong> Use MongoDB Atlas (works with all clouds) or migrate to AWS DocumentDB / Azure CosmosDB</li>
+  <li><strong>Python:</strong> Ensure the server has Python installed. For containerized deployments, use a Docker image with both Node.js and Python</li>
+</ul>
+
+<h2>12.3 Docker Deployment (Recommended for New Servers)</h2>
+<p>A Docker-based deployment is recommended for consistent environments. You would need a <code>Dockerfile</code> with:</p>
+<pre><code># Multi-stage: Node.js + Python
+FROM node:18-slim
+RUN apt-get update && apt-get install -y python3 python3-pip
+WORKDIR /app/backend
+COPY backend/package*.json ./
+RUN npm install --production
+COPY backend/ .
+RUN pip3 install -r requirements.txt
+EXPOSE 8000
+CMD ["node", "server.js"]</code></pre>
+
+<h2>12.4 Migration Checklist</h2>
+<ol>
+  <li>☐ Set up new server with Node.js 18+ and Python 3.9+</li>
+  <li>☐ Clone the repository to the new server</li>
+  <li>☐ Install all dependencies (npm install + pip install)</li>
+  <li>☐ Copy the <code>.env</code> file with updated URLs</li>
+  <li>☐ Update <code>FRONTEND_URL</code> in the backend environment</li>
+  <li>☐ Update <code>VITE_API_BASE_URL</code> in the frontend environment</li>
+  <li>☐ Redeploy frontend (if on Vercel, change env vars and redeploy)</li>
+  <li>☐ Update Google Cloud Console → Credentials → Authorized Origins</li>
+  <li>☐ Test Google Login, algorithm execution, image upload, and all features</li>
+  <li>☐ Wait 2–5 minutes for Google OAuth changes to propagate</li>
+</ol>
+
+<hr class="section-break">
+
+<!-- ═════════════════════════════════════════════════════ -->
+<!--              13. SCALING & PERFORMANCE              -->
+<!-- ═════════════════════════════════════════════════════ -->
+<h1 id="scaling">13. Scaling &amp; Performance</h1>
+
+<h2>13.1 Current Performance Characteristics</h2>
+<table>
+  <thead><tr><th>Metric</th><th>Value</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Frontend bundle size</td><td>~2.5 MB (gzipped)</td><td>Served via Vercel CDN with edge caching</td></tr>
+    <tr><td>API response time (Render)</td><td>50–200ms (hot), 30-60s (cold start)</td><td>Cold start eliminated on paid tier</td></tr>
+    <tr><td>Algorithm execution time</td><td>5–120 seconds</td><td>Depends on algorithm complexity. 120s timeout.</td></tr>
+    <tr><td>Rate limit</td><td>200 req/15 min global</td><td>Auth: 15 req/15 min in production</td></tr>
+    <tr><td>Max upload size</td><td>20 MB</td><td>Images only</td></tr>
+    <tr><td>JSON body limit</td><td>10 MB</td><td>For large blog/doc content</td></tr>
+  </tbody>
+</table>
+
+<h2>13.2 Caching Strategy</h2>
+<ul>
+  <li><strong>Redis Cache:</strong> Optional middleware for docs, blogs, news endpoints. TTL: 1 hour. Automatically invalidated on CRUD operations via <code>invalidateCache(keyPrefix)</code>.</li>
+  <li><strong>GNews Cache:</strong> In-memory <code>Map</code> with 15-minute TTL. Minimizes external API calls to stay within the 100 req/day free tier.</li>
+  <li><strong>Frontend:</strong> AlgorithmContext caches the algorithm list in React state to avoid redundant API calls across page navigations.</li>
+  <li><strong>Vercel CDN:</strong> Static assets are served from Vercel's global CDN with automatic edge caching.</li>
+</ul>
+
+<h2>13.3 Scaling Recommendations</h2>
+<ul>
+  <li><strong>Horizontal Scaling:</strong> The backend is stateless (no session storage). It can be horizontally scaled behind a load balancer.</li>
+  <li><strong>Python Execution Bottleneck:</strong> The quantum execution engine uses <code>child_process.exec()</code>, which is blocking. For high concurrency, consider offloading Python execution to a separate worker service (e.g., AWS Lambda, Cloud Functions, or a dedicated Python microservice with a job queue).</li>
+  <li><strong>Database Indexing:</strong> Key indexes are already in place: <code>Algorithm.id</code>, <code>User.username</code>, <code>User.email</code>, <code>PageVisit.path+date</code>.</li>
+</ul>
+
+<hr class="section-break">
+
+<!-- ═════════════════════════════════════════════════════ -->
+<!--              14. THEMING SYSTEM                     -->
+<!-- ═════════════════════════════════════════════════════ -->
+<h1 id="theming">14. Theming System</h1>
+
+<p>The application uses a robust CSS Variable-based theming system. Themes are toggled by changing the <code>data-theme</code> attribute on the <code>&lt;html&gt;</code> element.</p>
+
+<h3>Key CSS Variables</h3>
+<table>
+  <thead><tr><th>Variable</th><th>Purpose</th><th>Dark Mode</th><th>Light Mode</th></tr></thead>
+  <tbody>
+    <tr><td><code>--color-app-base</code></td><td>Page background</td><td>Deep navy</td><td>White</td></tr>
+    <tr><td><code>--color-app-surface</code></td><td>Card backgrounds</td><td>Dark slate</td><td>Light gray</td></tr>
+    <tr><td><code>--color-app-text-main</code></td><td>Primary text</td><td>White</td><td>Dark navy</td></tr>
+    <tr><td><code>--color-app-text-muted</code></td><td>Secondary text</td><td>Gray</td><td>Slate</td></tr>
+    <tr><td><code>--color-app-primary</code></td><td>Accent color</td><td>Neon blue</td><td>Blue</td></tr>
+    <tr><td><code>--color-app-border</code></td><td>Borders</td><td>Dark border</td><td>Light border</td></tr>
+    <tr><td><code>--color-app-glass</code></td><td>Glassmorphism backgrounds</td><td>Transparent dark</td><td>Transparent light</td></tr>
+  </tbody>
+</table>
+
+<div class="callout callout-info">
+  <div class="callout-title">ℹ️ Theming Rule</div>
+  <p>Never use hardcoded Tailwind colors like <code>bg-gray-900</code> or <code>text-blue-500</code>. Always use the CSS variables via <code>var(--color-app-*)</code> or the utility classes defined in <code>index.css</code> (e.g., <code>.app-glass</code>, <code>.app-card-hover</code>).</p>
+</div>
+
+<hr class="section-break">
+
+<!-- ═════════════════════════════════════════════════════ -->
+<!--              15. QUANTUM EXECUTION ENGINE           -->
+<!-- ═════════════════════════════════════════════════════ -->
+<h1 id="quantum-engine">15. Quantum Execution Engine</h1>
+
+<h2>15.1 How It Works</h2>
+<ol>
+  <li>User selects an algorithm and configures parameters in the UI</li>
+  <li>Frontend sends <code>POST /api/run</code> with <code>{algorithmId, parameters}</code></li>
+  <li>Backend maps frontend parameter names to Python variable names (e.g., "Number of Qubits" → <code>num_qubits</code>)</li>
+  <li>Backend constructs a <code>papermill</code> command: <pre><code>python -m papermill "notebooks/grover-search.ipynb" "notebooks/output_TIMESTAMP.ipynb" -p num_qubits 3 -p iterations 1 -k python3</code></pre></li>
+  <li>Papermill injects the parameters into the notebook's tagged "parameters" cell and executes all cells</li>
+  <li>Backend parses the executed notebook's output cells:
+    <ul>
+      <li><strong>Images</strong> (base64 PNG): Circuit diagrams, histograms, Bloch sphere images</li>
+      <li><strong>Text</strong> (stdout): Console output, measurement dictionaries</li>
+      <li><strong>Errors</strong>: Stack traces (ANSI color codes stripped)</li>
+    </ul>
+  </li>
+  <li>Backend extracts Bloch sphere angles (θ, φ) from text markers like <code>BLOCH_THETA=1.23</code></li>
+  <li>Backend parses measurement dictionaries (e.g., <code>{'101': 500, '010': 524}</code>) into probability distributions</li>
+  <li>Results returned as JSON: <code>{circuit, graph, blochImage, console, measurements, blochSphere}</code></li>
+  <li>Temporary output notebook is deleted after parsing</li>
+</ol>
+
+<h2>15.2 Available Quantum Algorithm Notebooks</h2>
+<table>
+  <thead><tr><th>#</th><th>Algorithm</th><th>Notebook File</th><th>Parameters</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>Deutsch's Algorithm</td><td><code>deutsch.ipynb</code></td><td>Function Type</td></tr>
+    <tr><td>2</td><td>Deutsch-Jozsa Algorithm</td><td><code>deutsch-jozsa.ipynb</code></td><td>Number of Qubits, Function Type</td></tr>
+    <tr><td>3</td><td>Bernstein-Vazirani</td><td><code>bernstein-vazirani.ipynb</code></td><td>Secret String</td></tr>
+    <tr><td>4</td><td>Simon's Algorithm</td><td><code>simon.ipynb</code></td><td>Number of Qubits</td></tr>
+    <tr><td>5</td><td>Grover's Search</td><td><code>grover-search.ipynb</code></td><td>Number of Qubits, Target State, Iterations</td></tr>
+    <tr><td>6</td><td>Shor's Algorithm</td><td><code>shor.ipynb</code></td><td>Number to Factor, Attempts</td></tr>
+    <tr><td>7</td><td>Quantum Fourier Transform</td><td><code>qft.ipynb</code></td><td>Number of Qubits, Input State</td></tr>
+    <tr><td>8</td><td>Quantum Phase Estimation</td><td><code>quantum-phase-estimation.ipynb</code></td><td>Precision Qubits, Phase (θ)</td></tr>
+    <tr><td>9</td><td>Quantum Teleportation</td><td><code>quantum-teleportation.ipynb</code></td><td>Alpha (real), Beta (real)</td></tr>
+    <tr><td>10</td><td>Superdense Coding</td><td><code>superdense-coding.ipynb</code></td><td>—</td></tr>
+    <tr><td>11</td><td>BB84 Protocol</td><td><code>bb84.ipynb</code></td><td>Number of Qubits</td></tr>
+    <tr><td>12</td><td>VQE (Variational Quantum Eigensolver)</td><td><code>vqe.ipynb</code></td><td>Number of Qubits</td></tr>
+  </tbody>
+</table>
+
+<hr class="section-break">
+
+<!-- ═════════════════════════════════════════════════════ -->
+<!--              16. ADMIN PANEL                        -->
+<!-- ═════════════════════════════════════════════════════ -->
+<h1 id="admin-panel">16. Admin Panel</h1>
+
+<p>The Admin Panel is a comprehensive management dashboard accessible only to users with <code>role: "admin"</code>. It comprises 10 dedicated pages:</p>
+
+<table>
+  <thead><tr><th>Page</th><th>Route</th><th>Functions</th></tr></thead>
+  <tbody>
+    <tr><td>Admin Dashboard</td><td><code>/admin</code></td><td>Overview cards with navigation to all admin sections</td></tr>
+    <tr><td>User Analytics</td><td><code>/admin/user-analytics</code></td><td>OS distribution pie chart, Gender distribution, Age group histogram, Page views bar chart. Time filters: week/month/5 months/year/all</td></tr>
+    <tr><td>Users Manager</td><td><code>/admin/users</code></td><td>Paginated user list with search. Promote/Demote user roles (user ↔ admin)</td></tr>
+    <tr><td>News Manager</td><td><code>/admin/news</code></td><td>CRUD for internal news articles with Rich Text editor</td></tr>
+    <tr><td>Blogs Manager</td><td><code>/admin/blogs</code></td><td>CRUD for blog posts with Rich Text editor, image upload, category management</td></tr>
+    <tr><td>Docs Manager</td><td><code>/admin/docs</code></td><td>CRUD for documentation with section/subsection hierarchy, drag-and-drop reordering, Rich Text editor with KaTeX math</td></tr>
+    <tr><td>Courses Manager</td><td><code>/admin/courses</code></td><td>CRUD for courses with lecture management (title, YouTube video URL, duration)</td></tr>
+    <tr><td>Challenges Manager</td><td><code>/admin/playground</code></td><td>CRUD for circuit challenges. Configure qubits, target states, allowed gates</td></tr>
+    <tr><td>Add Algorithm</td><td><code>/admin/add-algorithm</code></td><td>Form to create new quantum algorithms with parameters</td></tr>
+    <tr><td>Edit Algorithm</td><td><code>/admin/edit-algorithm/:id</code></td><td>Edit existing algorithm details and parameters</td></tr>
+  </tbody>
+</table>
+
+<hr class="section-break">
+
+<!-- ═════════════════════════════════════════════════════ -->
+<!--              17. TROUBLESHOOTING                    -->
+<!-- ═════════════════════════════════════════════════════ -->
+<h1 id="troubleshooting">17. Troubleshooting &amp; Known Issues</h1>
+
+<table>
+  <thead><tr><th>Issue</th><th>Cause</th><th>Solution</th></tr></thead>
+  <tbody>
+    <tr><td>Google Login: "Origin not allowed"</td><td>Browser URL not in Google Console's Authorized Origins</td><td>Add the URL to Google Cloud Console → Credentials → OAuth Client → Authorized JavaScript Origins</td></tr>
+    <tr><td>Google Login: "invalid_client (401)"</td><td><code>VITE_GOOGLE_CLIENT_ID</code> not set or wrong</td><td>Set correct Client ID in Vercel env vars and <strong>redeploy</strong></td></tr>
+    <tr><td>Google Login: "COOP block"</td><td>Browser blocking popup communication</td><td>Ensure <code>vite.config.js</code> has <code>"Cross-Origin-Opener-Policy": "same-origin-allow-popups"</code></td></tr>
+    <tr><td>Google Login: Consent screen in Testing mode</td><td>Only test users can login</td><td>Google Console → OAuth consent screen → Publish App</td></tr>
+    <tr><td>Backend cold start (30-60s delay)</td><td>Render free tier spins down after inactivity</td><td>Upgrade to Render Starter ($7/month) for always-on</td></tr>
+    <tr><td>Algorithm execution fails</td><td>Python/Qiskit not installed or wrong PYTHON_PATH</td><td>Install Python + requirements.txt. Set correct <code>PYTHON_PATH</code></td></tr>
+    <tr><td>Images not loading in production</td><td>Cloudinary credentials not set</td><td>Set all 3 Cloudinary env vars and ensure <code>NODE_ENV=production</code></td></tr>
+    <tr><td>CORS errors</td><td>Frontend URL not in backend's allowed origins</td><td>Set <code>FRONTEND_URL</code> in backend env to match exact frontend URL</td></tr>
+    <tr><td>Env vars not taking effect (Vercel)</td><td>Vite bakes vars at build time</td><td>Change env vars in Vercel dashboard and <strong>redeploy</strong></td></tr>
+    <tr><td>MongoDB connection error</td><td>IP not whitelisted in Atlas</td><td>Atlas → Network Access → Allow from Anywhere (0.0.0.0/0) for cloud hosting</td></tr>
+    <tr><td>Rate limit exceeded (429)</td><td>Too many requests from same IP</td><td>Wait 15 minutes or adjust limits in server.js</td></tr>
+  </tbody>
+</table>
+
+<hr class="section-break">
+
+<!-- ═════════════════════════════════════════════════════ -->
+<!--              18. FUTURE ROADMAP                     -->
+<!-- ═════════════════════════════════════════════════════ -->
+<h1 id="future">18. Future Roadmap</h1>
+
+<ul>
+  <li><strong>Containerization:</strong> Dockerize the entire stack for consistent deployment across environments</li>
+  <li><strong>CI/CD Pipeline:</strong> GitHub Actions for automated testing, building, and deployment</li>
+  <li><strong>Real Quantum Hardware:</strong> Integration with IBM Quantum Experience API for execution on real quantum processors</li>
+  <li><strong>User Progress Tracking:</strong> Track completed algorithms, challenge scores, and learning paths</li>
+  <li><strong>Collaboration Features:</strong> Share notebooks, circuits, and results with other users</li>
+  <li><strong>API Rate Limiting per User:</strong> Per-user API quotas instead of global IP-based limits</li>
+  <li><strong>WebSocket for Live Execution:</strong> Stream algorithm execution progress in real-time</li>
+  <li><strong>Multi-language Support:</strong> Internationalization (i18n) for Hindi and English</li>
+  <li><strong>Mobile App:</strong> React Native companion app for on-the-go learning</li>
+  <li><strong>Email Notifications:</strong> Blog comment notifications and algorithm completion emails</li>
+</ul>
+
+<hr class="section-break">
+
+<!-- ═════════════════════════════════════════════════════ -->
+<!--              19. APPENDIX                           -->
+<!-- ═════════════════════════════════════════════════════ -->
+<h1 id="appendix">19. Appendix</h1>
+
+<h2>A. SEO Configuration</h2>
+<p>The application includes comprehensive SEO meta tags in <code>index.html</code>:</p>
+<ul>
+  <li>Primary meta tags (title, description, keywords, author, robots, theme-color)</li>
+  <li>Open Graph (Facebook) meta tags for social sharing</li>
+  <li>Twitter Card meta tags for Twitter sharing</li>
+  <li>Google Fonts: Inter (UI), Outfit (headings), JetBrains Mono (code)</li>
+</ul>
+
+<h2>B. Fonts</h2>
+<table>
+  <thead><tr><th>Font</th><th>UGitHappense</th><th>Weights</th></tr></thead>
+  <tbody>
+    <tr><td>Inter</td><td>Primary UI text</td><td>300–900</td></tr>
+    <tr><td>Outfit</td><td>Headings and titles</td><td>300–900</td></tr>
+    <tr><td>JetBrains Mono</td><td>Code blocks and editor</td><td>400–700</td></tr>
+  </tbody>
+</table>
+
+<h2>C. Key NPM Scripts</h2>
+<table>
+  <thead><tr><th>Script</th><th>Command</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>npm run dev</code> (root)</td><td><code>concurrently "vite" "npm run dev --prefix backend"</code></td><td>Runs both frontend and backend in parallel</td></tr>
+    <tr><td><code>npm run build</code> (root)</td><td><code>vite build</code></td><td>Production build → <code>dist/</code></td></tr>
+    <tr><td><code>npm run dev</code> (backend)</td><td><code>node --watch server.js</code></td><td>Backend dev server with file watching</td></tr>
+    <tr><td><code>npm start</code> (backend)</td><td><code>node server.js</code></td><td>Production backend server</td></tr>
+  </tbody>
+</table>
+
+<h2>D. Production URLs</h2>
+<table>
+  <thead><tr><th>Component</th><th>URL</th></tr></thead>
+  <tbody>
+    <tr><td>Frontend (Vercel)</td><td><code>https://GitHappensqsim.vercel.app</code></td></tr>
+    <tr><td>Backend API (Render)</td><td><code>https://quantumsimulationlab.onrender.com</code></td></tr>
+    <tr><td>API Base</td><td><code>https://quantumsimulationlab.onrender.com/api</code></td></tr>
+    <tr><td>Health Check</td><td><code>https://quantumsimulationlab.onrender.com/</code></td></tr>
+    <tr><td>Cloudinary Images</td><td><code>https://res.cloudinary.com/GitHappens/image/upload/quantum-sim-lab/...</code></td></tr>
+  </tbody>
+</table>
+
+<br><br>
+
+<div style="text-align: center; padding: 40px 0; border-top: 3px solid var(--primary);">
+  <p style="font-size: 10pt; color: var(--text-muted); margin-bottom: 8px;">— End of Document —</p>
+  <p style="font-size: 9pt; color: var(--text-muted);">
+    Quantiva — Technical Project Documentation v1.0.0<br>
+    GitHappens (GitHappens), DRDO<br>
+    Generated: 30 July 2026
+  </p>
+</div>
+
+</body>
+</html>

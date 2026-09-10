@@ -1,0 +1,80 @@
+[
+  {
+    "_id": "6a53488ecf9001056216df30",
+    "title": "IBM Unveils 1000+ Qubit Processor",
+    "source": "Nature",
+    "date": "2026-02-15",
+    "tag": "Hardware",
+    "excerpt": "IBM's latest quantum processor marks a significant leap towards utility-scale quantum computing.",
+    "content": "<p>IBM has officially announced its new 1000+ qubit processor, shattering previous records and paving the way for fault-tolerant quantum computing.</p><p>This processor utilizes a novel coupling mechanism to significantly reduce crosstalk between neighboring qubits, which has been a major bottleneck in scaling up quantum hardware. According to the lead researcher, 'This is not just an incremental step; it is a fundamental shift in how we architect superconducting circuits.'</p><p>The community is eagerly waiting to see benchmarks on standard quantum volume metrics.</p>",
+    "isFeatured": false,
+    "__v": 0,
+    "createdAt": "2026-07-12T07:55:58.472Z",
+    "updatedAt": "2026-07-12T07:55:58.472Z"
+  },
+  {
+    "_id": "6a53488ecf9001056216df31",
+    "title": "Google Achieves Quantum Error Correction Milestone",
+    "source": "Science",
+    "date": "2026-03-10",
+    "tag": "Research",
+    "excerpt": "Researchers successfully demonstrate logical qubits that outlive their physical counterparts.",
+    "content": "<p>In a landmark paper published in Science, Google's Quantum AI team demonstrated the successful implementation of a surface code error correction scheme where a logical qubit outperformed its constituent physical qubits.</p><p>By scaling from a distance-3 to a distance-5 surface code, the team showed a measurable decrease in the logical error rate. This proves the foundational tenet of quantum error correction: that larger codes can suppress errors exponentially.</p>",
+    "isFeatured": false,
+    "__v": 0,
+    "createdAt": "2026-07-12T07:55:58.473Z",
+    "updatedAt": "2026-07-12T07:55:58.473Z"
+  },
+  {
+    "_id": "6a53488ecf9001056216df32",
+    "title": "India Launches National Quantum Mission Phase II",
+    "source": "DST",
+    "date": "2026-04-05",
+    "tag": "Policy",
+    "excerpt": "The government allocates new funds to accelerate domestic quantum capabilities.",
+    "content": "<p>The Department of Science and Technology (DST) has officially launched Phase II of the National Quantum Mission (NQM) with an increased budget allocation of ₹8,000 Crores over the next five years.</p><p>The focus of Phase II will be on transitioning laboratory prototypes into deployable field technologies. Key areas of investment include Quantum Key Distribution (QKD) networks across major metropolitan cities, development of indigenous cryogenic components, and fostering a startup ecosystem around quantum software.</p>",
+    "isFeatured": false,
+    "__v": 0,
+    "createdAt": "2026-07-12T07:55:58.473Z",
+    "updatedAt": "2026-07-12T07:55:58.473Z"
+  },
+  {
+    "_id": "6a53488ecf9001056216df33",
+    "title": "Quantum Computing Market to Reach $125B by 2030",
+    "source": "McKinsey",
+    "date": "2026-05-20",
+    "tag": "Industry",
+    "excerpt": "A new report predicts explosive growth in the commercial quantum computing sector.",
+    "content": "<p>A comprehensive report by McKinsey & Company forecasts that the quantum computing market will grow to an astounding $125 billion by 2030.</p><p>The growth is driven by early adopters in the pharmaceutical, materials science, and financial sectors who are beginning to see viable use cases for NISQ-era hardware. The report highlights that the primary value driver will be the optimization of complex supply chains and the discovery of novel chemical compounds.</p>",
+    "isFeatured": false,
+    "__v": 0,
+    "createdAt": "2026-07-12T07:55:58.473Z",
+    "updatedAt": "2026-07-12T07:55:58.473Z"
+  },
+  {
+    "_id": "6a53488ecf9001056216df34",
+    "title": "New Quantum Algorithm Breaks Optimization Records",
+    "source": "arXiv",
+    "date": "2026-06-12",
+    "tag": "Algorithm",
+    "excerpt": "A novel approach to QAOA shows unprecedented performance on complex graphs.",
+    "content": "<p>A preprint on arXiv introduces a modified version of the Quantum Approximate Optimization Algorithm (QAOA) that incorporates dynamic parameter initialization. The researchers tested the algorithm on the MaxCut problem for dense, non-regular graphs.</p><p>The results show a 40% improvement in the approximation ratio compared to standard QAOA with the same circuit depth. This suggests that near-term quantum devices might be much closer to demonstrating quantum advantage in combinatorial optimization than previously thought.</p>",
+    "isFeatured": false,
+    "__v": 0,
+    "createdAt": "2026-07-12T07:55:58.473Z",
+    "updatedAt": "2026-07-12T07:55:58.473Z"
+  },
+  {
+    "_id": "6a53488ecf9001056216df35",
+    "title": "DRDO Deploys Quantum Key Distribution Network",
+    "source": "DRDO",
+    "date": "2026-07-02",
+    "tag": "Defence",
+    "excerpt": "Secure communication links powered by quantum entanglement are now operational.",
+    "content": "<p>The Defence Research and Development Organisation (DRDO) has successfully deployed a multi-node Quantum Key Distribution (QKD) network connecting critical defense establishments.</p><p>The network relies on entanglement-based protocols to generate unconditionally secure encryption keys. Any attempt by an eavesdropper to intercept the quantum channel introduces measurable disturbances, instantly alerting the communicating parties. This milestone marks a significant upgrade in national security infrastructure.</p>",
+    "isFeatured": false,
+    "__v": 0,
+    "createdAt": "2026-07-12T07:55:58.473Z",
+    "updatedAt": "2026-07-12T07:55:58.473Z"
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "_id": "6a511b5e6cc359b3bbaae640",
+    "username": "admin",
+    "password": "$2b$10$c7VX9xwPSALw3HR3GOYXseSK9kTmud4TfNNZedHj7EuF0EQP1kUXO",
+    "role": "admin",
+    "createdAt": "2026-07-10T16:18:38.341Z",
+    "updatedAt": "2026-07-10T16:18:38.341Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a520270133df81eec77c4e1",
+    "username": "GitHappens016",
+    "password": "$2b$10$i25uCut0n6a0LuXz5imjVOqXMXCT3JS8SzuiPT0nkGaioiJ7yVaOy",
+    "role": "user",
+    "createdAt": "2026-07-11T08:44:32.111Z",
+    "updatedAt": "2026-07-11T08:44:32.111Z",
+    "__v": 0
+  }
+]

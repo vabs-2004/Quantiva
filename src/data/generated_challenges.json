@@ -1,0 +1,1872 @@
+[
+  {
+    "id": 14,
+    "title": "Advanced Challenge 14",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "targetStr": "100% |10\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 15,
+    "title": "Advanced Challenge 15",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      0.0,
+      0.9999999999999996
+    ],
+    "targetStr": "100% |1\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 16,
+    "title": "Advanced Challenge 16",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      1.0,
+      0.0
+    ],
+    "targetStr": "100% |0\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 17,
+    "title": "Advanced Challenge 17",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |01\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 18,
+    "title": "Advanced Challenge 18",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.4999999999999999,
+      0.0,
+      0.4999999999999999,
+      0.0
+    ],
+    "targetStr": "50% |00\u27e9 + 50% |10\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 19,
+    "title": "Advanced Challenge 19",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      0.4999999999999999,
+      0.4999999999999999
+    ],
+    "targetStr": "50% |0\u27e9 + 50% |1\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 20,
+    "title": "Advanced Challenge 20",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "targetStr": "100% |10\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 21,
+    "title": "Advanced Challenge 21",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "targetStr": "100% |110\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 22,
+    "title": "Advanced Challenge 22",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.4999999999999999,
+      0.0,
+      0.4999999999999999,
+      0.0
+    ],
+    "targetStr": "50% |00\u27e9 + 50% |10\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 23,
+    "title": "Advanced Challenge 23",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.24999999999999983,
+      2.6434987047674244e-34,
+      0.24999999999999983,
+      2.6434987047674244e-34,
+      0.24999999999999983,
+      2.6434987047674244e-34,
+      0.24999999999999983,
+      2.6434987047674244e-34
+    ],
+    "targetStr": "25% |000\u27e9 + 25% |010\u27e9 + 25% |100\u27e9 + 25% |110\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 24,
+    "title": "Advanced Challenge 24",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |000\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 25,
+    "title": "Advanced Challenge 25",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |00\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 26,
+    "title": "Advanced Challenge 26",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |001\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 27,
+    "title": "Advanced Challenge 27",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      0.0,
+      1.0
+    ],
+    "targetStr": "100% |1\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 28,
+    "title": "Advanced Challenge 28",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      0.0,
+      0.9999999999999996
+    ],
+    "targetStr": "100% |1\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 29,
+    "title": "Advanced Challenge 29",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.2499999999999999,
+      0.2499999999999999,
+      0.2499999999999999,
+      0.2499999999999999,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "25% |000\u27e9 + 25% |001\u27e9 + 25% |010\u27e9 + 25% |011\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 30,
+    "title": "Advanced Challenge 30",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.2499999999999999,
+      0.2499999999999999,
+      0.2499999999999999,
+      0.2499999999999999,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "25% |000\u27e9 + 25% |001\u27e9 + 25% |010\u27e9 + 25% |011\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 31,
+    "title": "Advanced Challenge 31",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |100\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 32,
+    "title": "Advanced Challenge 32",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.4999999999999998,
+      0.0,
+      0.0,
+      0.4999999999999998
+    ],
+    "targetStr": "50% |00\u27e9 + 50% |11\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 33,
+    "title": "Advanced Challenge 33",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      0.4999999999999999,
+      0.4999999999999999
+    ],
+    "targetStr": "50% |0\u27e9 + 50% |1\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 34,
+    "title": "Advanced Challenge 34",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.4999999999999999,
+      0.4999999999999999,
+      0.0,
+      0.0
+    ],
+    "targetStr": "50% |00\u27e9 + 50% |01\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 35,
+    "title": "Advanced Challenge 35",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |01\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 36,
+    "title": "Advanced Challenge 36",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      1.0,
+      0.0
+    ],
+    "targetStr": "100% |0\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 37,
+    "title": "Advanced Challenge 37",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |001\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 38,
+    "title": "Advanced Challenge 38",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.4999999999999999,
+      0.0,
+      0.4999999999999999,
+      0.0
+    ],
+    "targetStr": "50% |00\u27e9 + 50% |10\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 39,
+    "title": "Advanced Challenge 39",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |000\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 40,
+    "title": "Advanced Challenge 40",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.4999999999999999,
+      0.4999999999999999,
+      0.0,
+      0.0
+    ],
+    "targetStr": "50% |00\u27e9 + 50% |01\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 41,
+    "title": "Advanced Challenge 41",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      0.4999999999999999,
+      0.4999999999999999
+    ],
+    "targetStr": "50% |0\u27e9 + 50% |1\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 42,
+    "title": "Advanced Challenge 42",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.4999999999999999,
+      0.0,
+      0.4999999999999999,
+      0.0
+    ],
+    "targetStr": "50% |00\u27e9 + 50% |10\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 43,
+    "title": "Advanced Challenge 43",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      0.4999999999999999,
+      0.4999999999999999
+    ],
+    "targetStr": "50% |0\u27e9 + 50% |1\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 44,
+    "title": "Advanced Challenge 44",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |001\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 45,
+    "title": "Advanced Challenge 45",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |101\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 46,
+    "title": "Advanced Challenge 46",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.0,
+      0.4999999999999999,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.4999999999999999
+    ],
+    "targetStr": "50% |001\u27e9 + 50% |111\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 47,
+    "title": "Advanced Challenge 47",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      0.0,
+      1.0
+    ],
+    "targetStr": "100% |1\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 48,
+    "title": "Advanced Challenge 48",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.9999999999999996,
+      5.004680467665246e-34,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |000\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 49,
+    "title": "Advanced Challenge 49",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "targetStr": "100% |11\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 50,
+    "title": "Advanced Challenge 50",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      0.0,
+      1.0
+    ],
+    "targetStr": "100% |1\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 51,
+    "title": "Advanced Challenge 51",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.4999999999999999,
+      0.0,
+      0.4999999999999999,
+      0.0
+    ],
+    "targetStr": "50% |00\u27e9 + 50% |10\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 52,
+    "title": "Advanced Challenge 52",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "targetStr": "100% |10\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 53,
+    "title": "Advanced Challenge 53",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.9999999999999996,
+      0.0,
+      5.004680467665246e-34,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |000\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 54,
+    "title": "Advanced Challenge 54",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "targetStr": "100% |11\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 55,
+    "title": "Advanced Challenge 55",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |010\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 56,
+    "title": "Advanced Challenge 56",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.2499999999999999,
+      0.2499999999999999,
+      0.2499999999999999,
+      0.2499999999999999
+    ],
+    "targetStr": "25% |00\u27e9 + 25% |01\u27e9 + 25% |10\u27e9 + 25% |11\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 57,
+    "title": "Advanced Challenge 57",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.4999999999999999,
+      0.4999999999999999,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "50% |000\u27e9 + 50% |001\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 58,
+    "title": "Advanced Challenge 58",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      0.0,
+      1.0
+    ],
+    "targetStr": "100% |1\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 59,
+    "title": "Advanced Challenge 59",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      0.4999999999999999,
+      0.4999999999999999
+    ],
+    "targetStr": "50% |0\u27e9 + 50% |1\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 60,
+    "title": "Advanced Challenge 60",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.2499999999999999,
+      0.2499999999999999,
+      0.2499999999999999,
+      0.2499999999999999
+    ],
+    "targetStr": "25% |00\u27e9 + 25% |01\u27e9 + 25% |10\u27e9 + 25% |11\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 61,
+    "title": "Advanced Challenge 61",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.0,
+      0.4999999999999999,
+      0.0,
+      0.4999999999999999,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "50% |001\u27e9 + 50% |011\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 62,
+    "title": "Advanced Challenge 62",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.4999999999999999,
+      0.0,
+      0.4999999999999999,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "50% |000\u27e9 + 50% |010\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 63,
+    "title": "Advanced Challenge 63",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      0.0,
+      1.0
+    ],
+    "targetStr": "100% |1\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 64,
+    "title": "Advanced Challenge 64",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "targetStr": "100% |10\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 65,
+    "title": "Advanced Challenge 65",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      0.0,
+      1.0
+    ],
+    "targetStr": "100% |1\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 66,
+    "title": "Advanced Challenge 66",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.4999999999999998,
+      0.0,
+      0.4999999999999998,
+      0.0
+    ],
+    "targetStr": "50% |00\u27e9 + 50% |10\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 67,
+    "title": "Advanced Challenge 67",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.4999999999999999,
+      0.4999999999999999,
+      0.0,
+      0.0
+    ],
+    "targetStr": "50% |00\u27e9 + 50% |01\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 68,
+    "title": "Advanced Challenge 68",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.4999999999999999,
+      0.0,
+      0.4999999999999999,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "50% |000\u27e9 + 50% |010\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 69,
+    "title": "Advanced Challenge 69",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |101\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 70,
+    "title": "Advanced Challenge 70",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.9999999999999996,
+      5.004680467665246e-34,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |00\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 71,
+    "title": "Advanced Challenge 71",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      1.0,
+      0.0
+    ],
+    "targetStr": "100% |0\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 72,
+    "title": "Advanced Challenge 72",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.4999999999999999,
+      0.0,
+      0.4999999999999999,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "50% |000\u27e9 + 50% |010\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 73,
+    "title": "Advanced Challenge 73",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.4999999999999999,
+      0.0,
+      0.4999999999999999,
+      0.0
+    ],
+    "targetStr": "50% |100\u27e9 + 50% |110\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 74,
+    "title": "Advanced Challenge 74",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.2499999999999999,
+      0.2499999999999999,
+      0.2499999999999999,
+      0.2499999999999999,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "25% |000\u27e9 + 25% |001\u27e9 + 25% |010\u27e9 + 25% |011\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 75,
+    "title": "Advanced Challenge 75",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      0.0,
+      1.0
+    ],
+    "targetStr": "100% |1\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 76,
+    "title": "Advanced Challenge 76",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      0.4999999999999999,
+      0.4999999999999999
+    ],
+    "targetStr": "50% |0\u27e9 + 50% |1\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 77,
+    "title": "Advanced Challenge 77",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.0,
+      0.0,
+      0.4999999999999999,
+      0.4999999999999999
+    ],
+    "targetStr": "50% |10\u27e9 + 50% |11\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 78,
+    "title": "Advanced Challenge 78",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |000\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 79,
+    "title": "Advanced Challenge 79",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.4999999999999999,
+      0.0,
+      0.4999999999999999,
+      0.0
+    ],
+    "targetStr": "50% |100\u27e9 + 50% |110\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 80,
+    "title": "Advanced Challenge 80",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |000\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 81,
+    "title": "Advanced Challenge 81",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |000\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 82,
+    "title": "Advanced Challenge 82",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.0,
+      0.0,
+      0.4999999999999999,
+      0.4999999999999999
+    ],
+    "targetStr": "50% |10\u27e9 + 50% |11\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 83,
+    "title": "Advanced Challenge 83",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      0.4999999999999999,
+      0.4999999999999999
+    ],
+    "targetStr": "50% |0\u27e9 + 50% |1\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 84,
+    "title": "Advanced Challenge 84",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.9999999999999996,
+      0.0,
+      5.004680467665246e-34,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |000\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 85,
+    "title": "Advanced Challenge 85",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |000\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 86,
+    "title": "Advanced Challenge 86",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.0,
+      0.0,
+      0.4999999999999999,
+      0.4999999999999999
+    ],
+    "targetStr": "50% |10\u27e9 + 50% |11\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 87,
+    "title": "Advanced Challenge 87",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      1.0,
+      0.0
+    ],
+    "targetStr": "100% |0\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 88,
+    "title": "Advanced Challenge 88",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |001\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 89,
+    "title": "Advanced Challenge 89",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.0,
+      0.0,
+      0.4999999999999999,
+      0.4999999999999999
+    ],
+    "targetStr": "50% |10\u27e9 + 50% |11\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 90,
+    "title": "Advanced Challenge 90",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.9999999999999996,
+      5.004680467665246e-34,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |00\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 91,
+    "title": "Advanced Challenge 91",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |01\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 92,
+    "title": "Advanced Challenge 92",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |100\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 93,
+    "title": "Advanced Challenge 93",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      0.0,
+      1.0
+    ],
+    "targetStr": "100% |1\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 94,
+    "title": "Advanced Challenge 94",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |000\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 95,
+    "title": "Advanced Challenge 95",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.4999999999999999,
+      0.0,
+      0.0,
+      0.4999999999999999
+    ],
+    "targetStr": "50% |00\u27e9 + 50% |11\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 96,
+    "title": "Advanced Challenge 96",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |101\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 97,
+    "title": "Advanced Challenge 97",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.4999999999999999,
+      0.0,
+      0.4999999999999999,
+      0.0
+    ],
+    "targetStr": "50% |00\u27e9 + 50% |10\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 98,
+    "title": "Advanced Challenge 98",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.9999999999999996,
+      5.004680467665246e-34,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |000\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 99,
+    "title": "Advanced Challenge 99",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |000\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 100,
+    "title": "Advanced Challenge 100",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.0,
+      0.4999999999999999,
+      0.4999999999999999,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "50% |001\u27e9 + 50% |010\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 101,
+    "title": "Advanced Challenge 101",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      1.0,
+      0.0
+    ],
+    "targetStr": "100% |0\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 102,
+    "title": "Advanced Challenge 102",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |000\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 103,
+    "title": "Advanced Challenge 103",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      0.0,
+      1.0
+    ],
+    "targetStr": "100% |1\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 104,
+    "title": "Advanced Challenge 104",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |000\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 105,
+    "title": "Advanced Challenge 105",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.4999999999999999,
+      0.0,
+      0.4999999999999999,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "50% |000\u27e9 + 50% |010\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 106,
+    "title": "Advanced Challenge 106",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      0.4999999999999999,
+      0.4999999999999999
+    ],
+    "targetStr": "50% |0\u27e9 + 50% |1\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 107,
+    "title": "Advanced Challenge 107",
+    "desc": "Construct a 2-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 2,
+    "targetState": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |01\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 108,
+    "title": "Advanced Challenge 108",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "100% |000\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 109,
+    "title": "Advanced Challenge 109",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.4999999999999999,
+      0.0,
+      0.4999999999999999,
+      0.0
+    ],
+    "targetStr": "50% |100\u27e9 + 50% |110\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 110,
+    "title": "Advanced Challenge 110",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      0.0,
+      0.9999999999999996
+    ],
+    "targetStr": "100% |1\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 111,
+    "title": "Advanced Challenge 111",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      0.4999999999999998,
+      0.4999999999999998
+    ],
+    "targetStr": "50% |0\u27e9 + 50% |1\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 112,
+    "title": "Advanced Challenge 112",
+    "desc": "Construct a 1-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 1,
+    "targetState": [
+      1.0,
+      0.0
+    ],
+    "targetStr": "100% |0\u27e9",
+    "allowedGates": [
+      "CX",
+      "X",
+      "H"
+    ]
+  },
+  {
+    "id": 113,
+    "title": "Advanced Challenge 113",
+    "desc": "Construct a 3-qubit circuit that produces the exact probability distribution shown below. Hint: You might need to use superposition and entanglement.",
+    "numQubits": 3,
+    "targetState": [
+      0.0,
+      0.4999999999999999,
+      0.0,
+      0.4999999999999999,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "targetStr": "50% |001\u27e9 + 50% |011\u27e9",
+    "allowedGates": [
+      "X",
+      "H"
+    ]
+  }
+]

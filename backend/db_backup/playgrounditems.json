@@ -1,0 +1,50 @@
+[
+  {
+    "_id": "6a533dff3d180775fa9381e1",
+    "icon": "🌐",
+    "title": "Bloch Sphere Explorer",
+    "desc": "Visualize quantum states interactively on the Bloch Sphere. Understand superpositions and phase shifts intuitively.",
+    "status": "Available",
+    "path": "/sandbox",
+    "order": 1,
+    "__v": 0,
+    "createdAt": "2026-07-12T07:10:55.817Z",
+    "updatedAt": "2026-07-12T07:10:55.817Z"
+  },
+  {
+    "_id": "6a533dff3d180775fa9381e2",
+    "icon": "⚡",
+    "title": "Quantum Circuit Simulator",
+    "desc": "Drag-and-drop gates to build circuits. See state vectors and measurement probabilities in real-time.",
+    "status": "Available",
+    "path": "/circuit-simulator",
+    "order": 2,
+    "__v": 0,
+    "createdAt": "2026-07-12T07:10:55.836Z",
+    "updatedAt": "2026-07-12T07:10:55.836Z"
+  },
+  {
+    "_id": "6a533dff3d180775fa9381e3",
+    "icon": "🔗",
+    "title": "Entanglement Lab",
+    "desc": "Create and measure Bell States. Witness spooky action at a distance and the collapse of the wavefunction.",
+    "status": "Available",
+    "path": "/entanglement-lab",
+    "order": 3,
+    "__v": 0,
+    "createdAt": "2026-07-12T07:10:55.836Z",
+    "updatedAt": "2026-07-12T07:10:55.836Z"
+  },
+  {
+    "_id": "6a533dff3d180775fa9381e4",
+    "icon": "📐",
+    "title": "Circuit Challenges",
+    "desc": "Solve quantum circuit puzzles — build circuits that produce target output states.",
+    "status": "Available",
+    "path": "/circuit-challenges",
+    "order": 4,
+    "__v": 0,
+    "createdAt": "2026-07-12T07:10:55.836Z",
+    "updatedAt": "2026-07-12T07:10:55.836Z"
+  }
+]

@@ -1,0 +1,257 @@
+import { useState, useRef, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { marked } from "marked";
+import { useAITutor } from "../../context/AITutorContext";
+import { chatWithTutor, getRecommendations } from "../../services/api";
+import MathHTMLContainer from "../MathHTMLContainer/MathHTMLContainer";
+
+const QUICK_ACTIONS = [
+  { label: "Explain this page", prompt: "Explain the core quantum computing concept relevant to the page I'm currently on." },
+  { label: "Review my circuit", prompt: "Review the circuit/code I currently have open — point out bugs and possible optimizations." },
+  { label: "What should I learn next?", prompt: "__RECOMMEND__" },
+];
+
+function Bubble({ role, text }) {
+  const isUser = role === "user";
+  const html = marked.parse(text || "");
+  return (
+    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+      <div
+        className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${isUser ? "rounded-br-sm" : "rounded-bl-sm"}`}
+        style={{
+          background: isUser ? "var(--color-app-primary)" : "var(--color-app-surface-hover)",
+          color: isUser ? "#fff" : "var(--color-app-text-main)",
+          border: isUser ? "none" : "1px solid var(--color-app-border)",
+        }}
+      >
+        {isUser ? (
+          <p className="whitespace-pre-wrap break-words">{text}</p>
+        ) : (
+          <MathHTMLContainer html={html} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function AITutorPanel() {
+  const { isOpen, closeTutor, toggleTutor, pendingmessage, clearPendingmessage, pageContext } = useAITutor();
+  const location = useLocation();
+  const [messages, setmessages] = useState([
+    {
+      role: "assistant",
+      text: "Hi! I'm your **AI Tutor**. Ask me to explain a concept, debug your circuit, or suggest what to learn next.",
+    },
+  ]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, loading, isOpen]);
+
+  useEffect(() => {
+    if (pendingmessage && isOpen) {
+      send(pendingmessage);
+      clearPendingmessage();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingmessage, isOpen]);
+
+  async function send(rawText) {
+    const text = (rawText ?? input).trim();
+    if (!text || loading) return;
+
+    setError(null);
+    setInput("");
+
+    if (text === "__RECOMMEND__") {
+      setmessages((prev) => [...prev, { role: "user", text: "What should I learn next?" }]);
+      setLoading(true);
+      try {
+        const data = await getRecommendations();
+        setmessages((prev) => [...prev, { role: "assistant", text: data.recommendation }]);
+      } catch (err) {
+        setError(err?.response?.data?.error || "Couldn't fetch recommendations right now.");
+      }
+      setLoading(false);
+      return;
+    }
+
+    const nextmessages = [...messages, { role: "user", text }];
+    setmessages(nextmessages);
+    setLoading(true);
+
+    try {
+      const history = nextmessages
+        .filter((m) => m.role === "user" || m.role === "assistant")
+        .slice(0, -1)
+        .map((m) => ({ role: m.role, text: m.text }));
+
+      const context = { page: location.pathname, ...pageContext };
+      const data = await chatWithTutor(text, history, context);
+      setmessages((prev) => [...prev, { role: "assistant", text: data.reply }]);
+    } catch (err) {
+      const msg = err?.response?.data?.error || "AI Tutor is unavailable right now.";
+      setError(msg);
+    }
+    setLoading(false);
+  }
+
+  return (
+    <>
+      {/* Floating Launcher */}
+      <button
+        onClick={toggleTutor}
+        className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-2xl flex items-center justify-center transition-transform hover:scale-105 active:scale-95"
+        style={{
+          background: "linear-gradient(135deg, var(--color-app-primary), var(--color-app-accent))",
+          boxShadow: "0 8px 30px var(--color-app-primary-glow)",
+        }}
+        title="AI Tutor"
+        aria-label="Open AI Tutor"
+      >
+        {isOpen ? (
+          <svg width="22" height="22" fill="none" stroke="#fff" strokeWidth="2.2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        ) : (
+          <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          </svg>
+        )}
+      </button>
+
+      {/* Panel */}
+      {isOpen && (
+        <div
+          className="fixed bottom-24 right-6 z-50 w-[23rem] max-w-[calc(100vw-3rem)] h-[32rem] max-h-[calc(100vh-8rem)] flex flex-col rounded-2xl overflow-hidden animate-fade-in"
+          style={{
+            background: "var(--color-app-surface)",
+            border: "1px solid var(--color-app-border)",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
+          }}
+        >
+          {/* Header */}
+          <div
+            className="flex items-center justify-between px-4 py-3 shrink-0"
+            style={{ borderBottom: "1px solid var(--color-app-border)" }}
+          >
+            <div className="flex items-center gap-2">
+              <div
+                className="h-8 w-8 rounded-lg flex items-center justify-center"
+                style={{ background: "linear-gradient(135deg, var(--color-app-primary), var(--color-app-accent))" }}
+              >
+                <svg width="16" height="16" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+              </div>
+              <div>
+                <div className="text-sm font-bold" style={{ color: "var(--color-app-text-main)" }}>AI Tutor</div>
+                <div className="text-[10px]" style={{ color: "var(--color-app-text-muted)" }}>Powered by Gemini</div>
+              </div>
+            </div>
+            <button onClick={closeTutor} className="p-1 rounded hover:opacity-70" style={{ color: "var(--color-app-text-muted)" }}>
+              <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* messages */}
+          <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3" data-lenis-prevent="true">
+            {messages.map((m, i) => (
+              <Bubble key={i} role={m.role} text={m.text} />
+            ))}
+            {loading && (
+              <div className="flex justify-start">
+                <div
+                  className="rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm flex gap-1"
+                  style={{ background: "var(--color-app-surface-hover)", border: "1px solid var(--color-app-border)" }}
+                >
+                  <span className="ai-tutor-dot" />
+                  <span className="ai-tutor-dot" style={{ animationDelay: "0.15s" }} />
+                  <span className="ai-tutor-dot" style={{ animationDelay: "0.3s" }} />
+                </div>
+              </div>
+            )}
+            {error && (
+              <div className="text-xs px-3 py-2 rounded-lg" style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.3)" }}>
+                {error}
+              </div>
+            )}
+          </div>
+
+          {/* Quick Actions */}
+          {messages.length <= 1 && (
+            <div className="px-4 pb-2 flex flex-wrap gap-1.5 shrink-0">
+              {QUICK_ACTIONS.map((qa) => (
+                <button
+                  key={qa.label}
+                  onClick={() => send(qa.prompt)}
+                  className="text-[11px] px-2.5 py-1 rounded-full transition-colors"
+                  style={{
+                    border: "1px solid var(--color-app-border)",
+                    color: "var(--color-app-text-muted)",
+                    background: "var(--color-app-surface-hover)",
+                  }}
+                >
+                  {qa.label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Input */}
+          <form
+            className="flex items-center gap-2 p-3 shrink-0"
+            style={{ borderTop: "1px solid var(--color-app-border)" }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              send();
+            }}
+          >
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask about qubits, gates, algorithms..."
+              className="flex-1 px-3 py-2 rounded-lg text-sm outline-none"
+              style={{
+                background: "var(--color-app-surface-hover)",
+                border: "1px solid var(--color-app-border)",
+                color: "var(--color-app-text-main)",
+              }}
+            />
+            <button
+              type="submit"
+              disabled={loading || !input.trim()}
+              className="h-9 w-9 shrink-0 rounded-lg flex items-center justify-center disabled:opacity-40"
+              style={{ background: "var(--color-app-primary)", color: "#fff" }}
+            >
+              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+            </button>
+          </form>
+        </div>
+      )}
+
+      <style>{`
+        .ai-tutor-dot {
+          width: 6px; height: 6px; border-radius: 50%;
+          background: var(--color-app-text-muted);
+          animation: ai-tutor-bounce 1.2s infinite ease-in-out;
+        }
+        @keyframes ai-tutor-bounce {
+          0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+          40% { transform: scale(1); opacity: 1; }
+        }
+      `}</style>
+    </>
+  );
+}

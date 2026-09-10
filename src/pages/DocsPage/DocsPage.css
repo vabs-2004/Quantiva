@@ -1,0 +1,303 @@
+/* ═══════════════════════════════════════════════════════
+   Docs Page — W3Schools/MDN style
+   ═══════════════════════════════════════════════════════ */
+
+.docs-page {
+  min-height: 100vh;
+  background: var(--color-app-base);
+  color: var(--color-app-text-main);
+  display: flex;
+  flex-direction: column;
+}
+
+.docs-layout {
+  display: flex;
+  flex: 1;
+  position: relative;
+}
+
+/* ─── Sidebar ──────────────────────────────── */
+
+.docs-sidebar {
+  border-right: 1px solid var(--color-app-border);
+  background: var(--color-app-surface);
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.docs-sidebar.collapsed {
+  width: 0 !important;
+  border-right: none;
+}
+
+.docs-sidebar-header {
+  padding: 1.25rem 1rem;
+  border-bottom: 1px solid var(--color-app-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.docs-sidebar-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--color-app-text-main);
+  white-space: nowrap;
+}
+
+.docs-sidebar-toggle {
+  padding: 0.35rem;
+  border: none;
+  background: none;
+  color: var(--color-app-text-muted);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+.docs-sidebar-toggle:hover {
+  background: var(--color-app-surface-hover);
+  color: var(--color-app-text-main);
+}
+
+.docs-sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 0.75rem;
+}
+
+.docs-sidebar-section {
+  margin-bottom: 1.25rem;
+}
+
+.docs-sidebar-section-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-app-accent);
+  padding: 0.25rem 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.docs-sidebar-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-app-text-muted);
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.docs-sidebar-item:hover {
+  background: var(--color-app-surface-hover);
+  color: var(--color-app-text-main);
+}
+.docs-sidebar-item.active {
+  background: var(--color-app-primary-glow);
+  color: var(--color-app-primary);
+  font-weight: 600;
+}
+
+.docs-sidebar-open-btn {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 50;
+  padding: 0.75rem 0.35rem;
+  background: var(--color-app-surface);
+  border: 1px solid var(--color-app-border);
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  color: var(--color-app-text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.docs-sidebar-open-btn:hover {
+  color: var(--color-app-primary);
+  background: var(--color-app-primary-glow);
+}
+
+/* ─── Content ──────────────────────────────── */
+
+.docs-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2.5rem 3rem;
+  max-width: 900px;
+}
+
+.docs-article-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-app-text-main);
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--color-app-border);
+}
+
+.docs-h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-app-text-main);
+  margin: 2rem 0 0.75rem;
+}
+
+.docs-paragraph {
+  font-size: 0.92rem;
+  line-height: 1.8;
+  color: var(--color-app-text-muted);
+  margin-bottom: 1rem;
+}
+
+.docs-paragraph strong {
+  color: var(--color-app-text-main);
+  font-weight: 700;
+}
+
+.docs-list {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+.docs-list li {
+  font-size: 0.9rem;
+  color: var(--color-app-text-muted);
+  line-height: 1.8;
+  margin-bottom: 0.35rem;
+}
+
+.docs-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.85rem;
+}
+.docs-table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  background: var(--color-app-surface-hover);
+  border: 1px solid var(--color-app-border);
+  font-weight: 700;
+  color: var(--color-app-text-main);
+}
+.docs-table td {
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--color-app-border);
+  color: var(--color-app-text-muted);
+}
+
+.docs-code-block {
+  margin: 2rem 0;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid var(--color-app-border);
+}
+
+.docs-code-header {
+  padding: 0.65rem 1rem;
+  background: var(--color-app-surface-hover);
+  border-bottom: 1px solid var(--color-app-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-app-text-muted);
+}
+
+.docs-code-lang {
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  background: var(--color-app-primary-glow);
+  color: var(--color-app-primary);
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.docs-code-pre {
+  padding: 1.25rem;
+  background: #0f172a;
+  overflow-x: auto;
+  margin: 0;
+}
+.docs-code-pre code {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.7;
+  color: #e2e8f0;
+}
+
+.docs-nav-bottom {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--color-app-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.docs-nav-btn {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-app-border);
+  background: var(--color-app-surface);
+  color: var(--color-app-text-main);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  max-width: 45%;
+  flex: 1;
+}
+
+.docs-nav-btn:hover {
+  border-color: var(--color-app-primary);
+  background: var(--color-app-surface-hover);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.docs-nav-btn.next {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.docs-nav-btn.prev {
+  text-align: left;
+  align-items: flex-start;
+}
+
+.docs-nav-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-app-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.4rem;
+}
+
+.docs-nav-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-app-primary);
+}
+
+@media (max-width: 768px) {
+  .docs-content {
+    padding: 1.5rem;
+  }
+  .docs-article-title {
+    font-size: 1.5rem;
+  }
+}
