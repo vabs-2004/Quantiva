@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -11,6 +11,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useAITutor } from "../../context/AITutorContext";
 import MathHTMLContainer from "../MathHTMLContainer/MathHTMLContainer";
 import GeneratedInteractiveDispatcher from "./GeneratedInteractiveDispatcher";
+import { parseMathMarkdown } from "../../utils/mathMarkdownParser";
 
 export default function GeneratedLessonViewer() {
   const { lessonId } = useParams();
@@ -26,6 +27,15 @@ export default function GeneratedLessonViewer() {
   const [bmLoading, setBmLoading] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [toastMessage, setToastMessage] = useState(null);
+  const [copiedCode, setCopiedCode] = useState(false);
+
+  const handleCopyCode = (code) => {
+    if (!code) return;
+    navigator.clipboard.writeText(code).then(() => {
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    });
+  };
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -114,6 +124,30 @@ export default function GeneratedLessonViewer() {
     );
   };
 
+  const sections = lesson?.sections || [];
+  const currentSection = sections[activeSectionIndex] || sections[0] || null;
+
+  const parsedSectionContent = useMemo(() => {
+    return parseMathMarkdown(currentSection?.content || "");
+  }, [currentSection?.content]);
+
+  const codeSnippet = useMemo(() => {
+    if (!currentSection) return null;
+    if (currentSection.codeSnippet && currentSection.codeSnippet.code) {
+      return currentSection.codeSnippet;
+    }
+    if (currentSection.interactiveComponent && currentSection.interactiveComponent.type === "sandbox") {
+      const cfg = currentSection.interactiveComponent.config || {};
+      return {
+        code: cfg.code || "",
+        language: cfg.language || "python",
+        title: cfg.title || "Python / Qiskit Implementation",
+        instructions: cfg.instructions || "",
+      };
+    }
+    return null;
+  }, [currentSection]);
+
   if (loading) {
     return (
       <div className="min-h-screen pt-24 pb-16 px-4 max-w-4xl mx-auto flex flex-col items-center justify-center">
@@ -152,9 +186,6 @@ export default function GeneratedLessonViewer() {
       </div>
     );
   }
-
-  const sections = lesson.sections || [];
-  const currentSection = sections[activeSectionIndex] || sections[0];
 
   return (
     <div className="min-h-screen pt-20 pb-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
@@ -290,7 +321,7 @@ export default function GeneratedLessonViewer() {
 
           {/* Section Text & Markdown (with KaTeX) */}
           <div className="prose prose-invert max-w-none text-sm leading-relaxed text-[var(--color-app-text-muted)]">
-            <MathHTMLContainer html={currentSection.content} />
+            <MathHTMLContainer html={parsedSectionContent} />
           </div>
 
           {/* Optional Formula Card */}
@@ -310,27 +341,128 @@ export default function GeneratedLessonViewer() {
             </div>
           )}
 
-          {/* Interactive Component (Whitelisted Dispatcher) */}
-          {currentSection.interactiveComponent && (
-            <div className="pt-2">
-              <div className="text-xs font-bold uppercase tracking-wider text-purple-300 mb-3 flex items-center gap-1.5">
-                <span>⚡</span> Interactive Quantum Workspace
+          {/* Code Implementation Section (Copyable Code + Open in Sandbox) */}
+          {codeSnippet && codeSnippet.code && (
+            <div className="rounded-2xl border border-[var(--color-app-border)] bg-black/60 overflow-hidden shadow-2xl">
+              <div className="px-4 py-3 bg-white/[0.04] border-b border-white/10 flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/80 inline-block animate-pulse" />
+                  <span className="text-xs font-mono font-bold text-[var(--color-app-primary)]">
+                    🐍 {codeSnippet.title || "Python / Qiskit Implementation"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleCopyCode(codeSnippet.code)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition-all flex items-center gap-1.5 border border-white/10 cursor-pointer"
+                    title="Copy Python Code"
+                  >
+                    <span>{copiedCode ? "✓" : "📋"}</span>
+                    <span>{copiedCode ? "Copied!" : "Copy Code"}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => navigate("/sandbox", { state: { code: codeSnippet.code } })}
+                    className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[var(--color-app-primary)] text-black hover:opacity-90 transition-all flex items-center gap-1.5 shadow-md shadow-[var(--color-app-primary)]/20 cursor-pointer"
+                    title="Open in Quantiva Sandbox"
+                  >
+                    <span>🚀</span> Open in Sandbox
+                  </button>
+                </div>
               </div>
-              <GeneratedInteractiveDispatcher component={currentSection.interactiveComponent} />
+              {codeSnippet.instructions && (
+                <div className="px-4 py-2 bg-emerald-500/10 border-b border-emerald-500/20 text-xs text-emerald-300">
+                  💡 {codeSnippet.instructions}
+                </div>
+              )}
+              <pre className="p-5 text-xs font-mono text-emerald-300 bg-black/50 overflow-x-auto max-h-96 leading-relaxed">
+                <code>{codeSnippet.code}</code>
+              </pre>
             </div>
           )}
 
-          {/* Optional Check Question */}
-          {currentSection.checkQuestion && (
-            <div className="mt-8 p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3">
+          {/* Curated YouTube Video Section — Strictly restricted to Section 4 / video type */}
+          {(currentSection.type === "video" || activeSectionIndex === 3) &&
+            currentSection.video &&
+            (currentSection.video.embedUrl || currentSection.video.videoId || currentSection.video.url) && (
+            <div className="rounded-2xl border border-white/10 bg-black/40 overflow-hidden space-y-4 p-5 shadow-2xl">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-red-400 flex items-center gap-1">
+                    <span>▶</span> Curated Video Lecture
+                  </span>
+                  <h3 className="text-base font-bold text-white mt-1">
+                    {currentSection.video.title}
+                  </h3>
+                  <p className="text-xs text-[var(--color-app-text-muted)] mt-0.5">
+                    Channel: <span className="text-white font-medium">{currentSection.video.channelTitle || "Quantum Computing"}</span>
+                    {currentSection.video.viewCount > 0 && (
+                      <span className="ml-3 font-mono opacity-80">
+                        👁 {currentSection.video.viewCount.toLocaleString()} views
+                      </span>
+                    )}
+                  </p>
+                </div>
+                {currentSection.video.url && (
+                  <a
+                    href={currentSection.video.url}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-red-600/90 text-white hover:bg-red-500 transition-all flex items-center gap-1.5 shadow-md shrink-0"
+                  >
+                    <span>📺</span> Watch on YouTube
+                  </a>
+                )}
+              </div>
+
+              {currentSection.video.embedUrl ? (
+                <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-white/10 bg-black">
+                  <iframe
+                    src={currentSection.video.embedUrl}
+                    title={currentSection.video.title || "Quantum Video Guide"}
+                    className="absolute inset-0 w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                <div className="p-4 rounded-xl bg-white/5 text-xs text-[var(--color-app-text-muted)] italic">
+                  Video embed not available. Use the button above to view on YouTube.
+                </div>
+              )}
+
+              {currentSection.video.description && (
+                <p className="text-xs text-[var(--color-app-text-muted)] leading-relaxed italic border-t border-white/5 pt-3">
+                  {currentSection.video.description}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Interactive Visualizers (e.g. Bloch Sphere, Complex Plane, Measurement) */}
+          {currentSection.interactiveComponent &&
+            currentSection.interactiveComponent.type !== "sandbox" &&
+            currentSection.interactiveComponent.type !== "circuit" && (
+              <div className="pt-2">
+                <div className="text-xs font-bold uppercase tracking-wider text-purple-300 mb-3 flex items-center gap-1.5">
+                  <span>⚡</span> Interactive Quantum Workspace
+                </div>
+                <GeneratedInteractiveDispatcher component={currentSection.interactiveComponent} />
+              </div>
+            )}
+
+          {/* Dedicated Check Your Understanding Quiz — ONLY on Section 5 (final section) */}
+          {(activeSectionIndex === sections.length - 1 || currentSection.type === "quiz" || currentSection.type === "reflection") && currentSection.checkQuestion && (
+            <div className="mt-8 p-6 rounded-2xl bg-white/[0.03] border border-white/10 space-y-4 shadow-xl">
               <div className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
                 <span>💡</span> Check Your Understanding
               </div>
-              <p className="text-sm font-semibold text-[var(--color-app-text-main)]">
-                {currentSection.checkQuestion.question}
-              </p>
+              <div className="text-sm font-semibold text-[var(--color-app-text-main)]">
+                <MathHTMLContainer html={parseMathMarkdown(currentSection.checkQuestion.question || "")} />
+              </div>
 
-              <div className="space-y-2 pt-1">
+              <div className="space-y-2.5 pt-1">
                 {(currentSection.checkQuestion.options || []).map((opt, oIdx) => {
                   const isSelected = selectedAnswers[currentSection.id] === oIdx;
                   const isSubmitted = selectedAnswers[currentSection.id] !== undefined;
@@ -354,20 +486,22 @@ export default function GeneratedLessonViewer() {
                           [currentSection.id]: oIdx,
                         }));
                       }}
-                      className={`w-full text-left p-3 rounded-xl border text-xs transition-all flex items-center justify-between cursor-pointer ${optClass}`}
+                      className={`w-full text-left p-3.5 rounded-xl border text-xs transition-all flex items-center justify-between cursor-pointer ${optClass}`}
                     >
-                      <span>{opt}</span>
-                      {isSubmitted && isCorrect && <span className="text-green-400 font-bold">✓</span>}
-                      {isSubmitted && isSelected && !isCorrect && <span className="text-red-400 font-bold">✕</span>}
+                      <div className="flex-1 pr-3">
+                        <MathHTMLContainer html={parseMathMarkdown(opt)} />
+                      </div>
+                      {isSubmitted && isCorrect && <span className="text-green-400 font-bold text-sm">✓</span>}
+                      {isSubmitted && isSelected && !isCorrect && <span className="text-red-400 font-bold text-sm">✕</span>}
                     </button>
                   );
                 })}
               </div>
 
               {selectedAnswers[currentSection.id] !== undefined && currentSection.checkQuestion.explanation && (
-                <p className="text-xs text-[var(--color-app-text-muted)] italic pt-2 border-t border-white/5">
-                  {currentSection.checkQuestion.explanation}
-                </p>
+                <div className="text-xs text-[var(--color-app-text-muted)] italic pt-3 border-t border-white/5">
+                  <MathHTMLContainer html={parseMathMarkdown(currentSection.checkQuestion.explanation)} />
+                </div>
               )}
             </div>
           )}

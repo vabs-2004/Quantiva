@@ -225,6 +225,19 @@ async function runTests() {
     assert(emptyCatSearch.body.results.length >= 12, "Empty query category=micro_modules returns all 12 modules");
     assert(emptyCatSearch.body.results.every((r) => r.type === "micro_module"), "All items are micro_modules");
 
+    // 11. Exact vs Related match separation: "Quantum Cryptography" (no curated lesson, related exists)
+    const qCryptoRes = await request("/api/search?q=Quantum+Cryptography");
+    assert(qCryptoRes.status === 200, "GET /api/search?q=Quantum+Cryptography returns 200");
+    assert(qCryptoRes.body.exactMatch === null, "Quantum Cryptography has exactMatch: null");
+    assert(Array.isArray(qCryptoRes.body.related) && qCryptoRes.body.related.length > 0, "Quantum Cryptography has related results");
+    assert(qCryptoRes.body.related.some((r) => r.id === "bb84"), "Related results include BB84 / QKD");
+
+    // 12. Exact vs Related match separation: "Quantum Phase Estimation" (curated exact match)
+    const qpeExactRes = await request("/api/search?q=Quantum+Phase+Estimation");
+    assert(qpeExactRes.status === 200, "GET /api/search?q=Quantum+Phase+Estimation returns 200");
+    assert(qpeExactRes.body.exactMatch !== null, "Quantum Phase Estimation has exactMatch object");
+    assert(qpeExactRes.body.exactMatch.id === "quantum-phase-estimation", "Exact match ID is quantum-phase-estimation");
+
   } catch (err) {
     console.error("Test execution error:", err);
     failed++;

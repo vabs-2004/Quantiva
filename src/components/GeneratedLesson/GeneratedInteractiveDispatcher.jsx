@@ -1,7 +1,9 @@
 import React, { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import BlochSphereViewer from "../BlochSphereViewer/BlochSphereViewer";
 import ComplexPlane from "../ComplexPlane/ComplexPlane";
 import StateProbabilityHeatmap from "../StateProbabilityHeatmap/StateProbabilityHeatmap";
+import MeasurementTable from "../MeasurementTable/MeasurementTable";
 
 /**
  * GeneratedInteractiveDispatcher
@@ -9,9 +11,11 @@ import StateProbabilityHeatmap from "../StateProbabilityHeatmap/StateProbability
  * Secure adapter mapping whitelisted interactiveComponent types to trusted Quantiva visualizers.
  * Supported types:
  * - "bloch-sphere" -> BlochSphereViewer (with custom theta/phi and gate palette)
- * - "circuit" -> Interactive Quantum Wire & Step Visualizer
+ * - "circuit" -> Interactive Quantum Wire & Step Visualizer with Sandbox Bridge
  * - "complex-plane" -> ComplexPlane (with real & imaginary coordinate controls)
  * - "state-vector" / "probability-heatmap" -> StateProbabilityHeatmap
+ * - "measurement" -> MeasurementTable with interactive shot resampling
+ * - "sandbox" -> Sandboxed python/qiskit preview with explicit Sandbox bridge
  * 
  * NEVER executes arbitrary code or unwhitelisted components.
  */
@@ -30,6 +34,10 @@ export default function GeneratedInteractiveDispatcher({ component }) {
     case "state-vector":
     case "probability-heatmap":
       return <HeatmapAdapter config={config} />;
+    case "measurement":
+      return <MeasurementAdapter config={config} />;
+    case "sandbox":
+      return <SandboxAdapter config={config} />;
     default:
       return (
         <div className="p-4 rounded-xl border border-white/10 bg-black/20 text-xs text-[var(--color-app-text-muted)] italic">
@@ -96,9 +104,58 @@ function ComplexPlaneAdapter({ config }) {
 }
 
 /**
+ * Helper to translate visual circuit gates to runnable Qiskit python code
+ */
+function circuitToQiskit(numQubits, gates) {
+  const lines = [
+    "# Generated from Quantiva Circuit",
+    "from qiskit import QuantumCircuit, transpile",
+    "from qiskit_aer import Aer",
+    "from qiskit.visualization import circuit_drawer, plot_histogram",
+    "import matplotlib",
+    "matplotlib.use('agg')",
+    "import matplotlib.pyplot as plt",
+    "",
+    `qc = QuantumCircuit(${numQubits})`
+  ];
+  gates.forEach((g) => {
+    const type = (g.type || "").toUpperCase();
+    if (type === "H") lines.push(`qc.h(${g.wire})`);
+    else if (type === "X") lines.push(`qc.x(${g.wire})`);
+    else if (type === "Y") lines.push(`qc.y(${g.wire})`);
+    else if (type === "Z") lines.push(`qc.z(${g.wire})`);
+    else if (type === "CX" || type === "CNOT") {
+      const target = g.target !== undefined ? g.target : (g.wire + 1) % numQubits;
+      lines.push(`qc.cx(${g.wire}, ${target})`);
+    } else if (type === "S") lines.push(`qc.s(${g.wire})`);
+    else if (type === "T") lines.push(`qc.t(${g.wire})`);
+  });
+  lines.push("qc.measure_all()");
+  lines.push("");
+  lines.push("# Draw circuit");
+  lines.push("fig = circuit_drawer(qc, output='mpl')");
+  lines.push("display(fig)");
+  lines.push("plt.close(fig)");
+  lines.push("");
+  lines.push("# Simulate");
+  lines.push("simulator = Aer.get_backend('aer_simulator')");
+  lines.push("compiled = transpile(qc, simulator)");
+  lines.push("job = simulator.run(compiled, shots=1000)");
+  lines.push("result = job.result()");
+  lines.push("counts = result.get_counts()");
+  lines.push('print(f"Results: {counts}")');
+  lines.push("");
+  lines.push("fig2 = plot_histogram(counts)");
+  lines.push("display(fig2)");
+  lines.push("plt.close(fig2)");
+  return lines.join("\n");
+}
+
+/**
  * Circuit Visualizer Adapter
  */
 function CircuitAdapter({ config }) {
+  const navigate = useNavigate();
   const numQubits = Math.max(1, Math.min(4, Number(config.numQubits) || 2));
   const gates = Array.isArray(config.gates) ? config.gates : [];
 
@@ -107,13 +164,28 @@ function CircuitAdapter({ config }) {
     return gates.filter((g) => g.wire === q).sort((a, b) => (a.step || 0) - (b.step || 0));
   });
 
+  const handleOpenSandbox = () => {
+    const code = circuitToQiskit(numQubits, gates);
+    navigate("/sandbox", { state: { code } });
+  };
+
   return (
     <div className="space-y-3">
-      {config.instructions && (
-        <p className="text-xs font-medium text-[var(--color-app-text-muted)] italic">
-          💡 {config.instructions}
-        </p>
-      )}
+      <div className="flex items-center justify-between gap-2">
+        {config.instructions ? (
+          <p className="text-xs font-medium text-[var(--color-app-text-muted)] italic">
+            💡 {config.instructions}
+          </p>
+        ) : <div />}
+        <button
+          type="button"
+          onClick={handleOpenSandbox}
+          className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white/10 hover:bg-[var(--color-app-primary)] hover:text-black transition-all flex items-center gap-1.5 border border-white/10 shrink-0"
+          title="Export this circuit to executable Python in the Sandbox"
+        >
+          <span>🚀 Open in Sandbox</span>
+        </button>
+      </div>
       <div className="p-5 rounded-2xl border border-[var(--color-app-border)] bg-black/40 overflow-x-auto">
         <div className="min-w-[320px] space-y-4">
           {wires.map((wireGates, qIdx) => (
@@ -174,6 +246,111 @@ function HeatmapAdapter({ config }) {
         </p>
       )}
       <StateProbabilityHeatmap probabilities={probabilities} />
+    </div>
+  );
+}
+
+/**
+ * Measurement Adapter
+ */
+function MeasurementAdapter({ config }) {
+  const baseMeasurements = useMemo(() => {
+    return Array.isArray(config.measurements) && config.measurements.length > 0
+      ? config.measurements
+      : [
+          { state: "0", probability: 0.5, count: 500 },
+          { state: "1", probability: 0.5, count: 500 },
+        ];
+  }, [config]);
+
+  const shots = config.shots || 1000;
+  const [measurements, setMeasurements] = useState(baseMeasurements);
+  const [isResampling, setIsResampling] = useState(false);
+
+  const handleResample = () => {
+    setIsResampling(true);
+    setTimeout(() => {
+      const totalProb = baseMeasurements.reduce((sum, m) => sum + (m.probability || 0), 0) || 1;
+      const counts = new Array(baseMeasurements.length).fill(0);
+      for (let s = 0; s < shots; s++) {
+        let r = Math.random() * totalProb;
+        for (let i = 0; i < baseMeasurements.length; i++) {
+          r -= (baseMeasurements[i].probability || 0);
+          if (r <= 0 || i === baseMeasurements.length - 1) {
+            counts[i]++;
+            break;
+          }
+        }
+      }
+      setMeasurements(baseMeasurements.map((m, idx) => ({
+        ...m,
+        count: counts[idx],
+        probability: Math.round((counts[idx] / shots) * 1000) / 1000,
+      })));
+      setIsResampling(false);
+    }, 150);
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-2">
+        {config.instructions ? (
+          <p className="text-xs font-medium text-[var(--color-app-text-muted)] italic">
+            💡 {config.instructions}
+          </p>
+        ) : <div />}
+        <button
+          type="button"
+          onClick={handleResample}
+          disabled={isResampling}
+          className="px-3 py-1 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-[var(--color-app-text-main)] transition-all flex items-center gap-1.5 border border-white/10 disabled:opacity-50 shrink-0"
+        >
+          <span>🎲 Re-sample ({shots} shots)</span>
+        </button>
+      </div>
+      <MeasurementTable measurements={measurements} />
+    </div>
+  );
+}
+
+/**
+ * Sandbox Adapter
+ */
+function SandboxAdapter({ config }) {
+  const navigate = useNavigate();
+  const code = config.code || "# No code provided";
+
+  const handleOpenInSandbox = () => {
+    navigate("/sandbox", { state: { code } });
+  };
+
+  return (
+    <div className="space-y-3">
+      {config.instructions && (
+        <p className="text-xs font-medium text-[var(--color-app-text-muted)] italic">
+          💡 {config.instructions}
+        </p>
+      )}
+      <div className="rounded-2xl border border-[var(--color-app-border)] bg-black/60 overflow-hidden shadow-xl">
+        <div className="px-4 py-2.5 bg-white/5 border-b border-white/10 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/80 inline-block animate-pulse" />
+            <span className="text-xs font-mono font-semibold text-[var(--color-app-text-muted)]">
+              🐍 {config.title || "Python / Qiskit Code"}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={handleOpenInSandbox}
+            className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[var(--color-app-primary)] text-black hover:opacity-90 transition-all flex items-center gap-1.5 shadow-md shadow-[var(--color-app-primary)]/20 shrink-0"
+          >
+            <span>🚀 Open in Sandbox</span>
+          </button>
+        </div>
+        <pre className="p-4 text-xs font-mono text-emerald-300 bg-black/40 overflow-x-auto max-h-72 leading-relaxed">
+          <code>{code}</code>
+        </pre>
+      </div>
     </div>
   );
 }

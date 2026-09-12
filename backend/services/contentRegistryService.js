@@ -461,10 +461,35 @@ class ContentRegistryService {
       return a.title.localeCompare(b.title);
     });
 
-    const total = filtered.length;
-    const paginated = filtered.slice(offset, offset + limit);
+    // Exact Match Semantics (title == query, canonical ID == query, registered alias == query)
+    const isExactCuratedMatch = (item) => {
+      if (!queryNorm) return false;
+      if (normalizeText(item.title) === queryNorm) return true;
+      if (normalizeText(item.id) === queryNorm) return true;
+      if (Array.isArray(item.aliases) && item.aliases.some((a) => normalizeText(a) === queryNorm)) {
+        return true;
+      }
+      return false;
+    };
+
+    let exactMatches = [];
+    let relatedMatches = [];
+
+    if (queryNorm) {
+      exactMatches = filtered.filter((item) => isExactCuratedMatch(item));
+      relatedMatches = filtered.filter((item) => !isExactCuratedMatch(item));
+    } else {
+      relatedMatches = filtered;
+    }
+
+    // Exact curated matches always rank first in combined results
+    const combinedFiltered = queryNorm ? [...exactMatches, ...relatedMatches] : filtered;
+    const total = combinedFiltered.length;
+    const paginated = combinedFiltered.slice(offset, offset + limit);
 
     const sanitizedResults = paginated.map(({ contentBody, ...rest }) => rest);
+    const sanitizedExact = exactMatches.map(({ contentBody, ...rest }) => rest);
+    const sanitizedRelated = relatedMatches.map(({ contentBody, ...rest }) => rest);
 
     return {
       success: true,
@@ -472,6 +497,9 @@ class ContentRegistryService {
       total,
       facets,
       results: sanitizedResults,
+      exact: sanitizedExact,
+      exactMatch: sanitizedExact.length > 0 ? sanitizedExact[0] : null,
+      related: sanitizedRelated,
     };
   }
 

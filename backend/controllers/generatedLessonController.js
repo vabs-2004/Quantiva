@@ -38,7 +38,7 @@ async function getOrCreateProgress(userId) {
  */
 async function generateLesson(req, res) {
   try {
-    const { topic, topicDescription, learnerLevel, forceAlternative } = req.body;
+    const { topic, topicDescription, learnerLevel, forceAlternative, conversation, learnerIntent } = req.body;
 
     if (!topic || typeof topic !== "string" || !topic.trim()) {
       return res.status(400).json({ error: "Topic is required to generate a personal lesson." });
@@ -50,6 +50,8 @@ async function generateLesson(req, res) {
       userId: req.user.id,
       learnerLevel: learnerLevel || req.user.learningProfile?.startingLevel || "intermediate",
       forceAlternative: Boolean(forceAlternative),
+      conversation: Array.isArray(conversation) ? conversation : [],
+      learnerIntent: typeof learnerIntent === "string" ? learnerIntent.trim().slice(0, 500) : "",
     });
 
     if (result.curatedResource) {

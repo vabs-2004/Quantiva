@@ -196,11 +196,11 @@ export default function MyGeneratedLessonsPage() {
           <div className="w-16 h-16 rounded-2xl bg-purple-500/15 text-purple-300 border border-purple-500/30 flex items-center justify-center text-3xl mx-auto">
             ✨
           </div>
-          <h2 className="text-xl font-bold text-[var(--color-app-text-main)]">
-            You haven't created any personal interactive lessons yet.
+          <h2 className="text-xl sm:text-2xl font-bold text-[var(--color-app-text-main)]">
+            What would you like to learn?
           </h2>
           <p className="text-xs sm:text-sm text-[var(--color-app-text-muted)] leading-relaxed max-w-md mx-auto">
-            When Quantiva doesn't have an official Micro Module for a concept you want to explore, you can create a personalized interactive lesson directly from the Topic Navigator or AI Tutor.
+            Start a conversation with Quantiva Tutor, then turn the topic into your own interactive Micro-Module when you're ready.
           </p>
           <div className="pt-2 flex items-center justify-center gap-3">
             <Link
@@ -210,10 +210,17 @@ export default function MyGeneratedLessonsPage() {
               Explore Knowledge Map →
             </Link>
             <button
-              onClick={() => openTutor("Teach me Phase Kickback interactively.")}
-              className="px-5 py-2.5 rounded-xl text-xs font-bold border border-[var(--color-app-border)] text-[var(--color-app-text-main)] hover:bg-white/5"
+              onClick={() =>
+                openTutor(null, {
+                  source: "my-learning",
+                  topic: null,
+                  resource: null,
+                  query: null,
+                })
+              }
+              className="px-5 py-2.5 rounded-xl text-xs font-bold border border-[var(--color-app-border)] text-[var(--color-app-text-main)] hover:bg-white/5 cursor-pointer"
             >
-              Ask Tutor to Generate ⚡
+              Ask Tutor 💬
             </button>
           </div>
         </div>

@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { runSandboxCode, installSandboxPackages } from "../../services/api";
 import GraphViewer from "../../components/GraphViewer/GraphViewer";
 import Loading from "../../components/Loading/Loading";
@@ -321,7 +322,20 @@ function createCell(code = "", outputs = null) {
 }
 
 export default function SandboxPage() {
-  const [cells, setCells] = useState([createCell(TEMPLATES.blank.code)]);
+  const location = useLocation();
+  const [cells, setCells] = useState(() => {
+    if (location.state?.code && typeof location.state.code === "string") {
+      return [createCell(location.state.code)];
+    }
+    return [createCell(TEMPLATES.blank.code)];
+  });
+
+  useEffect(() => {
+    if (location.state?.code && typeof location.state.code === "string") {
+      setCells([createCell(location.state.code)]);
+    }
+  }, [location.state?.code]);
+
   const { openTutor } = useAITutor();
   const [globalLoading, setGlobalLoading] = useState(false);
   const fileInputRef = useRef(null);

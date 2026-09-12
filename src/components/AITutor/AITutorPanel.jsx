@@ -156,29 +156,34 @@ export default function AITutorPanel() {
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
 
-  const handleTeachInteractively = async () => {
-    if (!activeContext?.topic?.title || generatingLesson) return;
+  const currentTopicTitle = activeContext?.topic?.title || (activeContext?.query ? activeContext.query : null);
+
+  const handleGeneratePersonalModule = async () => {
+    if (!currentTopicTitle || generatingLesson) return;
     setGeneratingLesson(true);
-    setGenLessonNotice("✨ Generating your personal interactive lesson...");
+    setGenLessonNotice(`✨ Generating your personal interactive lesson for "${currentTopicTitle}"...`);
 
     try {
+      const userMsgs = messages.filter((m) => m.role === "user");
+      const learnerIntent = userMsgs.length > 0 ? userMsgs[userMsgs.length - 1].text : "";
+
       const res = await generatePersonalLesson({
-        topic: activeContext.topic.title,
-        topicDescription: activeContext.topic.description || "",
-        forceAlternative: false,
+        topic: currentTopicTitle,
+        topicDescription: activeContext?.topic?.description || "",
+        forceAlternative: true, // Explicit user intent to turn this conversation/topic into a personal module
+        conversation: messages.map((m) => ({ role: m.role, text: m.text })),
+        learnerIntent,
       });
 
-      if (res.hasCurated && res.curatedResource) {
-        setGenLessonNotice(null);
-        sendMessage(`I want to learn ${activeContext.topic.title} interactively.`);
-        setGeneratingLesson(false);
-        return;
-      }
-
-      if (res.lesson && res.lesson.lessonId) {
+      if (res && res.lesson && res.lesson.lessonId) {
         setGenLessonNotice(null);
         setGeneratingLesson(false);
+        closeTutor();
         navigate(`/generated-lessons/${res.lesson.lessonId}`);
+      } else if (res && res.hasCurated && res.curatedResource) {
+        setGenLessonNotice(null);
+        setGeneratingLesson(false);
+        navigate(res.curatedResource.route);
       }
     } catch (err) {
       console.error("Lesson generation from tutor failed:", err);
@@ -472,6 +477,32 @@ export default function AITutorPanel() {
             )}
           </div>
 
+          {/* Explicit Personal Module Generation CTA (Only appears when context has an explicit topic) */}
+          {currentTopicTitle && (
+            <div
+              className="px-4 py-2.5 flex items-center justify-between gap-3 border-t shrink-0"
+              style={{
+                background: "linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(99, 102, 241, 0.08))",
+                borderColor: "rgba(168, 85, 247, 0.25)",
+              }}
+            >
+              <div className="text-[11px] font-semibold text-purple-200 truncate">
+                Turn <strong className="text-white">"{currentTopicTitle}"</strong> into a lesson?
+              </div>
+              <button
+                onClick={handleGeneratePersonalModule}
+                disabled={generatingLesson || loading}
+                className="px-3 py-1.5 rounded-xl text-xs font-bold text-white transition-all shadow-md hover:scale-105 active:scale-95 disabled:opacity-50 shrink-0 cursor-pointer flex items-center gap-1.5"
+                style={{
+                  background: "linear-gradient(135deg, #9333ea, #6366f1)",
+                }}
+                title="Generate as Your Own Micro-Module"
+              >
+                <span>⚡</span> Generate as Your Own Micro-Module
+              </button>
+            </div>
+          )}
+
           {/* Suggested Starter Questions (when conversation has only initial greeting) */}
           {messages.length <= 1 && (
             <div
@@ -485,15 +516,6 @@ export default function AITutorPanel() {
                 <span>💡</span> Suggested questions:
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {activeContext?.topic?.title && (
-                  <button
-                    onClick={handleTeachInteractively}
-                    disabled={generatingLesson || loading}
-                    className="text-left text-[11px] font-bold px-2.5 py-1 rounded-lg border transition-all bg-purple-500/15 border-purple-500/40 text-purple-300 hover:bg-purple-500/25 active:scale-[0.98] disabled:opacity-50 cursor-pointer flex items-center gap-1"
-                  >
-                    <span>⚡</span> Teach me interactively
-                  </button>
-                )}
                 {suggestedQuestions.map((q, idx) => (
                   <button
                     key={idx}

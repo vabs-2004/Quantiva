@@ -11,6 +11,30 @@ const mongoose = require("mongoose");
  * - ZERO dynamic code execution (strictly validated declarative JSON sections)
  * - Strictly bounded field lengths to avoid pathological AI output
  */
+const videoSubSchema = new mongoose.Schema(
+  {
+    videoId: { type: String, maxlength: 100 },
+    title: { type: String, maxlength: 300 },
+    channelTitle: { type: String, maxlength: 200 },
+    embedUrl: { type: String, maxlength: 500 },
+    url: { type: String, maxlength: 500 },
+    viewCount: { type: Number, default: 0 },
+    likeCount: { type: Number, default: 0 },
+    description: { type: String, maxlength: 2000 },
+  },
+  { _id: false }
+);
+
+const codeSnippetSubSchema = new mongoose.Schema(
+  {
+    language: { type: String, default: "python", maxlength: 40 },
+    code: { type: String, maxlength: 6000 },
+    title: { type: String, maxlength: 200 },
+    instructions: { type: String, maxlength: 500 },
+  },
+  { _id: false }
+);
+
 const generatedLessonSchema = new mongoose.Schema(
   {
     lessonId: {
@@ -69,9 +93,13 @@ const generatedLessonSchema = new mongoose.Schema(
             "explanation",
             "intuition",
             "formula",
+            "formalism",
             "visualization",
             "interactive",
+            "code",
             "experiment",
+            "video",
+            "quiz",
             "reflection",
           ],
           required: true,
@@ -90,6 +118,14 @@ const generatedLessonSchema = new mongoose.Schema(
           latex: { type: String, maxlength: 2000 },
           explanation: { type: String, maxlength: 2000 },
         },
+        codeSnippet: {
+          type: codeSnippetSubSchema,
+          default: undefined,
+        },
+        video: {
+          type: videoSubSchema,
+          default: undefined,
+        },
         interactiveComponent: {
           type: {
             type: String,
@@ -99,6 +135,8 @@ const generatedLessonSchema = new mongoose.Schema(
               "complex-plane",
               "state-vector",
               "probability-heatmap",
+              "measurement",
+              "sandbox",
             ],
           },
           config: {

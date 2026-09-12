@@ -20,6 +20,7 @@ export const VALID_CONTEXT_SOURCES = [
   "circuit-simulator",
   "circuit-challenges",
   "sandbox",
+  "my-learning",
 ];
 
 /**
@@ -189,6 +190,15 @@ export function getSuggestedQuestions(context) {
   const title = (context.topic?.title || context.resource?.title || context.query || "").toLowerCase();
   const rawTitle = context.topic?.title || context.resource?.title || context.query || "";
 
+  if (context.source === "my-learning" && !rawTitle) {
+    return [
+      "What quantum computing concepts can I learn?",
+      "I'd like to learn about quantum cryptography.",
+      "Explain quantum teleportation step by step.",
+      "What should I start with if I'm completely new?",
+    ];
+  }
+
   // Topic specific rules:
   if (topicId.includes("phase-kickback") || title.includes("phase kickback")) {
     return [
@@ -337,6 +347,14 @@ export function getInitialGreeting(context) {
 
   const title = context.topic?.title || context.resource?.title || (context.query ? `"${context.query}"` : null);
   const category = context.topic?.category;
+
+  if (context.source === "my-learning" && !title) {
+    return "Hi! I'm your **Quantiva Tutor**. What would you like to learn today? Tell me any quantum concept or topic you're interested in, and once we establish it, you can generate your own personal interactive Micro-Module!";
+  }
+
+  if (context.source === "explore" && title) {
+    return `Hi! I'm your Quantiva Tutor. I'm ready to help you explore **${title}**. What would you like to understand first?`;
+  }
 
   if (title) {
     return `Hi! I'm your Quantiva Tutor. I'm focused on **${title}**${category ? ` (${category})` : ""}. What would you like to explore about this concept?`;

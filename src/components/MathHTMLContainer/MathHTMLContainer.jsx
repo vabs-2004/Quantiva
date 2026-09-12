@@ -62,12 +62,14 @@ export default function MathHTMLContainer({ html, onImageClick }) {
             { left: "\\(", right: "\\)", display: false },
             { left: "\\[", right: "\\]", display: true },
           ],
+          macros: {
+            "\\ket": "\\left|{#1}\\right\\rangle",
+            "\\bra": "\\left\\langle{#1}\\right|",
+            "\\braket": "\\left\\langle{#1}\\middle|{#2}\\right\\rangle",
+            "\\ketbra": "\\left|{#1}\\middle\\rangle\\!\\left\\langle{#2}\\right|",
+          },
           throwOnError: false,
         });
-        console.log(
-  "[MathHTML] KaTeX render complete:",
-  containerRef.current.querySelectorAll(".katex").length
-);
       } catch (e) {
         console.error("KaTeX error:", e);
       }
@@ -78,18 +80,56 @@ export default function MathHTMLContainer({ html, onImageClick }) {
     <>
       <div 
         ref={containerRef} 
-        className="math-html-content w-full break-words"
+        className="math-html-content w-full break-words leading-relaxed"
         style={{
           wordBreak: 'break-word',
           overflowWrap: 'break-word',
-          whiteSpace: 'pre-wrap'
         }}
       />
       <style>{`
         .math-html-content p {
-          white-space: pre-wrap !important;
+          margin-bottom: 1rem;
+          line-height: 1.7;
           word-wrap: break-word !important;
           overflow-wrap: break-word !important;
+        }
+        .math-html-content p:last-child {
+          margin-bottom: 0;
+        }
+        .math-html-content ol {
+          list-style-type: decimal !important;
+          margin-left: 1.5rem !important;
+          margin-top: 0.75rem !important;
+          margin-bottom: 1.25rem !important;
+          display: flex;
+          flex-direction: column;
+          gap: 0.6rem;
+        }
+        .math-html-content ul {
+          list-style-type: disc !important;
+          margin-left: 1.5rem !important;
+          margin-top: 0.75rem !important;
+          margin-bottom: 1.25rem !important;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+        .math-html-content li {
+          line-height: 1.6;
+          padding-left: 0.25rem;
+        }
+        .math-html-content strong {
+          color: var(--color-app-text-main, #ffffff) !important;
+          font-weight: 700 !important;
+        }
+        .math-html-content h1, 
+        .math-html-content h2, 
+        .math-html-content h3, 
+        .math-html-content h4 {
+          color: var(--color-app-text-main, #ffffff);
+          font-weight: 700;
+          margin-top: 1.25rem;
+          margin-bottom: 0.5rem;
         }
         .code-copy-btn {
           position: absolute;

@@ -19,7 +19,8 @@ const VALID_SOURCES = [
   'dashboard',
   'circuit-simulator',
   'circuit-challenges',
-  'sandbox'
+  'sandbox',
+  'my-learning'
 ];
 
 const VALID_RESOURCE_TYPES = [

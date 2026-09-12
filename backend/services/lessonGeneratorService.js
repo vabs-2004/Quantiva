@@ -13,6 +13,7 @@
 
 const aiProvider = require("./aiProvider");
 const contentRegistryService = require("./contentRegistryService");
+const youtubeService = require("./youtubeService");
 const GeneratedLesson = require("../models/GeneratedLesson");
 const UserProgress = require("../models/UserProgress");
 const { KNOWLEDGE_MAP_TOPICS } = require("../data/knowledgeMapData");
@@ -24,6 +25,8 @@ const ALLOWED_COMPONENTS = [
   "complex-plane",
   "state-vector",
   "probability-heatmap",
+  "measurement",
+  "sandbox",
 ];
 
 // Whitelisted section types
@@ -31,9 +34,13 @@ const ALLOWED_SECTION_TYPES = [
   "explanation",
   "intuition",
   "formula",
+  "formalism",
   "visualization",
   "interactive",
+  "code",
   "experiment",
+  "video",
+  "quiz",
   "reflection",
 ];
 
@@ -221,6 +228,38 @@ function sanitizeComponentConfig(type, rawConfig) {
     };
   }
 
+  if (type === "measurement") {
+    const rawMeasurements = Array.isArray(config.measurements) ? config.measurements : [];
+    const shots = Math.max(10, Math.min(10000, Number(config.shots) || 1000));
+    const measurements = rawMeasurements
+      .filter((m) => m && typeof m === "object" && typeof m.state === "string")
+      .slice(0, 16)
+      .map((m) => {
+        const state = String(m.state).trim().slice(0, 8);
+        const probability = typeof m.probability === "number" ? Math.max(0, Math.min(1, m.probability)) : 0;
+        const count = typeof m.count === "number" ? Math.max(0, Math.min(shots, Math.round(m.count))) : Math.round(probability * shots);
+        return { state, probability, count };
+      });
+    return {
+      measurements: measurements.length > 0 ? measurements : [
+        { state: "0", probability: 0.5, count: Math.round(shots * 0.5) },
+        { state: "1", probability: 0.5, count: Math.round(shots * 0.5) },
+      ],
+      shots,
+      instructions: typeof config.instructions === "string" ? config.instructions.slice(0, 300) : "",
+    };
+  }
+
+  if (type === "sandbox") {
+    const code = typeof config.code === "string" ? config.code.slice(0, 4000) : "";
+    return {
+      code,
+      language: "python",
+      title: typeof config.title === "string" ? config.title.slice(0, 100) : "Executable Sandbox",
+      instructions: typeof config.instructions === "string" ? config.instructions.slice(0, 300) : "",
+    };
+  }
+
   return {};
 }
 
@@ -300,6 +339,33 @@ function validateLessonSpec(spec) {
       formulaObj = { latex, explanation };
     }
 
+    // Optional Code Snippet (Section 3 / code implementation)
+    let codeSnippetObj = undefined;
+    if (s.codeSnippet && typeof s.codeSnippet === "object" && s.codeSnippet.code) {
+      codeSnippetObj = {
+        language: "python",
+        code: String(s.codeSnippet.code).slice(0, 6000),
+        title: s.codeSnippet.title ? String(s.codeSnippet.title).trim().slice(0, 200) : "Python / Qiskit Implementation",
+        instructions: s.codeSnippet.instructions ? String(s.codeSnippet.instructions).trim().slice(0, 500) : "",
+      };
+    }
+
+    // Optional Video (Section 4 / video resource ONLY)
+    let videoObj = undefined;
+    const isVideoSection = idx === 3 || sType === "video";
+    if (isVideoSection && s.video && typeof s.video === "object" && (s.video.embedUrl || s.video.videoId || s.video.url)) {
+      videoObj = {
+        videoId: s.video.videoId ? String(s.video.videoId).slice(0, 100) : "",
+        title: s.video.title ? String(s.video.title).trim().slice(0, 300) : "Video Guide",
+        channelTitle: s.video.channelTitle ? String(s.video.channelTitle).trim().slice(0, 200) : "Quantum Computing",
+        embedUrl: s.video.embedUrl ? String(s.video.embedUrl).slice(0, 500) : "",
+        url: s.video.url ? String(s.video.url).slice(0, 500) : "",
+        viewCount: Number(s.video.viewCount) || 0,
+        likeCount: Number(s.video.likeCount) || 0,
+        description: s.video.description ? String(s.video.description).slice(0, 2000) : "",
+      };
+    }
+
     // Interactive Component
     let interactiveObj = undefined;
     if (s.interactiveComponent && typeof s.interactiveComponent === "object") {
@@ -311,11 +377,23 @@ function validateLessonSpec(spec) {
           config: sanitizedConfig,
         };
       }
+    } else if (codeSnippetObj) {
+      // Auto-bridge codeSnippet to sandbox component for backward compatibility
+      interactiveObj = {
+        type: "sandbox",
+        config: {
+          code: codeSnippetObj.code,
+          language: "python",
+          title: codeSnippetObj.title,
+          instructions: codeSnippetObj.instructions,
+        },
+      };
     }
 
-    // Optional check question
+    // Check question — STRICTLY FORBIDDEN on earlier sections; ONLY allowed on the final section/quiz
     let questionObj = undefined;
-    if (s.checkQuestion && typeof s.checkQuestion === "object" && s.checkQuestion.question) {
+    const isFinalSection = idx === spec.sections.length - 1 || sType === "quiz" || sType === "reflection";
+    if (isFinalSection && s.checkQuestion && typeof s.checkQuestion === "object" && s.checkQuestion.question) {
       const qText = String(s.checkQuestion.question).trim().slice(0, 1000);
       const rawOptions = Array.isArray(s.checkQuestion.options) ? s.checkQuestion.options : [];
       const options = rawOptions
@@ -350,15 +428,16 @@ function validateLessonSpec(spec) {
       title: sTitle,
       content: sContent,
       ...(formulaObj ? { formula: formulaObj } : {}),
+      ...(codeSnippetObj ? { codeSnippet: codeSnippetObj } : {}),
+      ...(videoObj ? { video: videoObj } : {}),
       ...(interactiveObj ? { interactiveComponent: interactiveObj } : {}),
       ...(questionObj ? { checkQuestion: questionObj } : {}),
     });
   }
 
-  // Ensure at least one section has an interactive visual component
-  const hasInteractive = validatedSections.some((s) => s.interactiveComponent);
+  // Ensure at least one section has an interactive or code component
+  const hasInteractive = validatedSections.some((s) => s.interactiveComponent || s.codeSnippet || s.video);
   if (!hasInteractive) {
-    // Inject a default bloch-sphere or probability visualizer into the middle section
     const targetIdx = Math.min(1, validatedSections.length - 1);
     validatedSections[targetIdx].interactiveComponent = {
       type: "bloch-sphere",
@@ -383,69 +462,140 @@ function validateLessonSpec(spec) {
 /**
  * Builds the LLM system prompt and instructions for generating a declarative JSON lesson.
  */
-function buildLessonGenerationPrompt(topicName, topicDescription, learnerLevel) {
+function buildLessonGenerationPrompt(topicName, topicDescription, learnerLevel, options = {}) {
   const levelText = learnerLevel || "intermediate";
+  const { conversation = [], relatedResources = [], learnerIntent = "" } = options;
+
+  // Bounded conversation history (max 6 latest turns, max 2000 chars total)
+  let boundedConvoText = "";
+  if (Array.isArray(conversation) && conversation.length > 0) {
+    const recent = conversation
+      .filter((m) => m && (m.role === "user" || m.role === "assistant") && m.text)
+      .slice(-6);
+
+    let totalChars = 0;
+    const turns = [];
+    for (let i = recent.length - 1; i >= 0; i--) {
+      const roleLabel = recent[i].role === "user" ? "Learner" : "Tutor";
+      const cleanTurnText = recent[i].text.trim().replace(/<[^>]*>/g, "");
+      const turn = `${roleLabel}: ${cleanTurnText}`;
+      if (totalChars + turn.length > 2000) break;
+      turns.unshift(turn);
+      totalChars += turn.length;
+    }
+    if (turns.length > 0) {
+      boundedConvoText = turns.join("\n");
+    }
+  }
+
+  // Bounded related resources (max 3 items)
+  let boundedRelatedText = "";
+  if (Array.isArray(relatedResources) && relatedResources.length > 0) {
+    const topRelated = relatedResources.slice(0, 3).map(
+      (r) => `- ${r.title} (${r.type}: ${r.category || "Curated Resource"})`
+    );
+    boundedRelatedText = topRelated.join("\n");
+  }
 
   const systemPrompt = `You are the Quantiva AI Curriculum Generator.
 Your task is to generate a personalized, interactive quantum computing micro-lesson for a learner at the "${levelText}" level.
 
-CRITICAL SECURITY & DATA RULES:
-1. Output ONLY a valid JSON object. No Markdown code wrappers (no triple backticks), no preamble, no commentary.
-2. NEVER generate HTML, JSX, JavaScript, eval, React code, or script tags.
-3. Every formula must use standard LaTeX without dollar signs inside the formula.latex field.
-4. Allowed section types: "explanation", "intuition", "formula", "visualization", "interactive", "experiment", "reflection".
-5. Allowed interactive component types: "bloch-sphere", "circuit", "complex-plane", "state-vector", "probability-heatmap".
-6. Keep explanations clear, engaging, intuitive, and concise (2-4 paragraphs per section).
+CRITICAL PEDAGOGICAL & ARCHITECTURAL RULES:
+1. THE REQUESTED TOPIC IS AUTHORITATIVE: You are creating a lesson specifically for "${topicName}".
+2. EXACT 5-SECTION PROGRESSION (MANDATORY): You MUST output exactly 5 sections in this order:
+   - Section 1 (type: "intuition"): Intuition & Physical Analogy.
+   - Section 2 (type: "formalism"): Mathematical Formalism (equations & derivations).
+   - Section 3 (type: "code"): Code & Implementation (provide runnable Python/Qiskit code snippet).
+   - Section 4 (type: "video"): Video Learning (conceptual guide on what to watch for).
+   - Section 5 (type: "quiz"): Check Your Understanding (dedicated conceptual quiz question).
+3. CHECK QUESTIONS ARE EXCLUSIVE TO SECTION 5: NEVER attach a checkQuestion to sections 1, 2, 3, or 4. Only Section 5 contains checkQuestion.
+4. STRICT MATH DELIMITERS & COMPLETE EQUATION ENCLOSURE (MANDATORY):
+   - EVERY formula, equation, mathematical expression, variable, state vector, and Dirac notation MUST be completely wrapped in $...$ (for inline math) or $$...$$ (for display equations on their own line).
+   - NEVER output bare LaTeX commands without dollar signs.
+   - For multi-symbol formulas, wrap the ENTIRE equation in ONE set of dollar signs!
+     CORRECT: "$|b\\rangle = \\sum_i b_i |u_i\\rangle$"
+     CORRECT: "$\\sum_i b_i |u_i\\rangle |\\tilde{\\lambda}_i\\rangle$"
+     CORRECT: "$|0\\rangle \\to \\sqrt{1-\\left(\\frac{C}{\\lambda_i}\\right)^2}|0\\rangle + \\frac{C}{\\lambda_i}|1\\rangle$"
+     CORRECT: "$C/\\lambda_i \\le 1$"
+     CORRECT: "$A^{-1}|b\\rangle$"
+     WRONG: bare equations like \\sum_i b_i |u_i\\rangle or |b\\rangle = \\sum_i b_i |u_i\\rangle without surrounding dollars.
+   - NEVER nest dollar signs inside other dollar signs (e.g. NEVER do $\\frac{C}{$\\lambda$}$).
+5. POINT-WISE LIST FORMATTING: When writing numbered steps or bullet lists (e.g. 1., 2., 3.), use standard Markdown list syntax with separate lines for each item so points NEVER clutter together into continuous lines.
+6. CODE IMPLEMENTATION (SECTION 3): Section 3 must provide a clean, runnable Python/Qiskit code snippet in "codeSnippet" that demonstrates the topic (circuit creation, gates, and simulation).
+7. PRESERVE LEARNER INTENT: If the learner's conversation focused on a specific angle, mechanism, or question (e.g., detecting an eavesdropper, intuitive geometric intuition, circuit implementation), tailor the lesson's title, focus, and sections to that specific learning intent.
+8. Output ONLY a valid JSON object. No Markdown code wrappers (no triple backticks), no preamble, no commentary.
+9. NEVER generate HTML, JSX, JavaScript, eval, React code, or script tags.
 
 JSON SCHEMA TO PRODUCE:
 {
-  "title": "Clear Title of the Lesson",
+  "title": "Clear Title of the Lesson (reflecting topic and learner intent)",
   "summary": "1-2 sentence overview of what the learner will discover.",
   "difficulty": "${levelText === "completely_new" ? "beginner" : "intermediate"}",
-  "estimatedMinutes": 7,
+  "estimatedMinutes": 8,
   "sections": [
     {
       "id": "sec-1",
       "type": "intuition",
-      "title": "Intuitive Hook",
-      "content": "Explanation in Markdown. Use $...$ for inline math.",
-      "formula": { "latex": "\\text{Formula if applicable}", "explanation": "Brief explanation" }
+      "title": "Intuitive Picture & Core Concept",
+      "content": "Explanation in Markdown with physical intuition and analogies. Format key takeaways as distinct bullet points."
     },
     {
       "id": "sec-2",
-      "type": "interactive",
-      "title": "Interactive Exploration",
-      "content": "Guided exploration instructions.",
-      "interactiveComponent": {
-        "type": "bloch-sphere",
-        "config": {
-          "initialTheta": 1.5708,
-          "initialPhi": 0,
-          "allowedGates": ["H", "X", "Z"],
-          "instructions": "Apply H to create superposition."
-        }
-      }
+      "type": "formalism",
+      "title": "Mathematical Formalism",
+      "content": "Step-by-step mathematical derivation and state evolution. Format numbered steps cleanly with separate lines. EVERY equation and variable MUST be enclosed in $...$ (e.g., '$|b\\rangle = \\sum_i b_i |u_i\\rangle$', '$\\sum_i b_i |u_i\\rangle |\\tilde{\\lambda}_i\\rangle$').",
+      "formula": { "latex": "\\text{Primary equation}", "explanation": "Key takeaway of the formula" }
     },
     {
       "id": "sec-3",
-      "type": "reflection",
+      "type": "code",
+      "title": "Code & Implementation",
+      "content": "Explanation of how this quantum circuit or algorithm is implemented in Python and Qiskit.",
+      "codeSnippet": {
+        "language": "python",
+        "title": "Python / Qiskit Implementation",
+        "code": "# Python / Qiskit implementation\\nfrom qiskit import QuantumCircuit, transpile\\nfrom qiskit_aer import Aer\\n\\nqc = QuantumCircuit(2)\\n# Add gates...\\n",
+        "instructions": "Copy this code or click Open in Sandbox to run and simulate it."
+      }
+    },
+    {
+      "id": "sec-4",
+      "type": "video",
+      "title": "Video Learning",
+      "content": "Summary of visual demonstrations and key aspects to observe in the video lecture."
+    },
+    {
+      "id": "sec-5",
+      "type": "quiz",
       "title": "Check Your Understanding",
-      "content": "Summary of the core takeaway.",
+      "content": "Test your grasp of this topic with this conceptual check.",
       "checkQuestion": {
-        "question": "Conceptual multiple-choice question?",
+        "question": "Clear conceptual question testing understanding?",
         "options": ["Option A", "Option B", "Option C"],
         "correctIndex": 0,
-        "explanation": "Why Option A is correct."
+        "explanation": "Detailed explanation of why Option A is correct."
       }
     }
   ]
 }`;
 
-  const userPrompt = `Topic to teach: "${topicName}"
+  let userPrompt = `AUTHORITATIVE REQUESTED TOPIC: "${topicName}"
 Topic Context: "${topicDescription || topicName}"
-Learner Level: "${levelText}"
+Learner Level: "${levelText}"`;
 
-Generate a complete 3 to 5 section interactive quantum lesson JSON specification for this topic now.`;
+  if (learnerIntent) {
+    userPrompt += `\nLearner Intent: "${learnerIntent}"`;
+  }
+
+  if (boundedConvoText) {
+    userPrompt += `\n\nRELEVANT TUTOR CONVERSATION (preserve this pedagogical angle & intent):\n${boundedConvoText}`;
+  }
+
+  if (boundedRelatedText) {
+    userPrompt += `\n\nSUPPORTING CURATED QUANTIVA RESOURCES (for grounding only; do NOT substitute requested topic):\n${boundedRelatedText}`;
+  }
+
+  userPrompt += `\n\nGenerate the complete 5-section interactive quantum lesson JSON specification for "${topicName}" now.`;
 
   return { systemPrompt, userPrompt };
 }
@@ -459,35 +609,53 @@ Generate a complete 3 to 5 section interactive quantum lesson JSON specification
  * @param {string} options.userId - Authenticated user ObjectId
  * @param {string} [options.learnerLevel] - Learner level ("beginner", "intermediate", "advanced")
  * @param {boolean} [options.forceAlternative=false] - If true, skips curated priority check
+ * @param {Array} [options.conversation=[]] - Optional recent conversation turns from Tutor
+ * @param {string} [options.learnerIntent=""] - Optional specific learning angle/intent
  * @returns {Promise<{ curatedResource?: object, lesson?: object }>}
  */
-async function generateAndSaveLesson({
-  topic,
-  topicDescription = "",
-  userId,
-  learnerLevel = "intermediate",
-  forceAlternative = false,
-}) {
+async function generateAndSaveLesson(options) {
+  const {
+    topic,
+    topicDescription = "",
+    userId,
+    learnerLevel = "intermediate",
+    forceAlternative = false,
+    conversation = [],
+    learnerIntent = "",
+  } = options;
+
   if (!topic || !userId) {
-    throw new Error("topic and userId are required to generate a personal lesson.");
+    throw new Error("Missing required parameters: topic and userId are mandatory.");
   }
 
-  // 1. Curated Priority Check
+  // 1. Check Curated Resource Priority
   if (!forceAlternative) {
-    const { hasCurated, curatedResource } = await checkCuratedResource(topic);
-    if (hasCurated) {
+    const priority = await checkCuratedResource(topic);
+    if (priority.hasCurated) {
       return {
-        curatedResource,
+        curatedResource: priority.curatedResource,
         lesson: null,
       };
     }
   }
 
-  // 2. Build prompt for Groq
+  // Find supporting curated resources for context
+  let relatedResources = [];
+  try {
+    const searchRes = await contentRegistryService.search({ q: topic, limit: 3 });
+    if (searchRes && Array.isArray(searchRes.results)) {
+      relatedResources = searchRes.results.slice(0, 3);
+    }
+  } catch (err) {
+    console.warn("[lessonGeneratorService] Could not fetch related resources:", err.message);
+  }
+
+  // 2. Build Bounded, Structured Prompt
   const { systemPrompt, userPrompt } = buildLessonGenerationPrompt(
     topic,
     topicDescription,
-    learnerLevel
+    learnerLevel,
+    { conversation, relatedResources, learnerIntent }
   );
 
   // 3. Call AI provider
@@ -507,7 +675,6 @@ async function generateAndSaveLesson({
   // 4. Clean and parse JSON
   let parsedJson;
   try {
-    // Strip markdown fences if any were emitted
     let jsonStr = rawText;
     if (jsonStr.startsWith("```")) {
       jsonStr = jsonStr.replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
@@ -518,10 +685,40 @@ async function generateAndSaveLesson({
     throw new Error("Model response was not valid JSON: " + parseErr.message);
   }
 
-  // 5. Validate & sanitize against strict schema bounds
+  // 5. Fetch Top YouTube Video for Section 4
+  let topVideo = null;
+  try {
+    topVideo = await youtubeService.fetchTopVideo(topic);
+  } catch (ytErr) {
+    console.warn("[lessonGeneratorService] YouTube fetch error:", ytErr.message);
+  }
+
+  // Attach video to section 4 if present in parsedJson
+  if (parsedJson && Array.isArray(parsedJson.sections) && topVideo) {
+    const vSec = parsedJson.sections.find((s) => s.type === "video" || s.id === "sec-4") || parsedJson.sections[3];
+    if (vSec) {
+      vSec.video = topVideo;
+    }
+  }
+
+  // 6. Validate & sanitize against strict schema bounds
   const validatedData = validateLessonSpec(parsedJson);
 
-  // 6. Generate server-owned identifiers
+  // Ensure video is assigned ONLY to Section 4 and stripped from all other sections
+  if (validatedData.sections && Array.isArray(validatedData.sections)) {
+    validatedData.sections.forEach((sec, idx) => {
+      const isVideoSec = sec.type === "video" || idx === 3;
+      if (isVideoSec) {
+        if (topVideo && !sec.video) {
+          sec.video = topVideo;
+        }
+      } else {
+        delete sec.video;
+      }
+    });
+  }
+
+  // 7. Generate server-owned identifiers
   const cleanSlug = topic
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
@@ -555,6 +752,7 @@ module.exports = {
   checkCuratedResource,
   validateLessonSpec,
   sanitizeComponentConfig,
+  buildLessonGenerationPrompt,
   generateAndSaveLesson,
   BOUNDS,
   ALLOWED_COMPONENTS,

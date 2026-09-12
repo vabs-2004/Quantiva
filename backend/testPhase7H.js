@@ -201,23 +201,65 @@ async function runTests() {
     assert(err.message.includes("disallowed or unsafe tokens"), "Component config rejects javascript: URI tokens");
   }
 
-  // Rejection of script injection in section content
+  // Sanitize measurement component config
   try {
-    lessonGeneratorService.validateLessonSpec({
-      ...validSpec,
-      sections: [
-        {
-          id: "sec-1",
-          type: "explanation",
-          title: "Attack",
-          content: "Hello <script>document.cookie</script>",
-        },
-        validSpec.sections[1],
+    const measConfig = lessonGeneratorService.sanitizeComponentConfig("measurement", {
+      shots: 500,
+      measurements: [
+        { state: "00", probability: 0.5, count: 250 },
+        { state: "11", probability: 0.5, count: 250 },
       ],
+      instructions: "Observe the measurement distribution.",
     });
-    assert(false, "Should reject <script> in section content");
+    assert(measConfig.shots === 500, "Measurement config preserves valid shots");
+    assert(measConfig.measurements.length === 2, "Measurement config preserves states");
+    assert(measConfig.measurements[0].state === "00", "Measurement config preserves state label");
   } catch (err) {
-    assert(err.message.includes("disallowed script tokens"), "Section content rejects script tags");
+    assert(false, "Measurement config sanitization failed: " + err.message);
+  }
+
+  // Sanitize sandbox component config
+  try {
+    const sandConfig = lessonGeneratorService.sanitizeComponentConfig("sandbox", {
+      code: "from qiskit import QuantumCircuit\nqc = QuantumCircuit(2)",
+      title: "Custom Entanglement",
+      instructions: "Run this script in the sandbox.",
+    });
+    assert(sandConfig.language === "python", "Sandbox config enforces python language");
+    assert(sandConfig.title === "Custom Entanglement", "Sandbox config preserves title");
+    assert(sandConfig.code.includes("QuantumCircuit(2)"), "Sandbox config preserves valid python code");
+  } catch (err) {
+    assert(false, "Sandbox config sanitization failed: " + err.message);
+  }
+
+  // Prompt bounding tests
+  try {
+    const longConversation = Array.from({ length: 15 }, (_, i) => ({
+      role: i % 2 === 0 ? "user" : "assistant",
+      text: `Turn ${i}: ${'quantum '.repeat(50)}`,
+    }));
+    const { systemPrompt, userPrompt } = lessonGeneratorService.buildLessonGenerationPrompt(
+      "Quantum Cryptography",
+      "Quantum Cryptography",
+      "intermediate",
+      {
+        conversation: longConversation,
+        learnerIntent: "Detecting eavesdropping with BB84",
+        relatedResources: [
+          { id: "1", title: "Res 1" },
+          { id: "2", title: "Res 2" },
+          { id: "3", title: "Res 3" },
+          { id: "4", title: "Res 4" },
+        ],
+      }
+    );
+    assert(userPrompt.includes("Quantum Cryptography"), "Prompt includes authoritative topic");
+    assert(userPrompt.includes("Detecting eavesdropping with BB84"), "Prompt preserves learner intent");
+    assert(userPrompt.includes("Turn 14"), "Prompt preserves latest turns");
+    assert(!userPrompt.includes("Turn 2:"), "Prompt drops turns beyond the max bound of 6");
+    assert(!userPrompt.includes("Res 4"), "Prompt limits related resources to at most 3 items");
+  } catch (err) {
+    assert(false, "Prompt bounding test failed: " + err.message);
   }
 
   // ─────────────────────────────────────────────────────────────

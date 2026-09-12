@@ -18,6 +18,8 @@ export default function ExplorePage() {
   const [query, setQuery] = useState(initialQuery);
   const [category, setCategory] = useState(initialCategory);
   const [results, setResults] = useState([]);
+  const [exactMatch, setExactMatch] = useState(null);
+  const [relatedResults, setRelatedResults] = useState([]);
   const [facets, setFacets] = useState({ all: 0, micro_modules: 0, algorithms: 0, courses: 0, docs: 0 });
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -63,6 +65,8 @@ export default function ExplorePage() {
       });
       if (res && res.success) {
         setResults(res.results || []);
+        setExactMatch(res.exactMatch || null);
+        setRelatedResults(res.related || []);
         setFacets(res.facets || { all: 0, micro_modules: 0, algorithms: 0, courses: 0, docs: 0 });
         setTotal(res.total || 0);
       }
@@ -88,6 +92,8 @@ export default function ExplorePage() {
     if (!hasQuery && !hasCategoryFilter) {
       // Empty landing state
       setResults([]);
+      setExactMatch(null);
+      setRelatedResults([]);
       setTotal(0);
       setLoading(false);
       return;
@@ -117,21 +123,40 @@ export default function ExplorePage() {
     setCategory("all");
   };
 
-  // Ask Quantiva contextual handoff (Phase 7G contract)
-  const handleAskQuantiva = () => {
+  // Create Interactive Lesson CTA handoff (Phase 7E -> 7G contract)
+  // Strictly preserves topicId: null for user-requested topics that are not curated KM topics
+  const handleCreateInteractiveLesson = (targetQuery = query) => {
+    const cleanTopic = (targetQuery || "").trim();
+    if (!cleanTopic) return;
     const contextualPayload = {
       source: "explore",
-      query: query || (category !== "all" ? category : null),
+      query: cleanTopic,
       topic: {
-        topicId: query || category,
-        title: query ? `Search: "${query}"` : (category !== "all" ? (categoryLabels[category] || category) : "Explore Quantiva"),
+        topicId: null, // Strictly null: user-requested topic, not a curated Knowledge Map topic!
+        title: cleanTopic,
         category: "Explore & Search",
-        description: query ? `Learner searched for "${query}" in Quantiva.` : "Exploring quantum computing topics and resources.",
       },
       resource: null,
     };
-    const seed = query
-      ? `I was exploring Quantiva for "${query}", but couldn't find what I was looking for. Can you explain this quantum concept?`
+    const seed = `I'd like to explore "${cleanTopic}". Can you give me an intuitive overview of this concept?`;
+    openTutor(seed, contextualPayload);
+  };
+
+  // Ask Quantiva contextual handoff (Phase 7G contract)
+  const handleAskQuantiva = () => {
+    const cleanQuery = query.trim();
+    const contextualPayload = {
+      source: "explore",
+      query: cleanQuery || (category !== "all" ? category : null),
+      topic: {
+        topicId: null,
+        title: cleanQuery || (category !== "all" ? (categoryLabels[category] || category) : "Explore Quantiva"),
+        category: "Explore & Search",
+      },
+      resource: null,
+    };
+    const seed = cleanQuery
+      ? `I was exploring Quantiva for "${cleanQuery}". Can you explain this quantum concept?`
       : null;
     openTutor(seed, contextualPayload);
   };
@@ -240,7 +265,16 @@ export default function ExplorePage() {
                 <span className="animate-pulse">Loading resources...</span>
               ) : query.trim() ? (
                 <span>
-                  Found <strong className="text-[var(--color-app-primary)]">{total}</strong> {total === 1 ? "result" : "results"} for <span className="italic">"{query}"</span>
+                  {exactMatch ? (
+                    <>
+                      Exact match found for <span className="italic font-bold text-[var(--color-app-primary)]">"{query}"</span>
+                      {relatedResults.length > 0 && <span className="text-[var(--color-app-text-muted)]"> (+{relatedResults.length} related)</span>}
+                    </>
+                  ) : (
+                    <>
+                      Showing results for <span className="italic font-bold text-[var(--color-app-accent)]">"{query}"</span>
+                    </>
+                  )}
                   {category !== "all" && <span className="text-[var(--color-app-text-muted)]"> in {categoryLabels[category]}</span>}
                 </span>
               ) : (
@@ -264,142 +298,99 @@ export default function ExplorePage() {
             <div className="py-20 text-center text-sm font-semibold text-[var(--color-app-text-muted)] animate-pulse">
               Retrieving quantum learning resources...
             </div>
-          ) : results.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {results.map((item) => {
-                const isMicro = item.type === "micro_module";
-                const isAlgo = item.type === "algorithm";
-                const isCourse = item.type === "course";
-                const isDoc = item.type === "doc";
+          ) : query.trim() ? (
+            /* Search Query Active: Exact Match vs AI Fallback + Related Content */
+            <div className="space-y-8">
+              {/* 1. EXACT CURATED MATCH (Comes first when an exact resource exists) */}
+              {exactMatch && (
+                <div>
+                  <div className="text-xs font-extrabold uppercase tracking-wider text-emerald-400 mb-3 flex items-center gap-1.5">
+                    <span>🎯</span> Exact Curated Match
+                  </div>
+                  <div className="max-w-2xl">
+                    <ResourceCard item={exactMatch} isExact={true} />
+                  </div>
+                </div>
+              )}
 
-                const badgeColor = isMicro
-                  ? "bg-purple-500/15 text-purple-300 border-purple-500/30"
-                  : isAlgo
-                  ? "bg-blue-500/15 text-blue-300 border-blue-500/30"
-                  : isCourse
-                  ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-                  : "bg-amber-500/15 text-amber-300 border-amber-500/30";
-
-                const badgeLabel = isMicro
-                  ? "MICRO MODULE"
-                  : isAlgo
-                  ? "ALGORITHM"
-                  : isCourse
-                  ? "COURSE"
-                  : "DOC";
-
-                return (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="rounded-2xl p-5 border app-glass flex flex-col justify-between hover:border-[var(--color-app-primary)]/50 transition-all duration-200 group shadow-md"
-                    style={{ background: "var(--color-app-surface)" }}
+              {/* 2. NO EXACT MATCH UX (AI Fallback Card as the FIRST result area) */}
+              {!exactMatch && (
+                <div
+                  className="rounded-3xl p-6 sm:p-8 border border-indigo-500/30 app-glass relative overflow-hidden shadow-xl"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(99,102,241,0.12), rgba(168,85,247,0.06))",
+                  }}
+                >
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/30 mb-3">
+                    <span>✨</span> Quantiva AI
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-[var(--color-app-text-main)] mb-2">
+                    {query}
+                  </h2>
+                  <p className="text-sm sm:text-base font-semibold text-[var(--color-app-accent)] mb-2">
+                    No dedicated Quantiva lesson exists yet.
+                  </p>
+                  <p className="text-xs sm:text-sm text-[var(--color-app-text-muted)] mb-6 max-w-xl leading-relaxed">
+                    Learn this topic interactively with Quantiva AI.
+                  </p>
+                  <button
+                    onClick={() => handleCreateInteractiveLesson(query)}
+                    className="px-5 py-3 rounded-xl text-xs sm:text-sm font-bold text-white transition-all shadow-lg hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-2"
+                    style={{
+                      background: "linear-gradient(135deg, var(--color-app-primary), var(--color-app-accent))",
+                    }}
                   >
-                    <div>
-                      {/* Top Header: Resource Type & Category */}
-                      <div className="flex items-center justify-between mb-3">
-                        <span className={`text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md border ${badgeColor}`}>
-                          {badgeLabel}
-                        </span>
-                        {item.category && (
-                          <span className="text-[11px] font-semibold text-[var(--color-app-text-muted)]">
-                            {item.category}
-                          </span>
-                        )}
-                      </div>
+                    <span>⚡</span> Create Interactive Lesson
+                  </button>
+                </div>
+              )}
 
-                      {/* Title */}
-                      <h3 className="text-lg font-bold text-[var(--color-app-text-main)] group-hover:text-[var(--color-app-primary)] transition-colors mb-2">
-                        {item.title}
-                      </h3>
+              {/* 3. RELATED QUANTIVA CONTENT (Explicitly labeled, distinct from exact matches) */}
+              {relatedResults.length > 0 && (
+                <div className={exactMatch ? "pt-6 border-t border-[var(--color-app-border-light)]" : ""}>
+                  <div className="mb-4">
+                    <h2 className="text-lg sm:text-xl font-bold text-[var(--color-app-text-main)]">
+                      Related Quantiva Content
+                    </h2>
+                    <p className="text-xs text-[var(--color-app-text-muted)] mt-0.5">
+                      {exactMatch
+                        ? "Curated resources connected to this topic in the curriculum:"
+                        : `These existing resources are related to "${query}":`}
+                    </p>
+                  </div>
 
-                      {/* Description */}
-                      <p className="text-xs sm:text-sm text-[var(--color-app-text-muted)] line-clamp-3 mb-4 leading-relaxed">
-                        {item.description}
-                      </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {relatedResults.map((item) => (
+                      <ResourceCard key={item.id} item={item} />
+                    ))}
+                  </div>
+                </div>
+              )}
 
-                      {/* Real Metadata Badges */}
-                      <div className="flex flex-wrap items-center gap-2 mb-4 text-[11px] font-mono text-[var(--color-app-text-muted)]">
-                        {item.metadata?.timeComplexity && (
-                          <span className="px-2 py-0.5 rounded bg-black/30 border border-white/5 text-blue-300">
-                            ⏱ {item.metadata.timeComplexity}
-                          </span>
-                        )}
-                        {item.metadata?.spaceComplexity && (
-                          <span className="px-2 py-0.5 rounded bg-black/30 border border-white/5 text-purple-300">
-                            💾 {item.metadata.spaceComplexity}
-                          </span>
-                        )}
-                        {item.metadata?.sequenceOrder !== undefined && (
-                          <span className="px-2 py-0.5 rounded bg-black/30 border border-white/5 text-amber-300">
-                            Sequence #{item.metadata.sequenceOrder}
-                          </span>
-                        )}
-                        {item.metadata?.lecturesCount !== undefined && (
-                          <span className="px-2 py-0.5 rounded bg-black/30 border border-white/5 text-emerald-300">
-                            📹 {item.metadata.lecturesCount} {item.metadata.lecturesCount === 1 ? "lecture" : "lectures"}
-                          </span>
-                        )}
-                        {item.metadata?.instructor && (
-                          <span className="px-2 py-0.5 rounded bg-black/30 border border-white/5">
-                            👤 {item.metadata.instructor}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Action Button */}
-                    <div className="pt-3 border-t border-[var(--color-app-border-light)] flex items-center justify-between">
-                      <Link
-                        to={item.route}
-                        className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-app-primary)] hover:text-white transition-colors"
-                      >
-                        {isMicro && "Launch Module →"}
-                        {isAlgo && "Open Algorithm →"}
-                        {isCourse && "View Course →"}
-                        {isDoc && "Read Documentation →"}
-                      </Link>
-                    </div>
-                  </motion.div>
-                );
-              })}
+              {/* Zero related content message when query has no exact and no related items */}
+              {!exactMatch && relatedResults.length === 0 && (
+                <div className="py-8 text-center text-xs text-[var(--color-app-text-muted)]">
+                  No related Quantiva content found in the curriculum.
+                </div>
+              )}
+            </div>
+          ) : results.length > 0 ? (
+            /* Category Browsing (Empty Query, Specific Category Filter) */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {results.map((item) => (
+                <ResourceCard key={item.id} item={item} />
+              ))}
             </div>
           ) : (
-            /* No Results Found State */
+            /* Empty Filter State */
             <div className="py-16 text-center max-w-xl mx-auto rounded-3xl border border-[var(--color-app-border)] app-glass p-8">
               <div className="text-4xl mb-3">🔭</div>
               <h3 className="text-xl font-bold text-[var(--color-app-text-main)] mb-2">
                 No learning resources found
               </h3>
               <p className="text-sm text-[var(--color-app-text-muted)] mb-6">
-                No registered resources matched {query ? <span>"{query}"</span> : <span>the selected category</span>}.
+                No registered resources matched {category !== "all" ? categoryLabels[category] : "the selected criteria"}.
               </p>
-
-              {/* Contextual Ask Quantiva Bridge */}
-              <div
-                className="p-5 rounded-2xl border text-left flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
-                style={{
-                  borderColor: "rgba(99,102,241,0.3)",
-                  background: "linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.05))",
-                }}
-              >
-                <div>
-                  <div className="text-xs font-bold uppercase tracking-wider text-[var(--color-app-accent)] mb-1">
-                    Can't find what you're looking for?
-                  </div>
-                  <div className="text-sm font-bold text-white">
-                    Ask Quantiva AI Tutor about "{query || category}"
-                  </div>
-                </div>
-                <button
-                  onClick={handleAskQuantiva}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-white transition-all shadow-md shrink-0 cursor-pointer hover:scale-105"
-                  style={{ background: "linear-gradient(135deg, var(--color-app-primary), var(--color-app-accent))" }}
-                >
-                  Ask Quantiva →
-                </button>
-              </div>
             </div>
           )}
         </div>
@@ -576,5 +567,107 @@ export default function ExplorePage() {
         </div>
       )}
     </div>
+  );
+}
+
+function ResourceCard({ item, isExact = false }) {
+  const isMicro = item.type === "micro_module";
+  const isAlgo = item.type === "algorithm";
+  const isCourse = item.type === "course";
+  const isDoc = item.type === "doc";
+
+  const badgeColor = isMicro
+    ? "bg-purple-500/15 text-purple-300 border-purple-500/30"
+    : isAlgo
+    ? "bg-blue-500/15 text-blue-300 border-blue-500/30"
+    : isCourse
+    ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+    : "bg-amber-500/15 text-amber-300 border-amber-500/30";
+
+  const badgeLabel = isMicro
+    ? "MICRO MODULE"
+    : isAlgo
+    ? "ALGORITHM"
+    : isCourse
+    ? "COURSE"
+    : "DOC";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`rounded-2xl p-5 border app-glass flex flex-col justify-between hover:border-[var(--color-app-primary)]/50 transition-all duration-200 group shadow-md ${
+        isExact ? "ring-2 ring-emerald-500/40 bg-[var(--color-app-surface)] shadow-emerald-500/10" : ""
+      }`}
+      style={{ background: "var(--color-app-surface)" }}
+    >
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <span className={`text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md border ${badgeColor}`}>
+              {badgeLabel}
+            </span>
+            {isExact && (
+              <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                Exact Match
+              </span>
+            )}
+          </div>
+          {item.category && (
+            <span className="text-[11px] font-semibold text-[var(--color-app-text-muted)]">
+              {item.category}
+            </span>
+          )}
+        </div>
+
+        <h3 className="text-lg font-bold text-[var(--color-app-text-main)] group-hover:text-[var(--color-app-primary)] transition-colors mb-2">
+          {item.title}
+        </h3>
+
+        <p className="text-xs sm:text-sm text-[var(--color-app-text-muted)] line-clamp-3 mb-4 leading-relaxed">
+          {item.description}
+        </p>
+
+        <div className="flex flex-wrap items-center gap-2 mb-4 text-[11px] font-mono text-[var(--color-app-text-muted)]">
+          {item.metadata?.timeComplexity && (
+            <span className="px-2 py-0.5 rounded bg-black/30 border border-white/5 text-blue-300">
+              ⏱ {item.metadata.timeComplexity}
+            </span>
+          )}
+          {item.metadata?.spaceComplexity && (
+            <span className="px-2 py-0.5 rounded bg-black/30 border border-white/5 text-purple-300">
+              💾 {item.metadata.spaceComplexity}
+            </span>
+          )}
+          {item.metadata?.sequenceOrder !== undefined && (
+            <span className="px-2 py-0.5 rounded bg-black/30 border border-white/5 text-amber-300">
+              Sequence #{item.metadata.sequenceOrder}
+            </span>
+          )}
+          {item.metadata?.lecturesCount !== undefined && (
+            <span className="px-2 py-0.5 rounded bg-black/30 border border-white/5 text-emerald-300">
+              📹 {item.metadata.lecturesCount} {item.metadata.lecturesCount === 1 ? "lecture" : "lectures"}
+            </span>
+          )}
+          {item.metadata?.instructor && (
+            <span className="px-2 py-0.5 rounded bg-black/30 border border-white/5">
+              👤 {item.metadata.instructor}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="pt-3 border-t border-[var(--color-app-border-light)] flex items-center justify-between">
+        <Link
+          to={item.route}
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-app-primary)] hover:text-white transition-colors"
+        >
+          {isMicro && "Launch Module →"}
+          {isAlgo && "Open Algorithm →"}
+          {isCourse && "View Course →"}
+          {isDoc && "Read Documentation →"}
+        </Link>
+      </div>
+    </motion.div>
   );
 }
