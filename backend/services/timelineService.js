@@ -294,7 +294,15 @@ function evaluateNoisyTimeline(noisyPayload) {
     const child = execFile(
       PYTHON_PATH,
       [NOISY_EVALUATOR_SCRIPT, JSON.stringify(noisyPayload)],
-      { timeout: TIMEOUT_MS },
+      {
+  timeout: TIMEOUT_MS,
+  env: {
+    ...process.env,
+    OMP_NUM_THREADS: "1",
+    KMP_DUPLICATE_LIB_OK: "TRUE",
+    PYTHONIOENCODING: "utf-8",
+  },
+},
       (error, stdout, stderr) => {
         if (error) {
           console.error("[TimelineService Noisy Subprocess error]:", stderr || error.message);

@@ -69,9 +69,9 @@ export default function NoiseLabControls({
               <h3 className="text-sm font-bold text-[var(--color-app-text-main)]">
                 Noise Lab: Environmental Decoherence & Divergence
               </h3>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40">
+              {/* <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40">
                 Stage 6
-              </span>
+              </span> */}
             </div>
             <p className="text-xs text-[var(--color-app-text-muted)] mt-0.5">
               Inspect how physical and detector noise causes the physical state trajectory to depart from the ideal circuit.
