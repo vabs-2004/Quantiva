@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar/Navbar";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Footer from "../components/Footer/Footer";
 import AITutorPanel from "../components/AITutor/AITutorPanel";
+import LearningGoalCard from "../components/Onboarding/LearningGoalCard";
 
 export default function MainLayout() {
   const location = useLocation();
@@ -67,6 +68,7 @@ export default function MainLayout() {
         )}
       </div>
       <AITutorPanel />
+      <LearningGoalCard />
     </div>
   );
 }

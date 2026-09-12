@@ -322,6 +322,26 @@ export async function getMyProgress() {
   return res.data;
 }
 
+export async function updateMicroModuleProgress(moduleId, status) {
+  const res = await apiClient.put(`/progress/micro-module/${moduleId}`, { status });
+  return res.data;
+}
+
+export async function getMicroModules(track = "foundations") {
+  const res = await apiClient.get(`/micro-modules?track=${track}`);
+  return res.data;
+}
+
+export async function getMicroModuleById(moduleId) {
+  const res = await apiClient.get(`/micro-modules/${moduleId}`);
+  return res.data;
+}
+
+export async function updateLearningProfile(profileData) {
+  const res = await apiClient.put("/auth/learning-profile", profileData);
+  return res.data;
+}
+
 export async function markLectureComplete(courseId, lectureIndex) {
   const res = await apiClient.post(`/progress/course/${courseId}/lecture/${lectureIndex}`);
   return res.data;

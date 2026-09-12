@@ -32,6 +32,8 @@ import CoursesPage from "../pages/CoursesPage/CoursesPage";
 import CourseViewerPage from "../pages/CoursesPage/CourseViewerPage";
 import AdminInstructorDashboard from "../pages/AdminPanel/AdminInstructorDashboard";
 import VerifyCertificatePage from "../pages/VerifyCertificatePage/VerifyCertificatePage";
+import MicroModulesPage from "../pages/MicroModulesPage/MicroModulesPage";
+import MicroModuleViewerPage from "../pages/MicroModulesPage/MicroModuleViewerPage";
 
 /**
  * Application routes.
@@ -52,6 +54,8 @@ export default function AppRoutes() {
         
         <Route path="/courses" element={<AnimatedPage><CoursesPage /></AnimatedPage>} />
         <Route path="/courses/:id" element={<AnimatedPage><CourseViewerPage /></AnimatedPage>} />
+        <Route path="/micro-modules" element={<AnimatedPage><MicroModulesPage /></AnimatedPage>} />
+        <Route path="/micro-modules/:id" element={<AnimatedPage><MicroModuleViewerPage /></AnimatedPage>} />
         <Route path="/verify" element={<AnimatedPage><VerifyCertificatePage /></AnimatedPage>} />
         <Route path="/verify/:certificateId" element={<AnimatedPage><VerifyCertificatePage /></AnimatedPage>} />
         

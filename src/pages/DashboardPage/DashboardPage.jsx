@@ -115,6 +115,57 @@ export default function DashboardPage() {
           </div>
         </motion.header>
 
+        {/* ─── Beginner Quantum Foundations Progress Card (Shown ONLY for completely_new) ─── */}
+        {user?.learningProfile?.startingLevel === "completely_new" && progressSummary && (
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.03, duration: 0.5 }}
+            className="mb-8 rounded-2xl app-glass p-6 border"
+            style={{
+              borderColor: "rgba(59,130,246,0.3)",
+              background: "linear-gradient(135deg, rgba(59,130,246,0.08), rgba(99,102,241,0.03))",
+            }}
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-xl shrink-0">
+                  ⚛️
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-[var(--color-app-text-main)]">
+                    Quantum Foundations
+                  </h2>
+                  <p className="text-xs text-[var(--color-app-text-muted)]">
+                    Foundational micro-modules designed to introduce quantum principles step by step.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate("/micro-modules")}
+                className="px-4 py-2 rounded-lg text-xs font-bold text-white transition-all hover:scale-105 shrink-0 self-start sm:self-center"
+                style={{ background: "linear-gradient(135deg, var(--color-app-primary), var(--color-app-primary-hover))" }}
+              >
+                Open Foundations →
+              </button>
+            </div>
+
+            <div className="pt-2">
+              <ProgressStat
+                label="Micro-modules Completed"
+                value={progressSummary.microModulesCompleted || 0}
+                total={progressSummary.totalMicroModules || 12}
+                color="linear-gradient(90deg, #3b82f6, #6366f1)"
+              />
+              {progressSummary.microModulesSkipped > 0 && (
+                <div className="mt-2 text-[11px] text-[var(--color-app-text-light)]">
+                  {progressSummary.microModulesSkipped} module(s) marked as skipped (already known)
+                </div>
+              )}
+            </div>
+          </motion.section>
+        )}
+
         {/* ─── My Progress ─────────────────────── */}
         {progressSummary && (
           <motion.section

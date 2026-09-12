@@ -32,6 +32,7 @@ const aiRoutes = require("./routes/aiRoutes");
 const progressRoutes = require("./routes/progressRoutes");
 const circuitRoutes = require("./routes/circuitRoutes");
 const certificateRoutes = require("./routes/certificateRoutes");
+const microModuleRoutes = require("./routes/microModuleRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -119,6 +120,7 @@ app.use("/api/ai", aiRoutes);
 app.use("/api/progress", progressRoutes);
 app.use("/api/circuit", circuitRoutes);
 app.use("/api/certificates", certificateRoutes);
+app.use("/api/micro-modules", microModuleRoutes);
 
 // ─── Health check ────────────────────────────────
 app.get("/", (req, res) => {

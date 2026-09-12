@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect } from "react";
-import { loginUser, registerUser, getCurrentUser, googleLoginUser } from "../services/api";
+import { loginUser, registerUser, getCurrentUser, googleLoginUser, updateLearningProfile } from "../services/api";
 
 const AuthContext = createContext(null);
 
@@ -68,6 +68,19 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  const setLearningProfile = useCallback(async ({ startingLevel, onboardingCompleted }) => {
+    try {
+      const res = await updateLearningProfile({ startingLevel, onboardingCompleted });
+      if (res.success && res.learningProfile) {
+        setUser((prev) => (prev ? { ...prev, learningProfile: res.learningProfile } : prev));
+      }
+      return res.learningProfile;
+    } catch (err) {
+      console.error("Failed to update learning profile:", err);
+      throw err;
+    }
+  }, []);
+
   const value = {
     user,
     token,
@@ -78,6 +91,7 @@ export function AuthProvider({ children }) {
     register,
     googleLogin,
     logout,
+    setLearningProfile,
   };
 
   return (

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import {
   DndContext,
   DragOverlay,
@@ -303,8 +304,17 @@ function WireDroppable({ wireIndex, gates, onRemove, onUpdate, numQubits, active
 
 
 export default function CircuitSimulatorPage() {
-  const [numQubits, setNumQubits] = useState(3);
-  const [circuit, setCircuit] = useState({ 0: [], 1: [], 2: [] });
+  const location = useLocation();
+  const initialCircuit = location.state?.initialCircuit;
+  const initialNumQubits = location.state?.initialNumQubits;
+  const bridgeOrigin = location.state?.origin;
+
+  const [numQubits, setNumQubits] = useState(initialNumQubits || 3);
+  const [circuit, setCircuit] = useState(() => {
+    if (initialCircuit) return initialCircuit;
+    return { 0: [], 1: [], 2: [] };
+  });
+  const [bridgeNotice, setBridgeNotice] = useState(bridgeOrigin === "why-quantum");
   const [activeDragItem, setActiveDragItem] = useState(null);
   const [backend, setBackend] = useState("qiskit");
 
@@ -627,6 +637,24 @@ console.log("=== END GENERATED SANDBOX PYTHON ===");
         </div>
       </div>
       <div className="app-gradient-line" />
+
+      {/* Educational Bridge Notification */}
+      {bridgeNotice && (
+        <div className="px-8 py-2.5 bg-blue-500/10 border-b border-blue-500/30 flex items-center justify-between text-xs text-blue-300">
+          <div className="flex items-center gap-2">
+            <span>🔬</span>
+            <span>
+              <strong>Transferred from Micro Module 1: Why Quantum?</strong> Preloaded with the single-qubit Hadamard experiment (<code className="bg-black/30 px-1 py-0.5 rounded text-blue-200">|0⟩ ── H ── M</code>). Drag gates to experiment freely!
+            </span>
+          </div>
+          <button
+            onClick={() => setBridgeNotice(false)}
+            className="text-xs text-blue-400 hover:text-white px-2 py-0.5 rounded transition-colors"
+          >
+            ✕ Dismiss
+          </button>
+        </div>
+      )}
 
       <div className="flex flex-1 overflow-hidden">
         <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} collisionDetection={closestCenter}>

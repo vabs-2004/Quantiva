@@ -2,6 +2,7 @@ const UserProgress = require("../models/UserProgress");
 const Course = require("../models/Course");
 const Challenge = require("../models/Challenge");
 const User = require("../models/User");
+const MicroModule = require("../models/MicroModule");
 const { issueCertificateIfEligible } = require("./certificateController");
 
 async function getOrCreateProgress(userId) {
@@ -16,13 +17,21 @@ async function getOrCreateProgress(userId) {
 async function getMyProgress(req, res) {
   try {
     const progress = await getOrCreateProgress(req.user.id);
-    const [totalCourses, totalChallenges] = await Promise.all([
+    const [totalCourses, totalChallenges, totalMicroModules] = await Promise.all([
       Course.countDocuments(),
       Challenge.countDocuments(),
+      MicroModule.countDocuments({ track: "foundations", status: "published" }),
     ]);
 
     const coursesCompleted = progress.courseProgress.filter((c) => c.completed).length;
     const challengesCompleted = progress.challengeProgress.filter((c) => c.completed).length;
+
+    const microModulesCompleted = (progress.microModuleProgress || []).filter(
+      (m) => m.status === "completed"
+    ).length;
+    const microModulesSkipped = (progress.microModuleProgress || []).filter(
+      (m) => m.status === "skipped"
+    ).length;
 
     res.json({
       progress,
@@ -32,6 +41,9 @@ async function getMyProgress(req, res) {
         totalChallenges,
         challengesCompleted,
         algorithmsRun: progress.algorithmRuns.length,
+        totalMicroModules: totalMicroModules || 12,
+        microModulesCompleted,
+        microModulesSkipped,
       },
     });
   } catch (error) {
@@ -187,6 +199,85 @@ async function getCohortProgress(req, res) {
   }
 }
 
+// PUT /api/progress/micro-module/:moduleId
+async function updateMicroModuleStatus(req, res) {
+  try {
+    const { moduleId } = req.params;
+    const { status } = req.body;
+
+    const validStatuses = ["not_started", "in_progress", "completed", "skipped"];
+    if (!status || !validStatuses.includes(status)) {
+      return res.status(400).json({
+        error: `Invalid status '${status}'. Must be one of: ${validStatuses.join(", ")}`,
+      });
+    }
+
+    // Verify module exists in authoritative registry
+    const moduleExists = await MicroModule.findOne({ moduleId, status: "published" });
+    if (!moduleExists) {
+      return res.status(404).json({ error: `Micro-module '${moduleId}' not found` });
+    }
+
+    const progress = await getOrCreateProgress(req.user.id);
+    if (!progress.microModuleProgress) {
+      progress.microModuleProgress = [];
+    }
+
+    let entry = progress.microModuleProgress.find((m) => m.moduleId === moduleId);
+
+    if (!entry) {
+      entry = { moduleId, status: "not_started" };
+      progress.microModuleProgress.push(entry);
+      entry = progress.microModuleProgress[progress.microModuleProgress.length - 1];
+    }
+
+    const currentStatus = entry.status;
+
+    // Review behavior: Reopening completed or skipped module maintains existing status
+    if (status === "in_progress" && (currentStatus === "completed" || currentStatus === "skipped")) {
+      entry.lastAccessedAt = new Date();
+      await progress.save();
+      return res.json({
+        success: true,
+        entry,
+        message: "Module reopened in review mode; status preserved.",
+      });
+    }
+
+    // Apply valid 7A transitions
+    entry.status = status;
+    entry.lastAccessedAt = new Date();
+
+    if (status === "completed" && !entry.completedAt) {
+      entry.completedAt = new Date();
+    } else if (status === "skipped" && !entry.skippedAt) {
+      entry.skippedAt = new Date();
+    }
+
+    await progress.save();
+
+    const microModulesCompleted = progress.microModuleProgress.filter(
+      (m) => m.status === "completed"
+    ).length;
+    const microModulesSkipped = progress.microModuleProgress.filter(
+      (m) => m.status === "skipped"
+    ).length;
+
+    res.json({
+      success: true,
+      entry,
+      summary: {
+        microModulesCompleted,
+        microModulesSkipped,
+        totalMicroModules: 12,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating micro-module progress:", error);
+    res.status(500).json({ error: "Failed to update micro-module progress" });
+  }
+}
+
 module.exports = {
   getMyProgress,
   markLectureComplete,
@@ -194,4 +285,5 @@ module.exports = {
   recordAlgorithmRun,
   getCohortProgress,
   getOrCreateProgress,
+  updateMicroModuleStatus,
 };

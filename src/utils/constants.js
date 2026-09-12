@@ -13,6 +13,7 @@ export const APP_ORG_SHORT = "GH";
  * Public navigation links (shown in main navbar)
  */
 export const PUBLIC_NAV_LINKS = [
+  { path: "/micro-modules", label: "Micro Modules" },
   { path: "/docs", label: "Docs" },
   { path: "/blogs", label: "Blogs" },
   { path: "/news", label: "News" },
@@ -27,6 +28,11 @@ export const SIDEBAR_LINKS = [
     label: "Dashboard",
     path: "/dashboard",
     icon: "dashboard",
+  },
+  {
+    label: "Micro Modules",
+    path: "/micro-modules",
+    icon: "module",
   },
   {
     label: "Bloch Sphere",

@@ -50,6 +50,17 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user",
     },
+    learningProfile: {
+      startingLevel: {
+        type: String,
+        enum: ["completely_new", "knows_basics", "well_aware"],
+        default: "completely_new",
+      },
+      onboardingCompleted: {
+        type: Boolean,
+        default: false,
+      },
+    },
   },
   { timestamps: true }
 );

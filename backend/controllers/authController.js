@@ -53,7 +53,13 @@ async function register(req, res) {
 
     res.status(201).json({
       token,
-      user: { id: user._id, username: user.username, role: user.role, name: user.name },
+      user: {
+        id: user._id,
+        username: user.username,
+        role: user.role,
+        name: user.name,
+        learningProfile: user.learningProfile,
+      },
     });
   } catch (error) {
     console.error("Register error:", error);
@@ -85,9 +91,24 @@ async function login(req, res) {
 
     const token = generateToken(user);
 
+    // Lazy initialize learning profile for legacy users if absent
+    if (!user.learningProfile || !user.learningProfile.startingLevel) {
+      user.learningProfile = {
+        startingLevel: "completely_new",
+        onboardingCompleted: false,
+      };
+      await user.save();
+    }
+
     res.json({
       token,
-      user: { id: user._id, username: user.username, role: user.role, name: user.name },
+      user: {
+        id: user._id,
+        username: user.username,
+        role: user.role,
+        name: user.name,
+        learningProfile: user.learningProfile,
+      },
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -105,7 +126,23 @@ async function getMe(req, res) {
     if (!user) {
       return res.status(404).json({ error: "User not found." });
     }
-    res.json({ id: user._id, username: user.username, role: user.role, name: user.name });
+
+    // Lazy initialization fallback for existing users created prior to 7A
+    if (!user.learningProfile || !user.learningProfile.startingLevel) {
+      user.learningProfile = {
+        startingLevel: "completely_new",
+        onboardingCompleted: false,
+      };
+      await user.save();
+    }
+
+    res.json({
+      id: user._id,
+      username: user.username,
+      role: user.role,
+      name: user.name,
+      learningProfile: user.learningProfile,
+    });
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch user." });
   }
@@ -155,10 +192,24 @@ async function googleLogin(req, res) {
       await user.save();
     }
 
+    if (!user.learningProfile || !user.learningProfile.startingLevel) {
+      user.learningProfile = {
+        startingLevel: "completely_new",
+        onboardingCompleted: false,
+      };
+      await user.save();
+    }
+
     const jwtToken = generateToken(user);
     res.json({
       token: jwtToken,
-      user: { id: user._id, username: user.username, role: user.role, name: user.name },
+      user: {
+        id: user._id,
+        username: user.username,
+        role: user.role,
+        name: user.name,
+        learningProfile: user.learningProfile,
+      },
     });
   } catch (error) {
     console.error("Google login error:", error);
@@ -166,4 +217,45 @@ async function googleLogin(req, res) {
   }
 }
 
-module.exports = { register, login, getMe, googleLogin };
+/**
+ * PUT /api/auth/learning-profile
+ * Updates the user's starting level and onboarding completed status.
+ */
+async function updateLearningProfile(req, res) {
+  try {
+    const { startingLevel, onboardingCompleted } = req.body;
+    const validLevels = ["completely_new", "knows_basics", "well_aware"];
+
+    if (startingLevel && !validLevels.includes(startingLevel)) {
+      return res.status(400).json({
+        error: `Invalid startingLevel '${startingLevel}'. Must be one of: ${validLevels.join(", ")}`,
+      });
+    }
+
+    const updates = {};
+    if (startingLevel) updates["learningProfile.startingLevel"] = startingLevel;
+    if (typeof onboardingCompleted === "boolean") {
+      updates["learningProfile.onboardingCompleted"] = onboardingCompleted;
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { $set: updates },
+      { new: true }
+    ).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    res.json({
+      success: true,
+      learningProfile: user.learningProfile,
+    });
+  } catch (error) {
+    console.error("Error updating learning profile:", error);
+    res.status(500).json({ error: "Failed to update learning profile." });
+  }
+}
+
+module.exports = { register, login, getMe, googleLogin, updateLearningProfile };

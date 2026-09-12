@@ -6,9 +6,11 @@ const {
   markLectureComplete,
   recordAlgorithmRun,
   getCohortProgress,
+  updateMicroModuleStatus,
 } = require("../controllers/progressController");
 
 router.get("/me", authenticate, getMyProgress);
+router.put("/micro-module/:moduleId", authenticate, updateMicroModuleStatus);
 router.post("/course/:courseId/lecture/:lectureIndex", authenticate, markLectureComplete);
 router.post("/algorithm/:algorithmId", authenticate, recordAlgorithmRun);
 

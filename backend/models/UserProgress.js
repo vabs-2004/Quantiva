@@ -35,6 +35,19 @@ const userProgressSchema = new mongoose.Schema(
         lastRunAt: { type: Date, default: Date.now },
       },
     ],
+    microModuleProgress: [
+      {
+        moduleId: { type: String, required: true },
+        status: {
+          type: String,
+          enum: ["not_started", "in_progress", "completed", "skipped"],
+          default: "not_started",
+        },
+        completedAt: { type: Date },
+        skippedAt: { type: Date },
+        lastAccessedAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );
