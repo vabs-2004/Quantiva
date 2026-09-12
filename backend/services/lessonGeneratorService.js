@@ -329,14 +329,19 @@ function validateLessonSpec(spec) {
       throw new Error(`Section "${sTitle}" contains disallowed script tokens.`);
     }
 
-    // Optional formula
+    // Optional formula (strip any accidental surrounding dollar signs)
     let formulaObj = undefined;
     if (s.formula && typeof s.formula === "object" && s.formula.latex) {
-      const latex = String(s.formula.latex).trim().slice(0, BOUNDS.MAX_FORMULA_LEN);
+      const cleanLatex = String(s.formula.latex)
+        .trim()
+        .replace(/^(\$\$|\$)+/, "")
+        .replace(/(\$\$|\$)+$/, "")
+        .trim()
+        .slice(0, BOUNDS.MAX_FORMULA_LEN);
       const explanation = s.formula.explanation
         ? String(s.formula.explanation).trim().slice(0, BOUNDS.MAX_FORMULA_LEN)
         : "";
-      formulaObj = { latex, explanation };
+      formulaObj = { latex: cleanLatex, explanation };
     }
 
     // Optional Code Snippet (Section 3 / code implementation)

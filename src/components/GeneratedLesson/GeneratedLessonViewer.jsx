@@ -331,12 +331,18 @@ export default function GeneratedLessonViewer() {
                 Mathematical Principle
               </div>
               <div className="overflow-x-auto py-2 flex justify-center">
-                <MathHTMLContainer html={`$$${currentSection.formula.latex}$$ `} />
+                <MathHTMLContainer
+                  html={`$$${String(currentSection.formula.latex)
+                    .trim()
+                    .replace(/^(\$\$|\$)+/, "")
+                    .replace(/(\$\$|\$)+$/, "")
+                    .trim()}$$`}
+                />
               </div>
               {currentSection.formula.explanation && (
-                <p className="text-xs text-[var(--color-app-text-light)] italic border-t border-white/5 pt-2">
-                  {currentSection.formula.explanation}
-                </p>
+                <div className="text-xs text-[var(--color-app-text-light)] italic border-t border-white/5 pt-2">
+                  <MathHTMLContainer html={parseMathMarkdown(currentSection.formula.explanation)} />
+                </div>
               )}
             </div>
           )}
