@@ -615,7 +615,16 @@ export default function SandboxPage() {
             </div>
 
             <button
-              onClick={() => openTutor("Review my code — point out bugs and possible optimizations.", { code: cells.map((c) => c.code).join("\n\n# ---\n\n"), page: "Quantum Sandbox" })}
+              onClick={() =>
+  openTutor(
+    "Review my code — point out bugs and possible optimizations.",
+    {
+      source: "sandbox",
+      page: "Quantum Sandbox",
+      code: cells.map((c) => c.code).join("\n\n# ---\n\n"),
+    }
+  )
+}
               className="rounded-lg px-3 py-1.5 text-xs font-bold transition-colors"
               style={{ border: "1px solid var(--color-app-primary)", color: "var(--color-app-primary)" }}
             >

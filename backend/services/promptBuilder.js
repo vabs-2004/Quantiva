@@ -539,7 +539,12 @@ function buildCircuitAnalysisPrompt({
 
     'Under **What it does**: Explain in 1-2 sentences what the circuit appears to do and the quantum state/measurement behavior it produces.',
 
-    "Be concise because this response appears in a side panel."
+    "Be concise because this response appears in a side panel.",
+
+    'When the platform location is "sandbox" and Sandbox code is supplied, treat the supplied code as the learner’s current program and review it directly for syntax errors, runtime issues, quantum-logic errors, incorrect API usage, inefficient circuit construction, unnecessary operations, and other meaningful optimizations.',
+
+'When reviewing Sandbox code, do not ask the learner to paste the code again if the code is already present in the supplied context. Base the review on the provided code and identify specific lines, operations, or constructs when possible.',
+
   ];
 
   const constraints = [

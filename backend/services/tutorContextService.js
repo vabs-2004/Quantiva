@@ -160,7 +160,17 @@ function validateAndNormalizeContext(rawContext) {
 
   // Query validation
   const query = sanitizeString(rawContext.query, 150);
+  function sanitizeCode(val, maxLength = 12000) {
+  if (typeof val !== 'string') return null;
 
+  const cleaned = val
+    .replace(/\x00/g, '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .trim();
+
+  return cleaned.slice(0, maxLength) || null;
+}
   // Circuit simulator backwards compatibility
   const circuit = {
     numQubits: typeof rawContext.numQubits === 'number' ? rawContext.numQubits : null,
@@ -168,7 +178,7 @@ function validateAndNormalizeContext(rawContext) {
     layers: Array.isArray(rawContext.layers) ? rawContext.layers.slice(0, 30) : [],
     probabilities: rawContext.probabilities && typeof rawContext.probabilities === 'object' ? rawContext.probabilities : {},
     stateVector: Array.isArray(rawContext.stateVector) ? rawContext.stateVector.slice(0, 16) : null,
-    code: sanitizeString(rawContext.code, 2000),
+    code: sanitizeCode(rawContext.code, 12000),
   };
 
   return {
@@ -257,15 +267,54 @@ function formatContextForPrompt(ctx) {
     }
   }
 
+  // Sandbox Code
+  if (ctx.source === 'sandbox' && ctx.circuit?.code) {
+  lines.push('Active Sandbox Code:');
+  lines.push(
+    "  The following is the learner's current Sandbox code. Treat it as authoritative input for code review."
+  );
+  lines.push('  <SANDBOX_CODE>');
+  lines.push(ctx.circuit.code);
+  lines.push('  </SANDBOX_CODE>');
+}
+
   // Circuit context if present
-  if (ctx.circuit && (ctx.circuit.numQubits || ctx.circuit.gates?.length)) {
-    lines.push('Active Circuit State:');
-    if (ctx.circuit.numQubits) lines.push(`  * Qubits: ${ctx.circuit.numQubits}`);
-    if (ctx.circuit.gates?.length) lines.push(`  * Gates: ${JSON.stringify(ctx.circuit.gates.map(g => g.name || g.gate || g))}`);
-    if (ctx.circuit.probabilities && Object.keys(ctx.circuit.probabilities).length) {
-      lines.push(`  * Measurement Probabilities: ${JSON.stringify(ctx.circuit.probabilities)}`);
-    }
+  // Circuit context if present
+if (ctx.circuit && (ctx.circuit.numQubits || ctx.circuit.gates?.length)) {
+  lines.push('Active Circuit State:');
+
+  if (ctx.circuit.numQubits) {
+    lines.push(`  * Qubits: ${ctx.circuit.numQubits}`);
   }
+
+  if (ctx.circuit.gates?.length) {
+    lines.push(
+      `  * Gates: ${JSON.stringify(
+        ctx.circuit.gates.map(g => g.name || g.gate || g)
+      )}`
+    );
+  }
+
+  if (
+    ctx.circuit.probabilities &&
+    Object.keys(ctx.circuit.probabilities).length
+  ) {
+    lines.push(
+      `  * Measurement Probabilities: ${JSON.stringify(
+        ctx.circuit.probabilities
+      )}`
+    );
+  }
+}
+
+// Sandbox code context
+if (ctx.source === 'sandbox' && ctx.circuit?.code) {
+  lines.push('Active Sandbox Code:');
+  lines.push('  The following is the learner\'s current Sandbox code. Treat it as authoritative input for code review.');
+  lines.push('  <SANDBOX_CODE>');
+  lines.push(ctx.circuit.code);
+  lines.push('  </SANDBOX_CODE>');
+}
 
   return lines.join('\n');
 }

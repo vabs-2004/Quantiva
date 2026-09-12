@@ -41,6 +41,7 @@ export function normalizeContext(rawContext, user = null) {
   layers: [],
   probabilities: {},
   circuit: null,
+  code: null,
 };
   }
 
@@ -128,6 +129,9 @@ return {
   layers: Array.isArray(rawContext.layers) ? rawContext.layers : [],
   probabilities: rawContext.probabilities || {},
 
+  // Sandbox context
+  code: typeof rawContext.code === "string" ? rawContext.code : null,
+
   // Legacy/general circuit context
   circuit: rawContext.circuit || null,
 };
@@ -148,7 +152,16 @@ export function isSameContext(ctxA, ctxB) {
   const chalA = normA.challenge?.id || (normA.challengeMode ? "challenge" : "");
   const chalB = normB.challenge?.id || (normB.challengeMode ? "challenge" : "");
 
-  return idA === idB && sourceA === sourceB && chalA === chalB;
+  if (sourceA === "sandbox" || sourceB === "sandbox") {
+  return (
+    idA === idB &&
+    sourceA === sourceB &&
+    chalA === chalB &&
+    normA.code === normB.code
+  );
+}
+
+return idA === idB && sourceA === sourceB && chalA === chalB;
 }
 
 /**

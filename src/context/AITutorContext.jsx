@@ -134,6 +134,9 @@ export function AITutorProvider({ children }) {
 
   // Legacy/general circuit context
   circuit: ctx.circuit || null,
+
+  // Code context
+  code: ctx.code || null,
 };
 
         const data = await chatWithTutor(text, history, contextPayload);
