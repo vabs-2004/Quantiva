@@ -166,7 +166,19 @@ async function runAlgorithm(req, res) {
 
   console.log("Running papermill with args:", args);
 
-  execFile(PYTHON_PATH, args, { timeout: 120000 }, (error, stdout, stderr) => {
+  execFile(
+    PYTHON_PATH,
+    args,
+    {
+      timeout: 120000,
+      env: {
+        ...process.env,
+        OMP_NUM_THREADS: "1",
+        KMP_DUPLICATE_LIB_OK: "TRUE",
+        PYTHONIOENCODING: "utf-8",
+      },
+    },
+    (error, stdout, stderr) => {
     if (error) {
       console.error("Papermill execution error:", error.message);
       if (!fs.existsSync(outputNb)) {

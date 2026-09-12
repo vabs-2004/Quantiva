@@ -44,9 +44,13 @@ function runSandboxCode(req, res) {
     },
     cells: [
       {
+        id: "cell_0",
         cell_type: "code",
         metadata: {},
         source: [
+          "import os\n",
+          "os.environ[\"OMP_NUM_THREADS\"] = \"1\"\n",
+          "os.environ[\"KMP_DUPLICATE_LIB_OK\"] = \"TRUE\"\n",
           "import matplotlib\n",
           "matplotlib.use('agg')\n",
           "import matplotlib.pyplot as plt\n",
@@ -76,7 +80,8 @@ function runSandboxCode(req, res) {
         outputs: [],
         execution_count: null,
       },
-      ...codeCells.map(c => ({
+      ...codeCells.map((c, index) => ({
+        id: `cell_${index + 1}`,
         cell_type: "code",
         metadata: {},
         source: c.split("\n").map((line, i, arr) =>
@@ -99,7 +104,18 @@ function runSandboxCode(req, res) {
 
   console.log("Sandbox: Running command:", command);
 
-  exec(command, { timeout: 120000 }, (error, stdout, stderr) => {
+  exec(
+    command,
+    {
+      timeout: 120000,
+      env: {
+        ...process.env,
+        OMP_NUM_THREADS: "1",
+        KMP_DUPLICATE_LIB_OK: "TRUE",
+        PYTHONIOENCODING: "utf-8",
+      },
+    },
+    (error, stdout, stderr) => {
   if (error) {
     console.error("========== SANDBOX FAILED ==========");
     console.error("Python executable:", PYTHON_PATH);
