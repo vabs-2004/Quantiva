@@ -3,30 +3,28 @@ require("dotenv").config({
   path: path.join(__dirname, "../../.env"),
 });
 
-const { GoogleGenAI } = require("@google/genai");
+const aiProvider = require("../services/aiProvider");
 
 async function test() {
-  console.log(
-    "Key loaded:",
-    process.env.GEMINI_API_KEY
-      ? `YES (${process.env.GEMINI_API_KEY.length} chars)`
-      : "NO"
-  );
+  const isConfigured = aiProvider.isConfigured();
+  console.log("Groq Configured:", isConfigured ? "YES" : "NO");
 
-  const ai = new GoogleGenAI({
-    apiKey: process.env.GEMINI_API_KEY,
-  });
+  if (!isConfigured) {
+    console.error("GROQ TEST FAILED: GROQ_API_KEY is not set.");
+    return;
+  }
 
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3.6-flash",
-      contents: "Reply with exactly: GEMINI_TEST_OK",
+    const result = await aiProvider.generateText({
+      systemPrompt: "<QUANTIVA_SYSTEM_POLICY><ROLE>You are a test agent.</ROLE></QUANTIVA_SYSTEM_POLICY>",
+      userPrompt: "<QUANTIVA_REQUEST><TASK>Reply with exactly: GROQ_TEST_OK</TASK></QUANTIVA_REQUEST>",
+      maxTokens: 50,
     });
 
     console.log("SUCCESS:");
-    console.log(response.text);
+    console.log(result.text);
   } catch (error) {
-    console.error("GEMINI TEST FAILED:");
+    console.error("GROQ TEST FAILED:");
     console.error(error);
   }
 }

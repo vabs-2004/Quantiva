@@ -453,7 +453,7 @@ const MANUAL_CHALLENGES = [
   },
   {
     id: 50,
-    title: "Challenge 50: The DRDO Final Boss",
+    title: "Challenge 50: The Quantum Final Boss",
     desc: "Create a 4-qubit state representing a secure key distribution prep: q0 and q3 entangled, q1 and q2 superposed.",
     numQubits: 4,
     targetState: [0.125,0,0,0.125,0.125,0,0,0.125,0.125,0,0,0.125,0.125,0,0,0.125], 

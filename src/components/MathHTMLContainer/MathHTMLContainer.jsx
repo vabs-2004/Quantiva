@@ -64,6 +64,10 @@ export default function MathHTMLContainer({ html, onImageClick }) {
           ],
           throwOnError: false,
         });
+        console.log(
+  "[MathHTML] KaTeX render complete:",
+  containerRef.current.querySelectorAll(".katex").length
+);
       } catch (e) {
         console.error("KaTeX error:", e);
       }
@@ -74,7 +78,7 @@ export default function MathHTMLContainer({ html, onImageClick }) {
     <>
       <div 
         ref={containerRef} 
-        className="math-html-content w-full overflow-hidden break-words"
+        className="math-html-content w-full break-words"
         style={{
           wordBreak: 'break-word',
           overflowWrap: 'break-word',

@@ -7,7 +7,7 @@ This document provides a comprehensive overview of the Quantiva project. **Any A
 ## 1. Project Overview
 
 **Name:** Quantiva  
-**Organization:** GitHappens (GitHappens), DRDO  
+**Organization:** GitHappens 
 **Purpose:** An interactive platform for quantum algorithm research, simulation, and experimentation. Users can learn about quantum computing, run quantum circuits, visualize qubits on a Bloch sphere, and execute algorithms using an IBM Qiskit backend.
 
 ---

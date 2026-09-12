@@ -891,3 +891,110 @@ html.lenis, html.lenis body {
   display: inline-block; 
   width: 1em; 
 }
+
+
+/* math html css in AI tutor*/
+.math-html-content {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  line-height: 1.55;
+}
+
+/* Tables */
+.math-html-content table {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin: 0.75rem 0 1rem;
+  font-size: 0.85rem;
+}
+
+.math-html-content th,
+.math-html-content td {
+  padding: 0.5rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.math-html-content th {
+  font-weight: 700;
+}
+
+/* 2-column tables */
+.math-html-content table:has(th:nth-child(2):last-child) th:first-child,
+.math-html-content table:has(th:nth-child(2):last-child) td:first-child {
+  width: 35%;
+}
+
+.math-html-content table:has(th:nth-child(2):last-child) th:nth-child(2),
+.math-html-content table:has(th:nth-child(2):last-child) td:nth-child(2) {
+  width: 65%;
+}
+
+/* 3-column tables */
+.math-html-content table:has(th:nth-child(3):last-child) th,
+.math-html-content table:has(th:nth-child(3):last-child) td {
+  width: 33.33%;
+}
+
+/* Paragraphs / headings */
+.math-html-content p {
+  margin: 0.45rem 0;
+}
+
+.math-html-content h2 {
+  margin-top: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.math-html-content h3 {
+  margin-top: 0.8rem;
+  margin-bottom: 0.4rem;
+}
+
+.math-html-content ul,
+.math-html-content ol {
+  padding-left: 1.25rem;
+}
+
+/* Code blocks */
+.math-html-content pre {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  overflow-x: hidden;
+}
+
+.math-html-content code {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Display equations */
+.math-html-content .katex-display {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  box-sizing: border-box;
+  padding-bottom: 0.2rem;
+}
+
+.math-html-content .katex-display > .katex {
+  max-width: 100%;
+}

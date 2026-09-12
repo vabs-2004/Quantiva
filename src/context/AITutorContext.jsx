@@ -13,15 +13,41 @@ export function AITutorProvider({ children }) {
   const [pendingmessage, setPendingmessage] = useState(null);
   const [pageContext, setPageContext] = useState({});
 
-  const openTutor = useCallback((seedmessage = null, context = null) => {
-    if (context) setPageContext((prev) => ({ ...prev, ...context }));
-    if (seedmessage) setPendingmessage(seedmessage);
-    setIsOpen(true);
+  const openTutor = useCallback(
+    (seedmessage = null, context = null) => {
+      /*
+       * Each Tutor opening represents a new page/session context.
+       *
+       * Replace the previous context instead of merging it.
+       *
+       * This is important for Circuit Challenges because otherwise
+       * context from Circuit Simulator could remain here, e.g.
+       * code, stateVector, probabilities, etc.
+       */
+      if (context) {
+        setPageContext(context);
+      }
+
+      if (seedmessage) {
+        setPendingmessage(seedmessage);
+      }
+
+      setIsOpen(true);
+    },
+    []
+  );
+
+  const closeTutor = useCallback(() => {
+    setIsOpen(false);
   }, []);
 
-  const closeTutor = useCallback(() => setIsOpen(false), []);
-  const toggleTutor = useCallback(() => setIsOpen((v) => !v), []);
-  const clearPendingmessage = useCallback(() => setPendingmessage(null), []);
+  const toggleTutor = useCallback(() => {
+    setIsOpen((v) => !v);
+  }, []);
+
+  const clearPendingmessage = useCallback(() => {
+    setPendingmessage(null);
+  }, []);
 
   const value = {
     isOpen,
@@ -34,14 +60,22 @@ export function AITutorProvider({ children }) {
     setPageContext,
   };
 
-  return <AITutorContext.Provider value={value}>{children}</AITutorContext.Provider>;
+  return (
+    <AITutorContext.Provider value={value}>
+      {children}
+    </AITutorContext.Provider>
+  );
 }
 
 export function useAITutor() {
   const context = useContext(AITutorContext);
+
   if (!context) {
-    throw new Error("useAITutor must be used within an AITutorProvider");
+    throw new Error(
+      "useAITutor must be used within an AITutorProvider"
+    );
   }
+
   return context;
 }
 

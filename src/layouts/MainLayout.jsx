@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar/Navbar";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Footer from "../components/Footer/Footer";
 import AITutorPanel from "../components/AITutor/AITutorPanel";
 
 export default function MainLayout() {
+  const location = useLocation();
+  const hideFooter = location.pathname === "/circuit-challenges";
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -44,7 +46,7 @@ export default function MainLayout() {
             <div className="flex-1">
               <Outlet />
             </div>
-            <Footer />
+              {!hideFooter && <Footer />}
           </div>
         </main>
 

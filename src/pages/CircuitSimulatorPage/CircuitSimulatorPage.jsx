@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -9,8 +9,11 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import Button from "../../components/Button/Button";
 import { useAITutor } from "../../context/AITutorContext";
-import { exportCircuitToQasm, importCircuitFromQasm } from "../../services/api";
+import { exportCircuitToQasm, importCircuitFromQasm, runCircuitTimeline } from "../../services/api";
 import StateProbabilityHeatmap from "../../components/StateProbabilityHeatmap/StateProbabilityHeatmap";
+import QuantumTimeMachinePanel from "../../components/QuantumTimeMachine/QuantumTimeMachinePanel";
+import { getCircuitLayers, flattenCircuitByLayer } from "../../utils/circuitLayers";
+
 
 const GATES = [
   { type: "I", label: "I (Spacer)", short: "I", color: "bg-gray-500/20 text-gray-400 border-gray-500 border-dashed" },
@@ -52,20 +55,35 @@ function generateQiskitCode(numQubits, circuit, hasMeasureGate) {
     ? `qc = QuantumCircuit(${numQubits}, ${numQubits})\n`
     : `qc = QuantumCircuit(${numQubits})\n`;
 
-  for (let q = 0; q < numQubits; q++) {
-    (circuit[q] || []).forEach((gate) => {
+  const layers = getCircuitLayers(numQubits, circuit);
+
+  for (let l = 0; l < layers.length; l++) {
+    const layer = layers[l];
+
+    // Emit unitary operations in this layer (applied to both qc and qc_state)
+    layer.forEach((gate) => {
+      const q = gate.wire;
       if (gate.type === "CX" || gate.type === "SWAP") {
-        let target = gate.target !== undefined ? gate.target : (q + 1) % numQubits;
-        if (numQubits > 1) {
+        let target = gate.target !== undefined && gate.target !== null ? gate.target : (q + 1) % numQubits;
+        if (numQubits > 1 && target !== q) {
           pyCode += `qc.${gate.type.toLowerCase()}(${q}, ${target})\n`;
           pyCode += `qc_state.${gate.type.toLowerCase()}(${q}, ${target})\n`;
-        } else pyCode += `# ${gate.type.toLowerCase()} skipped (only 1 qubit available)\n`;
+        } else {
+          pyCode += `# ${gate.type.toLowerCase()} skipped (invalid target or single qubit)\n`;
+        }
       } else if (gate.type === "I") {
         pyCode += `qc.id(${q})\nqc_state.id(${q})\n`;
       } else if (gate.type === "M") {
-        pyCode += `qc.measure(${q}, ${q})\n`;
+        // Handled in measurement pass below
       } else {
         pyCode += `qc.${gate.type.toLowerCase()}(${q})\nqc_state.${gate.type.toLowerCase()}(${q})\n`;
+      }
+    });
+
+    // Emit measurement operations in this layer (applied ONLY to qc, never to qc_state)
+    layer.forEach((gate) => {
+      if (gate.type === "M") {
+        pyCode += `qc.measure(${gate.wire}, ${gate.wire})\n`;
       }
     });
   }
@@ -108,14 +126,18 @@ function generatePennyLaneCode(numQubits, circuit) {
   py += `@qml.qnode(dev)\ndef circuit():\n`;
 
   let bodyLines = [];
-  for (let q = 0; q < numQubits; q++) {
-    (circuit[q] || []).forEach((gate) => {
+  const layers = getCircuitLayers(numQubits, circuit);
+
+  for (let l = 0; l < layers.length; l++) {
+    const layer = layers[l];
+    layer.forEach((gate) => {
+      const q = gate.wire;
       if (gate.type === "M" || gate.type === "I") return; // measurement is implicit; identity is a no-op for state
       if (gate.type === "CX") {
-        const target = gate.target !== undefined ? gate.target : (q + 1) % numQubits;
+        const target = gate.target !== undefined && gate.target !== null ? gate.target : (q + 1) % numQubits;
         if (numQubits > 1 && target !== q) bodyLines.push(`    qml.CNOT(wires=[${q}, ${target}])`);
       } else if (gate.type === "SWAP") {
-        const target = gate.target !== undefined ? gate.target : (q + 1) % numQubits;
+        const target = gate.target !== undefined && gate.target !== null ? gate.target : (q + 1) % numQubits;
         if (numQubits > 1 && target !== q) bodyLines.push(`    qml.SWAP(wires=[${q}, ${target}])`);
       } else if (gate.type === "SDG") {
         bodyLines.push(`    qml.adjoint(qml.S)(wires=${q})`);
@@ -146,14 +168,18 @@ function generateCirqCode(numQubits, circuit) {
   let py = `import cirq\nimport matplotlib.pyplot as plt\n\n`;
   py += `qubits = cirq.LineQubit.range(${numQubits})\ncircuit = cirq.Circuit()\n`;
 
-  for (let q = 0; q < numQubits; q++) {
-    (circuit[q] || []).forEach((gate) => {
+  const layers = getCircuitLayers(numQubits, circuit);
+
+  for (let l = 0; l < layers.length; l++) {
+    const layer = layers[l];
+    layer.forEach((gate) => {
+      const q = gate.wire;
       if (gate.type === "M" || gate.type === "I") return;
       if (gate.type === "CX") {
-        const target = gate.target !== undefined ? gate.target : (q + 1) % numQubits;
+        const target = gate.target !== undefined && gate.target !== null ? gate.target : (q + 1) % numQubits;
         if (numQubits > 1 && target !== q) py += `circuit.append(cirq.CNOT(qubits[${q}], qubits[${target}]))\n`;
       } else if (gate.type === "SWAP") {
-        const target = gate.target !== undefined ? gate.target : (q + 1) % numQubits;
+        const target = gate.target !== undefined && gate.target !== null ? gate.target : (q + 1) % numQubits;
         if (numQubits > 1 && target !== q) py += `circuit.append(cirq.SWAP(qubits[${q}], qubits[${target}]))\n`;
       } else if (gate.type === "SX") {
         py += `circuit.append((cirq.X**0.5)(qubits[${q}]))\n`;
@@ -204,7 +230,7 @@ function DraggableGate({ gate }) {
   );
 }
 
-function WireDroppable({ wireIndex, gates, onRemove, onUpdate, numQubits }) {
+function WireDroppable({ wireIndex, gates, onRemove, onUpdate, numQubits, activeGateIndex, activeLayerIndex }) {
   const { isOver, setNodeRef } = useDroppable({
     id: `wire-${wireIndex}`,
   });
@@ -227,33 +253,43 @@ function WireDroppable({ wireIndex, gates, onRemove, onUpdate, numQubits }) {
 
         {/* Gates on the wire */}
         <div className="flex gap-2 relative z-10 overflow-x-auto w-full custom-scrollbar items-center">
-          {gates.map((g, i) => (
-            <div
-              key={i}
-              className={`h-12 w-16 shrink-0 flex flex-col items-center justify-center rounded-lg border-2 hover:scale-105 transition-transform relative group/gate ${g.color}`}
-            >
-              <div 
-                className="absolute top-0 right-0 -mt-2 -mr-2 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover/gate:opacity-100 cursor-pointer z-20"
-                onClick={(e) => { e.stopPropagation(); onRemove(wireIndex, i); }}
-              >✕</div>
-              <span className="font-bold text-sm">{g.short || g.label}</span>
-              {(g.type === "CX" || g.type === "SWAP") && (
-                <select 
-                  className="text-[10px] bg-black/40 mt-0.5 border border-pink-500/50 rounded px-1 outline-none text-pink-400 font-mono cursor-pointer"
-                  value={g.target !== undefined ? g.target : ((wireIndex + 1) % numQubits)}
-                  onChange={(e) => onUpdate(wireIndex, i, { ...g, target: parseInt(e.target.value) })}
-                >
-                  {Array.from({ length: numQubits }).map((_, targetIdx) => (
-                    targetIdx !== wireIndex && (
-                      <option key={targetIdx} value={targetIdx} className="bg-[var(--color-app-surface)]">
-                        → q[{targetIdx}]
-                      </option>
-                    )
-                  ))}
-                </select>
-              )}
-            </div>
-          ))}
+          {gates.map((g, i) => {
+            const isActive = activeGateIndex === i;
+            const isLayerActive = !isActive && activeLayerIndex !== null && activeLayerIndex !== undefined && activeLayerIndex === i;
+            return (
+              <div
+                key={i}
+                className={`h-12 w-16 shrink-0 flex flex-col items-center justify-center rounded-lg border-2 hover:scale-105 transition-all relative group/gate ${g.color} ${
+                  isActive
+                    ? "ring-4 ring-[var(--color-app-primary)] border-[var(--color-app-primary)] shadow-xl shadow-[var(--color-app-primary)]/50 scale-110 z-30 animate-pulse"
+                    : isLayerActive
+                    ? "ring-2 ring-cyan-400/60 border-cyan-400 shadow-md shadow-cyan-500/20"
+                    : ""
+                }`}
+              >
+                <div 
+                  className="absolute top-0 right-0 -mt-2 -mr-2 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover/gate:opacity-100 cursor-pointer z-20"
+                  onClick={(e) => { e.stopPropagation(); onRemove(wireIndex, i); }}
+                >✕</div>
+                <span className="font-bold text-sm">{g.short || g.label}</span>
+                {(g.type === "CX" || g.type === "SWAP") && (
+                  <select 
+                    className="text-[10px] bg-black/40 mt-0.5 border border-pink-500/50 rounded px-1 outline-none text-pink-400 font-mono cursor-pointer"
+                    value={g.target !== undefined ? g.target : ((wireIndex + 1) % numQubits)}
+                    onChange={(e) => onUpdate(wireIndex, i, { ...g, target: parseInt(e.target.value) })}
+                  >
+                    {Array.from({ length: numQubits }).map((_, targetIdx) => (
+                      targetIdx !== wireIndex && (
+                        <option key={targetIdx} value={targetIdx} className="bg-[var(--color-app-surface)]">
+                          → q[{targetIdx}]
+                        </option>
+                      )
+                    ))}
+                  </select>
+                )}
+              </div>
+            );
+          })}
           {gates.length === 0 && !isOver && (
             <div className="text-[10px] text-[var(--color-app-text-muted)] italic opacity-0 group-hover:opacity-100 transition-opacity absolute left-4 pointer-events-none">
               Drag gates here...
@@ -264,6 +300,7 @@ function WireDroppable({ wireIndex, gates, onRemove, onUpdate, numQubits }) {
     </div>
   );
 }
+
 
 export default function CircuitSimulatorPage() {
   const [numQubits, setNumQubits] = useState(3);
@@ -281,6 +318,32 @@ export default function CircuitSimulatorPage() {
   const [qasmError, setQasmError] = useState(null);
   const [stateProbs, setStateProbs] = useState(null);
 
+  // ─── Quantum Time Machine State ───
+  const [timeline, setTimeline] = useState(null);
+  const [timelineLoading, setTimelineLoading] = useState(false);
+  const [timelineError, setTimelineError] = useState(null);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [timelineStale, setTimelineStale] = useState(false);
+
+  // Playback timer effect
+  useEffect(() => {
+    if (!isPlaying || !timeline || !timeline.steps || timeline.steps.length === 0) return;
+    const intervalMs = Math.round(1200 / playbackSpeed);
+    const timer = setInterval(() => {
+      setCurrentStepIndex((prev) => {
+        if (prev >= timeline.steps.length - 1) {
+          setIsPlaying(false);
+          return prev;
+        }
+        return prev + 1;
+      });
+    }, intervalMs);
+
+    return () => clearInterval(timer);
+  }, [isPlaying, playbackSpeed, timeline]);
+
   const handleDragStart = (event) => {
     setActiveDragItem(event.active.data.current);
   };
@@ -297,6 +360,7 @@ export default function CircuitSimulatorPage() {
         ...prev,
         [wireIndex]: [...(prev[wireIndex] || []), gateData],
       }));
+      setTimelineStale(true);
     }
   };
 
@@ -306,6 +370,7 @@ export default function CircuitSimulatorPage() {
       newWire.splice(gateIndex, 1);
       return { ...prev, [wireIndex]: newWire };
     });
+    setTimelineStale(true);
   };
 
   const updateGate = (wireIndex, gateIndex, newGateData) => {
@@ -314,6 +379,7 @@ export default function CircuitSimulatorPage() {
       newWire[gateIndex] = newGateData;
       return { ...prev, [wireIndex]: newWire };
     });
+    setTimelineStale(true);
   };
 
   const handleQubitChange = (e) => {
@@ -323,17 +389,16 @@ export default function CircuitSimulatorPage() {
     
     setCircuit((prev) => {
       const fresh = { ...prev };
-      // add new wires
       for (let i = 0; i < val; i++) {
         if (!fresh[i]) fresh[i] = [];
       }
-      // remove extra wires
       for (let i = val; i < 15; i++) {
         delete fresh[i];
       }
       return fresh;
     });
     setNumQubits(val);
+    setTimelineStale(true);
   };
 
   const clearCircuit = () => {
@@ -343,11 +408,81 @@ export default function CircuitSimulatorPage() {
     setSimResult(null);
     setOutputPython("");
     setCompareResults(null);
+    setTimeline(null);
+    setTimelineStale(false);
+    setIsPlaying(false);
+    setCurrentStepIndex(0);
+  };
+
+  // Flatten circuit representation for Time Machine evaluation (canonical time-major layer ordering)
+  const flattenTimelineGates = useCallback(() => {
+    return flattenCircuitByLayer(numQubits, circuit);
+  }, [circuit, numQubits]);
+
+  const flattenedTimelineGates = useMemo(() => flattenTimelineGates(), [flattenTimelineGates]);
+
+  // Identify currently active gate on the wires
+  const activeGateInfo = useMemo(() => {
+    if (!timeline || currentStepIndex <= 0) return null;
+    const step = timeline.steps?.[currentStepIndex];
+    if (!step || !step.appliedGate) return null;
+    const origIdx = step.appliedGate.originalIndex;
+    if (origIdx !== undefined && flattenedTimelineGates[origIdx]) {
+      return {
+        wireIndex: flattenedTimelineGates[origIdx].wireIndex,
+        gateIndexOnWire: flattenedTimelineGates[origIdx].gateIndexOnWire,
+        layerIndex: flattenedTimelineGates[origIdx].layerIndex,
+      };
+    }
+    return null;
+  }, [timeline, currentStepIndex, flattenedTimelineGates]);
+
+  const handleRunTimeline = async () => {
+    if (numQubits > 8) {
+      setTimelineError("Quantum Time Machine supports up to 8 qubits. Please set Number of Qubits to 8 or fewer.");
+      return;
+    }
+    if (flattenedTimelineGates.length > 30) {
+      setTimelineError(`Quantum Time Machine supports up to 30 gates. Current circuit has ${flattenedTimelineGates.length} gates.`);
+      return;
+    }
+
+    setTimelineLoading(true);
+    setTimelineError(null);
+    setIsPlaying(false);
+
+    try {
+      const payloadGates = flattenedTimelineGates.map(({ type, wire, target, layerIndex }) => ({
+        type,
+        wire,
+        target,
+        layerIndex,
+      }));
+
+      const res = await runCircuitTimeline({
+        numQubits,
+        gates: payloadGates,
+      });
+
+      if (res && res.success) {
+        setTimeline(res);
+        setCurrentStepIndex(0);
+        setTimelineStale(false);
+      } else {
+        setTimelineError(res?.error || "Failed to evaluate circuit timeline.");
+      }
+    } catch (err) {
+      console.error("Timeline error:", err);
+      setTimelineError(err?.response?.data?.error || err.message || "Failed to connect to timeline backend.");
+    } finally {
+      setTimelineLoading(false);
+    }
   };
 
   const hasMeasureGate = () => {
     for (let q = 0; q < numQubits; q++) {
       if (circuit[q] && circuit[q].some((g) => g.type === "M")) return true;
+
     }
     return false;
   };
@@ -407,11 +542,11 @@ console.log("=== END GENERATED SANDBOX PYTHON ===");
   };
 
   const flattenGates = () => {
-    const gates = [];
-    for (let q = 0; q < numQubits; q++) {
-      (circuit[q] || []).forEach((g) => gates.push({ type: g.type, qubit: q, target: g.target }));
-    }
-    return gates;
+    return flattenCircuitByLayer(numQubits, circuit).map((g) => ({
+      type: g.type,
+      qubit: g.wire,
+      target: g.target,
+    }));
   };
 
   const handleExportQasm = async () => {
@@ -478,6 +613,14 @@ console.log("=== END GENERATED SANDBOX PYTHON ===");
           <Button variant="outline" loading={comparing} onClick={runComparison}>
             {comparing ? "Comparing..." : "⇄ Compare Backends"}
           </Button>
+          <Button
+            variant="outline"
+            loading={timelineLoading}
+            onClick={handleRunTimeline}
+            className="bg-gradient-to-r from-cyan-500/20 to-teal-500/20 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-500/30 font-bold"
+          >
+            {timelineLoading ? "Evaluating..." : "⏱ Time Machine"}
+          </Button>
           <Button variant="primary" loading={loading} onClick={runSimulation}>
             {loading ? "Running..." : "▶ Run Circuit"}
           </Button>
@@ -522,9 +665,57 @@ console.log("=== END GENERATED SANDBOX PYTHON ===");
             {/* Wires */}
             <div className="app-glass p-6 rounded-2xl flex flex-col gap-4 border border-[var(--color-app-border)] shadow-xl shadow-[var(--color-app-primary-glow)]/5">
               {Array.from({ length: numQubits }).map((_, i) => (
-                <WireDroppable key={i} wireIndex={i} gates={circuit[i] || []} onRemove={removeGate} onUpdate={updateGate} numQubits={numQubits} />
+                <WireDroppable
+                  key={i}
+                  wireIndex={i}
+                  gates={circuit[i] || []}
+                  onRemove={removeGate}
+                  onUpdate={updateGate}
+                  numQubits={numQubits}
+                  activeGateIndex={activeGateInfo?.wireIndex === i ? activeGateInfo.gateIndexOnWire : null}
+                  activeLayerIndex={activeGateInfo?.layerIndex}
+                />
               ))}
             </div>
+
+            {/* Quantum Time Machine Status & Panel */}
+            {timelineLoading && (
+              <div className="mt-8 p-6 rounded-2xl app-glass border border-cyan-500/30 flex items-center justify-center gap-3 text-cyan-300 animate-pulse">
+                <div className="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+                <span className="text-sm font-bold">Traveling through quantum timeline... (Calculating gate-by-gate state evolution)</span>
+              </div>
+            )}
+
+            {timelineError && (
+              <div className="mt-8 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs flex items-center justify-between">
+                <span>⚠️ {timelineError}</span>
+                <button onClick={() => setTimelineError(null)} className="text-xs font-bold underline">Dismiss</button>
+              </div>
+            )}
+
+            {timeline && !timelineLoading && (
+              <QuantumTimeMachinePanel
+                timeline={timeline}
+                currentStepIndex={currentStepIndex}
+                onStepChange={setCurrentStepIndex}
+                isPlaying={isPlaying}
+                onPlayPause={() => setIsPlaying(!isPlaying)}
+                playbackSpeed={playbackSpeed}
+                onSpeedChange={setPlaybackSpeed}
+                onReset={() => {
+                  setIsPlaying(false);
+                  setCurrentStepIndex(0);
+                }}
+                onClose={() => {
+                  setIsPlaying(false);
+                  setTimeline(null);
+                }}
+                isStale={timelineStale}
+                onRefresh={handleRunTimeline}
+                numQubits={numQubits}
+              />
+            )}
+
 
             {/* Cross-Backend Comparison Results */}
             {compareResults && (
@@ -567,7 +758,17 @@ console.log("=== END GENERATED SANDBOX PYTHON ===");
                     {BACKENDS.find((b) => b.id === backend)?.label}
                   </span>
                   <button
-                    onClick={() => openTutor("Review my circuit — point out bugs and optimizations.", { code: outputPython, page: "Circuit Simulator" })}
+                    onClick={() => openTutor(
+  "Review my circuit — point out bugs and optimizations.",
+  {
+    page: "Circuit Simulator",
+    code: outputPython,
+    numQubits,
+    gates: flattenCircuitByLayer(numQubits, circuit),
+    layers: getCircuitLayers(numQubits, circuit),
+    probabilities: stateProbs || {},
+  }
+)}
                     className="ml-auto text-[10px] normal-case tracking-normal font-semibold px-2.5 py-1 rounded-full transition-colors"
                     style={{ border: "1px solid var(--color-app-primary)", color: "var(--color-app-primary)" }}
                   >

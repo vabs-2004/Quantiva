@@ -382,4 +382,63 @@ export async function importCircuitFromQasm(qasm) {
   return res.data;
 }
 
+/**
+ * Evaluates a circuit step-by-step for the Quantum Circuit Time Machine.
+ * POST /api/circuit/timeline
+ * @param {Object} circuitPayload - { numQubits: number, gates: Array<{ type, wire, target? }> }
+ */
+export async function runCircuitTimeline(circuitPayload) {
+  const payload = (circuitPayload && circuitPayload.numQubits !== undefined)
+    ? circuitPayload
+    : { numQubits: arguments[0], gates: arguments[1] };
+  const res = await apiClient.post("/circuit/timeline", payload);
+  return res.data;
+}
+
+/**
+ * Requests an AI-grounded pedagogical explanation for a specific step transition.
+ * POST /api/ai/explain-transition
+ * Uses unguessable bearer capability timelineId; server retrieves verified Stage 4 facts.
+ * @param {Object} params - { timelineId: string, stepIndex: number, learnerQuestion?: string, explanationMode?: string }
+ */
+export async function explainCircuitTransition({ timelineId, stepIndex, learnerQuestion = "", explanationMode = "standard" }) {
+  const res = await apiClient.post("/ai/explain-transition", {
+    timelineId,
+    stepIndex,
+    learnerQuestion,
+    explanationMode,
+  });
+  return res.data;
+}
+
+/**
+ * Evaluates a noisy circuit timeline against a verified ideal timeline (Stage 6 Noise Lab).
+ * POST /api/circuit/noisy-timeline
+ * @param {Object} params - { timelineId: string, noiseModel: string, noiseStrength: number }
+ */
+export async function runNoisyCircuitTimeline({ timelineId, noiseModel, noiseStrength }) {
+  const res = await apiClient.post("/circuit/noisy-timeline", {
+    timelineId,
+    noiseModel,
+    noiseStrength,
+  });
+  return res.data;
+}
+
+/**
+ * Requests an AI-grounded pedagogical explanation of noise-induced trajectory divergence (Stage 6).
+ * POST /api/ai/explain-noise
+ * @param {Object} params - { timelineId: string, noisyTimelineId: string, stepIndex: number, learnerQuestion?: string }
+ */
+export async function explainNoiseDivergence({ timelineId, noisyTimelineId, stepIndex, learnerQuestion = "" }) {
+  const res = await apiClient.post("/ai/explain-noise", {
+    timelineId,
+    noisyTimelineId,
+    stepIndex,
+    learnerQuestion,
+  });
+  return res.data;
+}
+
 export default apiClient;
+

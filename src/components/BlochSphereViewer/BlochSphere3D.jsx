@@ -22,23 +22,26 @@ const COLORS = {
 /**
  * The 3D Bloch sphere scene rendered inside a React Three Fiber Canvas.
  *
- * @param {number} theta — polar angle (0 to π)
- * @param {number} phi   — azimuthal angle (0 to 2π)
+ * @param {number} theta  — polar angle (0 to π)
+ * @param {number} phi    — azimuthal angle (0 to 2π)
+ * @param {number} radius — length of Bloch vector (0 to 1, default 1)
  */
 
-export default function BlochSphere3D({ theta = 0, phi = 0 }) {
+export default function BlochSphere3D({ theta = 0, phi = 0, radius = 1 }) {
   const vectorRef = useRef();
   const tipRef = useRef();
   const trailRef = useRef();
 
-  // State vector endpoint on the sphere
+  // State vector endpoint on or inside the sphere
   const stateVec = useMemo(() => {
+    const r = typeof radius === "number" ? Math.max(0, Math.min(1, radius)) : 1;
     // In ThreeJS, Y is UP. So theta=0 (North Pole) must map to Y=1.
-    const x = SPHERE_RADIUS * Math.sin(theta) * Math.cos(phi);
-    const y = SPHERE_RADIUS * Math.cos(theta); // UP is cos(theta)
-    const z = SPHERE_RADIUS * Math.sin(theta) * Math.sin(phi); // DEPTH is sin(theta)sin(phi)
+    const x = SPHERE_RADIUS * r * Math.sin(theta) * Math.cos(phi);
+    const y = SPHERE_RADIUS * r * Math.cos(theta); // UP is cos(theta)
+    const z = SPHERE_RADIUS * r * Math.sin(theta) * Math.sin(phi); // DEPTH is sin(theta)sin(phi)
     return new THREE.Vector3(x, y, z);
-  }, [theta, phi]);
+  }, [theta, phi, radius]);
+
 
   // Animate the tip glow
   useFrame(({ clock }) => {

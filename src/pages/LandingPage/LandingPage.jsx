@@ -159,19 +159,19 @@ export default function LandingPage() {
           <div className="landing-hero-text">
             <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0} className="landing-badge">
               <span className="landing-badge-dot" />
-              DRDO — Defence R&D Organisation
+              Team GitHappens
             </motion.div>
 
             <motion.h1 variants={fadeUp} initial="hidden" animate="visible" custom={1} className="landing-title">
-              Quantum<br />
-              <span className="landing-title-gradient">Simulation Lab</span>
+              Quantiva<br />
+              <span className="landing-title-gradient"></span>
             </motion.h1>
 
             <motion.p variants={fadeUp} initial="hidden" animate="visible" custom={2} className="landing-description">
               An AI-powered platform for quantum algorithm research, learning,
-              and experimentation — simulate on Qiskit, PennyLane, or Cirq,
+              and experimentation , where you can simulate on Qiskit, PennyLane, or Cirq,
               get real-time help from an AI tutor, and earn certificates
-              along the way. Built for GitHappens (GitHappens), DRDO.
+              along the way. Built for Egreen Quanta, SIH26140.
             </motion.p>
 
             <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={3} className="landing-hero-actions">

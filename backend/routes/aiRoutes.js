@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const rateLimit = require("express-rate-limit");
-const { authenticate } = require("../middleware/auth");
-const { chat, explainConcept, analyzeCircuit, recommend } = require("../controllers/aiController");
+const { authenticate, optionalAuthenticate } = require("../middleware/auth");
+const { chat, explainConcept, analyzeCircuit, recommend, explainTransition, explainNoise } = require("../controllers/aiController");
 
 // AI calls are more expensive than regular CRUD — keep a tighter limit.
 const aiLimiter = rateLimit({
@@ -12,6 +12,12 @@ const aiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+// Stage 5: Explain Why transition endpoint — accepts unguessable bearer timelineId
+router.post("/explain-transition", optionalAuthenticate, aiLimiter, explainTransition);
+
+// Stage 6: Noise Lab Explain endpoint — accepts unguessable bearer timelineId and noisyTimelineId
+router.post("/explain-noise", optionalAuthenticate, aiLimiter, explainNoise);
 
 router.use(authenticate, aiLimiter);
 

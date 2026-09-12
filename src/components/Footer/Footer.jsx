@@ -18,7 +18,7 @@ const footerLinks = {
     { label: "Playground", path: "/playground" },
   ],
   Resources: [
-    { label: "DRDO Official Website", href: "https://www.drdo.gov.in/" },
+    // { label: "DRDO Official Website", href: "https://www.drdo.gov.in/" },
     { label: "Qiskit Documentation", href: "https://qiskit.org/documentation/" },
     { label: "IBM Quantum", href: "https://quantum-computing.ibm.com/" },
     { label: "arXiv Quantum", href: "https://arxiv.org/archive/quant-ph" },
@@ -44,10 +44,10 @@ export default function Footer() {
           </div>
           <p className="footer-brand-desc">
             An interactive platform for quantum algorithm research,
-            simulation, and experimentation. Powered by IBM Qiskit.
+            simulation, and experimentation. Powered by IBM Qiskit, Cirq and PennyLane.
           </p>
           {/* Social Icons */}
-          <div className="footer-socials">
+          {/* <div className="footer-socials">
             {[
               { id: "twitter", url: "https://x.com/DRDO_India?lang=en" },
               { id: "linkedin", url: "https://www.linkedin.com/company/drdo-ministry-of-defence-govt-of-india/" }
@@ -70,7 +70,7 @@ export default function Footer() {
                 )}
               </motion.a>
             ))}
-          </div>
+          </div> */}
         </div>
 
         {/* Link Columns */}
@@ -101,12 +101,12 @@ export default function Footer() {
 
       {/* Bottom bar */}
       <div className="footer-bottom">
-        <p>© {new Date().getFullYear()} Defence Research & Development Organisation. All rights reserved.</p>
+        {/* <p>© {new Date().getFullYear()} Defence Research & Development Organisation. All rights reserved.</p> */}
         <p className="footer-bottom-sub" style={{ marginTop: "0.5rem" }}>
-           GitHappens (GitHappens)
+           SIH26140
         </p>
         <p className="footer-bottom-sub" style={{ marginTop: "0.25rem", fontWeight: 600, color: "var(--color-app-primary)" }}>
-          Designed & Developed by GitHappens Gupta & Prashant Verma
+          Designed & Developed by Team GitHappens
         </p>
       </div>
     </footer>

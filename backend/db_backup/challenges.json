@@ -1253,7 +1253,7 @@
   },
   {
     "_id": "6a534560c32d5b0089a731bb",
-    "title": "Challenge 50: The DRDO Final Boss",
+    "title": "Challenge 50: The Quantum Final Boss",
     "desc": "Create a 4-qubit state representing a secure key distribution prep: q0 and q3 entangled, q1 and q2 superposed.",
     "numQubits": 4,
     "targetState": [
