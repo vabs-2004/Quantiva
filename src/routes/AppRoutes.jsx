@@ -38,6 +38,7 @@ import ExplorePage from "../pages/ExplorePage/ExplorePage";
 import AlgorithmsPage from "../pages/AlgorithmsPage/AlgorithmsPage";
 import MyGeneratedLessonsPage from "../pages/MyGeneratedLessonsPage/MyGeneratedLessonsPage";
 import GeneratedLessonViewer from "../components/GeneratedLesson/GeneratedLessonViewer";
+import ScrollToTop from "../components/ScrollToTop/ScrollToTop";
 
 /**
  * Application routes.
@@ -46,6 +47,8 @@ export default function AppRoutes() {
   const location = useLocation();
 
   return (
+    <>
+    <ScrollToTop />
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         {/* Public routes (with their own Navbar inside) */}
@@ -122,5 +125,6 @@ export default function AppRoutes() {
         />
       </Routes>
     </AnimatePresence>
+    </>
   );
 }
