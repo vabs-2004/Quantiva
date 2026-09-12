@@ -295,6 +295,7 @@ export const deleteCourse = async (id) => {
 
 export async function chatWithTutor(message, history = [], context = {}) {
   const res = await apiClient.post("/ai/chat", { message, history, context });
+  
   return res.data;
 }
 

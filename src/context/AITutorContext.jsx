@@ -114,17 +114,27 @@ export function AITutorProvider({ children }) {
         // Build structured context payload for backend
         const ctx = stateRef.current.activeContext || normalizeContext(null, user);
         const contextPayload = {
-          page: location.pathname,
-          source: ctx.source || "dashboard",
-          topic: ctx.topic || null,
-          resource: ctx.resource || null,
-          knowledgeMap: ctx.knowledgeMap || null,
-          learner: ctx.learner || (user?.startingLevel ? { level: user.startingLevel } : null),
-          query: ctx.query || null,
-          challengeMode: ctx.challengeMode || false,
-          challenge: ctx.challenge || null,
-          circuit: ctx.circuit || null,
-        };
+  page: location.pathname,
+  source: ctx.source || "dashboard",
+  topic: ctx.topic || null,
+  resource: ctx.resource || null,
+  knowledgeMap: ctx.knowledgeMap || null,
+  learner:
+    ctx.learner ||
+    (user?.startingLevel ? { level: user.startingLevel } : null),
+  query: ctx.query || null,
+
+  // Challenge Tutor context
+  challengeMode: ctx.challengeMode || false,
+  challenge: ctx.challenge || null,
+  numQubits: ctx.numQubits ?? null,
+  gates: ctx.gates || [],
+  layers: ctx.layers || [],
+  probabilities: ctx.probabilities || {},
+
+  // Legacy/general circuit context
+  circuit: ctx.circuit || null,
+};
 
         const data = await chatWithTutor(text, history, contextPayload);
 

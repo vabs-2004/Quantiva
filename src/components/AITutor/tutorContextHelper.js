@@ -28,16 +28,20 @@ export const VALID_CONTEXT_SOURCES = [
 export function normalizeContext(rawContext, user = null) {
   if (!rawContext || typeof rawContext !== "object") {
     return {
-      source: "dashboard",
-      topic: null,
-      resource: null,
-      knowledgeMap: null,
-      learner: user?.startingLevel ? { level: user.startingLevel } : null,
-      query: null,
-      challengeMode: false,
-      challenge: null,
-      circuit: null,
-    };
+  source: "dashboard",
+  topic: null,
+  resource: null,
+  knowledgeMap: null,
+  learner: user?.startingLevel ? { level: user.startingLevel } : null,
+  query: null,
+  challengeMode: false,
+  challenge: null,
+  numQubits: null,
+  gates: [],
+  layers: [],
+  probabilities: {},
+  circuit: null,
+};
   }
 
   // Derive source
@@ -108,18 +112,25 @@ export function normalizeContext(rawContext, user = null) {
   // Derive learner
   const learner = rawContext.learner || (user?.startingLevel ? { level: user.startingLevel } : null);
 
-  return {
-    source,
-    topic,
-    resource,
-    knowledgeMap,
-    learner,
-    query: rawContext.query || null,
-    // Backwards compatibility for challenge/circuit simulator
-    challengeMode: Boolean(rawContext.challengeMode),
-    challenge: rawContext.challenge || null,
-    circuit: rawContext.circuit || null,
-  };
+return {
+  source,
+  topic,
+  resource,
+  knowledgeMap,
+  learner,
+  query: rawContext.query || null,
+
+  // Challenge Tutor context
+  challengeMode: Boolean(rawContext.challengeMode),
+  challenge: rawContext.challenge || null,
+  numQubits: rawContext.numQubits ?? null,
+  gates: Array.isArray(rawContext.gates) ? rawContext.gates : [],
+  layers: Array.isArray(rawContext.layers) ? rawContext.layers : [],
+  probabilities: rawContext.probabilities || {},
+
+  // Legacy/general circuit context
+  circuit: rawContext.circuit || null,
+};
 }
 
 /**

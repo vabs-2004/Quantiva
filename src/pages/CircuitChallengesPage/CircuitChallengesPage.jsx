@@ -637,7 +637,17 @@ export default function CircuitChallengesPage() {
   const handleAskTutor = () => {
     const challenge =
       challenges[activeChallengeIdx];
+      console.log("========== CHALLENGE TUTOR DEBUG ==========");
+  console.log("challenge:", challenge);
+  console.log("activeChallengeIdx:", activeChallengeIdx);
+  console.log("wires:", wires);
+  console.log("numQubits:", challenge?.numQubits);
+  const debugGates = challenge
+    ? flattenCircuitByLayer(challenge.numQubits, wires)
+    : [];
 
+  console.log("flattened gates:", debugGates);
+  console.log("gate count:", debugGates.length);
     if (!challenge) {
       return;
     }
@@ -701,6 +711,30 @@ export default function CircuitChallengesPage() {
      *
      * It is explicitly told not to solve the challenge.
      */
+    console.log(
+  "========== EXACT TUTOR CONTEXT ==========\n" +
+  JSON.stringify(
+    {
+      page: "Circuit Challenges",
+      challengeMode: true,
+      challenge: {
+        id: challenge._id || challenge.id,
+        title: challenge.title,
+        description: challenge.desc,
+        numQubits: challenge.numQubits,
+        targetState: challenge.targetState,
+        targetDisplay: challenge.targetStr,
+        allowedGates: challenge.allowedGates,
+      },
+      numQubits: challenge.numQubits,
+      gates,
+      layers,
+      probabilities,
+    },
+    null,
+    2
+  )
+);
     openTutor(
       "I'm working on this quantum circuit challenge. Analyze my current attempt and help me with a hint. Do NOT give me the solution, final circuit, exact sequence of gates, or code that directly solves the challenge. First identify whether my current approach is correct or where it goes wrong, then give me a progressively useful hint that helps me figure out the next step myself.",
       {

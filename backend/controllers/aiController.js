@@ -150,6 +150,13 @@ async function chat(req, res) {
       history = [],
       context = {},
     } = req.body;
+    console.log(
+  "========== BACKEND AI CHAT CONTEXT =========="
+);
+
+console.log(
+  JSON.stringify(req.body.context, null, 2)
+);
 
     console.log("[AI CHAT] Request received:", {
       hasMessage: !!message,
