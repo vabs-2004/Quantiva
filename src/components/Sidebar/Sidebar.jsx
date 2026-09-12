@@ -34,6 +34,26 @@ const icons = {
       <polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /><line x1="12" y1="2" x2="12" y2="22" opacity="0.3" />
     </svg>
   ),
+  challenges: (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M8 3h8v4a4 4 0 0 1-8 0V3z" />
+    <path d="M8 5H5a2 2 0 0 0 0 4h3" />
+    <path d="M16 5h3a2 2 0 0 1 0 4h-3" />
+    <path d="M12 11v5" />
+    <path d="M9 21h6" />
+    <path d="M10 16h4" />
+    <path d="M10 3h4" />
+  </svg>
+),
   playground: (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="2" y="6" width="20" height="12" rx="2" />

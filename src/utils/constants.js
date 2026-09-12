@@ -51,10 +51,16 @@ export const SIDEBAR_LINKS = [
     icon: "sandbox",
   },
   {
+    label: "Challenges",
+    path: "/circuit-challenges",
+    icon: "challenges",
+  },
+  {
     label: "Playground",
     path: "/playground",
     icon: "playground",
   },
+
 ];
 
 /**
