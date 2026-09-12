@@ -34,6 +34,10 @@ import AdminInstructorDashboard from "../pages/AdminPanel/AdminInstructorDashboa
 import VerifyCertificatePage from "../pages/VerifyCertificatePage/VerifyCertificatePage";
 import MicroModulesPage from "../pages/MicroModulesPage/MicroModulesPage";
 import MicroModuleViewerPage from "../pages/MicroModulesPage/MicroModuleViewerPage";
+import ExplorePage from "../pages/ExplorePage/ExplorePage";
+import AlgorithmsPage from "../pages/AlgorithmsPage/AlgorithmsPage";
+import MyGeneratedLessonsPage from "../pages/MyGeneratedLessonsPage/MyGeneratedLessonsPage";
+import GeneratedLessonViewer from "../components/GeneratedLesson/GeneratedLessonViewer";
 
 /**
  * Application routes.
@@ -52,10 +56,17 @@ export default function AppRoutes() {
         <Route path="/news" element={<AnimatedPage><NewsPage /></AnimatedPage>} />
         <Route path="/news/:id" element={<AnimatedPage><NewsViewerPage /></AnimatedPage>} />
         
+        <Route path="/explore" element={<AnimatedPage><ExplorePage /></AnimatedPage>} />
+        <Route path="/algorithms" element={<AnimatedPage><AlgorithmsPage /></AnimatedPage>} />
         <Route path="/courses" element={<AnimatedPage><CoursesPage /></AnimatedPage>} />
         <Route path="/courses/:id" element={<AnimatedPage><CourseViewerPage /></AnimatedPage>} />
         <Route path="/micro-modules" element={<AnimatedPage><MicroModulesPage /></AnimatedPage>} />
         <Route path="/micro-modules/:id" element={<AnimatedPage><MicroModuleViewerPage /></AnimatedPage>} />
+        
+        {/* User-Generated Interactive Learning (Phase 7H) */}
+        <Route path="/my-learning/generated-lessons" element={<ProtectedRoute><AnimatedPage><MyGeneratedLessonsPage /></AnimatedPage></ProtectedRoute>} />
+        <Route path="/generated-lessons/:lessonId" element={<ProtectedRoute><AnimatedPage><GeneratedLessonViewer /></AnimatedPage></ProtectedRoute>} />
+        
         <Route path="/verify" element={<AnimatedPage><VerifyCertificatePage /></AnimatedPage>} />
         <Route path="/verify/:certificateId" element={<AnimatedPage><VerifyCertificatePage /></AnimatedPage>} />
         

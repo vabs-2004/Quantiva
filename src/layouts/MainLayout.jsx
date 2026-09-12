@@ -3,7 +3,6 @@ import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar/Navbar";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Footer from "../components/Footer/Footer";
-import AITutorPanel from "../components/AITutor/AITutorPanel";
 import LearningGoalCard from "../components/Onboarding/LearningGoalCard";
 
 export default function MainLayout() {
@@ -67,7 +66,6 @@ export default function MainLayout() {
           </button>
         )}
       </div>
-      <AITutorPanel />
       <LearningGoalCard />
     </div>
   );

@@ -3,6 +3,7 @@ const Course = require("../models/Course");
 const Challenge = require("../models/Challenge");
 const User = require("../models/User");
 const MicroModule = require("../models/MicroModule");
+const Algorithm = require("../models/Algorithm");
 const { issueCertificateIfEligible } = require("./certificateController");
 
 async function getOrCreateProgress(userId) {
@@ -278,6 +279,254 @@ async function updateMicroModuleStatus(req, res) {
   }
 }
 
+/**
+ * POST /api/progress/micro-module/:moduleId/bookmark
+ * Idempotently bookmarks a micro-module for the authenticated user.
+ */
+async function bookmarkMicroModule(req, res) {
+  try {
+    const { moduleId } = req.params;
+
+    // Validate module exists in authoritative catalog
+    const moduleItem = await MicroModule.findOne({ moduleId, status: "published" });
+    if (!moduleItem) {
+      return res.status(404).json({ error: `Micro-module '${moduleId}' not found` });
+    }
+
+    const progress = await getOrCreateProgress(req.user.id);
+    if (!progress.bookmarkedMicroModules) {
+      progress.bookmarkedMicroModules = [];
+    }
+
+    const existing = progress.bookmarkedMicroModules.find((b) => b.moduleId === moduleId);
+    let bookmarkedAt;
+    if (!existing) {
+      bookmarkedAt = new Date();
+      progress.bookmarkedMicroModules.push({ moduleId, bookmarkedAt });
+      await progress.save();
+    } else {
+      bookmarkedAt = existing.bookmarkedAt;
+    }
+
+    res.json({
+      success: true,
+      bookmarked: true,
+      moduleId,
+      bookmarkedAt,
+      totalBookmarks: progress.bookmarkedMicroModules.length,
+    });
+  } catch (error) {
+    console.error("Error bookmarking micro-module:", error);
+    res.status(500).json({ error: "Failed to bookmark micro-module" });
+  }
+}
+
+/**
+ * DELETE /api/progress/micro-module/:moduleId/bookmark
+ * Idempotently removes a bookmark for the authenticated user.
+ */
+async function unbookmarkMicroModule(req, res) {
+  try {
+    const { moduleId } = req.params;
+    const progress = await getOrCreateProgress(req.user.id);
+
+    if (!progress.bookmarkedMicroModules) {
+      progress.bookmarkedMicroModules = [];
+    }
+
+    const initialLength = progress.bookmarkedMicroModules.length;
+    progress.bookmarkedMicroModules = progress.bookmarkedMicroModules.filter(
+      (b) => b.moduleId !== moduleId
+    );
+
+    if (progress.bookmarkedMicroModules.length !== initialLength) {
+      await progress.save();
+    }
+
+    res.json({
+      success: true,
+      bookmarked: false,
+      moduleId,
+      totalBookmarks: progress.bookmarkedMicroModules.length,
+    });
+  } catch (error) {
+    console.error("Error unbookmarking micro-module:", error);
+    res.status(500).json({ error: "Failed to remove bookmark" });
+  }
+}
+
+/**
+ * GET /api/progress/micro-modules/bookmarks
+ * Returns all bookmarked micro-modules for the authenticated user,
+ * ordered strictly by bookmarkedAt descending (most recently bookmarked first).
+ */
+async function getMyBookmarks(req, res) {
+  try {
+    const progress = await getOrCreateProgress(req.user.id);
+    const bookmarks = progress.bookmarkedMicroModules || [];
+
+    if (!bookmarks.length) {
+      return res.json({ success: true, bookmarks: [] });
+    }
+
+    // Sort by bookmarkedAt descending
+    const sorted = bookmarks.slice().sort(
+      (a, b) => new Date(b.bookmarkedAt).getTime() - new Date(a.bookmarkedAt).getTime()
+    );
+
+    const moduleIds = sorted.map((b) => b.moduleId);
+    const modules = await MicroModule.find({
+      moduleId: { $in: moduleIds },
+      status: "published",
+    }).select("-__v");
+
+    const moduleMap = new Map(modules.map((m) => [m.moduleId, m]));
+
+    // Strictly preserve user's bookmarkedAt order
+    const orderedModules = sorted
+      .map((b) => {
+        const mod = moduleMap.get(b.moduleId);
+        if (!mod) return null;
+        return {
+          ...mod.toObject(),
+          bookmarkedAt: b.bookmarkedAt,
+        };
+      })
+      .filter(Boolean);
+
+    res.json({
+      success: true,
+      bookmarks: orderedModules,
+    });
+  } catch (error) {
+    console.error("Error fetching bookmarked micro-modules:", error);
+    res.status(500).json({ error: "Failed to fetch bookmarks" });
+  }
+}
+
+/**
+ * POST /api/progress/algorithm/:algorithmId/bookmark
+ * Idempotently bookmarks an algorithm for the authenticated user.
+ */
+async function bookmarkAlgorithm(req, res) {
+  try {
+    const { algorithmId } = req.params;
+    const progress = await getOrCreateProgress(req.user.id);
+
+    // Verify algorithm exists
+    const algo = await Algorithm.findOne({ id: algorithmId });
+    if (!algo) {
+      return res.status(404).json({ error: "Algorithm not found" });
+    }
+
+    if (!progress.bookmarkedAlgorithms) {
+      progress.bookmarkedAlgorithms = [];
+    }
+
+    const existing = progress.bookmarkedAlgorithms.find((b) => b.algorithmId === algorithmId);
+    let bookmarkedAt;
+    if (!existing) {
+      bookmarkedAt = new Date();
+      progress.bookmarkedAlgorithms.push({ algorithmId, bookmarkedAt });
+      await progress.save();
+    } else {
+      bookmarkedAt = existing.bookmarkedAt;
+    }
+
+    res.json({
+      success: true,
+      bookmarked: true,
+      algorithmId,
+      bookmarkedAt,
+      totalBookmarks: progress.bookmarkedAlgorithms.length,
+    });
+  } catch (error) {
+    console.error("Error bookmarking algorithm:", error);
+    res.status(500).json({ error: "Failed to bookmark algorithm" });
+  }
+}
+
+/**
+ * DELETE /api/progress/algorithm/:algorithmId/bookmark
+ * Idempotently removes an algorithm bookmark.
+ */
+async function unbookmarkAlgorithm(req, res) {
+  try {
+    const { algorithmId } = req.params;
+    const progress = await getOrCreateProgress(req.user.id);
+
+    if (!progress.bookmarkedAlgorithms) {
+      progress.bookmarkedAlgorithms = [];
+    }
+
+    const initialLength = progress.bookmarkedAlgorithms.length;
+    progress.bookmarkedAlgorithms = progress.bookmarkedAlgorithms.filter(
+      (b) => b.algorithmId !== algorithmId
+    );
+
+    if (progress.bookmarkedAlgorithms.length !== initialLength) {
+      await progress.save();
+    }
+
+    res.json({
+      success: true,
+      bookmarked: false,
+      algorithmId,
+      totalBookmarks: progress.bookmarkedAlgorithms.length,
+    });
+  } catch (error) {
+    console.error("Error unbookmarking algorithm:", error);
+    res.status(500).json({ error: "Failed to remove algorithm bookmark" });
+  }
+}
+
+/**
+ * GET /api/progress/algorithms/bookmarks
+ * Returns all bookmarked algorithms for the authenticated user,
+ * ordered strictly by bookmarkedAt descending.
+ */
+async function getMyBookmarkedAlgorithms(req, res) {
+  try {
+    const progress = await getOrCreateProgress(req.user.id);
+    const bookmarks = progress.bookmarkedAlgorithms || [];
+
+    if (!bookmarks.length) {
+      return res.json({ success: true, bookmarks: [] });
+    }
+
+    // Sort by bookmarkedAt descending
+    const sorted = bookmarks.slice().sort(
+      (a, b) => new Date(b.bookmarkedAt).getTime() - new Date(a.bookmarkedAt).getTime()
+    );
+
+    const algoIds = sorted.map((b) => b.algorithmId);
+    const algos = await Algorithm.find({
+      id: { $in: algoIds },
+    }).select("-__v");
+
+    const algoMap = new Map(algos.map((a) => [a.id, a]));
+
+    const orderedAlgos = sorted
+      .map((b) => {
+        const algo = algoMap.get(b.algorithmId);
+        if (!algo) return null;
+        return {
+          ...algo.toObject(),
+          bookmarkedAt: b.bookmarkedAt,
+        };
+      })
+      .filter(Boolean);
+
+    res.json({
+      success: true,
+      bookmarks: orderedAlgos,
+    });
+  } catch (error) {
+    console.error("Error fetching bookmarked algorithms:", error);
+    res.status(500).json({ error: "Failed to fetch algorithm bookmarks" });
+  }
+}
+
 module.exports = {
   getMyProgress,
   markLectureComplete,
@@ -286,4 +535,10 @@ module.exports = {
   getCohortProgress,
   getOrCreateProgress,
   updateMicroModuleStatus,
+  bookmarkMicroModule,
+  unbookmarkMicroModule,
+  getMyBookmarks,
+  bookmarkAlgorithm,
+  unbookmarkAlgorithm,
+  getMyBookmarkedAlgorithms,
 };

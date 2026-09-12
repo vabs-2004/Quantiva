@@ -48,6 +48,24 @@ const userProgressSchema = new mongoose.Schema(
         lastAccessedAt: { type: Date, default: Date.now },
       },
     ],
+    bookmarkedMicroModules: [
+      {
+        moduleId: { type: String, required: true },
+        bookmarkedAt: { type: Date, default: Date.now },
+      },
+    ],
+    bookmarkedAlgorithms: [
+      {
+        algorithmId: { type: String, required: true },
+        bookmarkedAt: { type: Date, default: Date.now },
+      },
+    ],
+    bookmarkedGeneratedLessons: [
+      {
+        lessonId: { type: String, required: true },
+        bookmarkedAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );

@@ -1,12 +1,30 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { getMicroModules, getMicroModuleById, updateMicroModuleProgress, getMyProgress } from "../../services/api";
+import {
+  getMicroModules,
+  getMicroModuleById,
+  updateMicroModuleProgress,
+  getMyProgress,
+  bookmarkMicroModule,
+  unbookmarkMicroModule,
+} from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import { useAITutor } from "../../context/AITutorContext";
 import MathHTMLContainer from "../../components/MathHTMLContainer/MathHTMLContainer";
 import WhyQuantumLesson from "./modules/WhyQuantumLesson";
 import MathematicalFoundationsLesson from "./modules/MathematicalFoundationsLesson";
+import QubitsQuantumStatesLesson from "./modules/QubitsQuantumStatesLesson";
+import DiracNotationLesson from "./modules/DiracNotationLesson";
+import AmplitudesPhaseLesson from "./modules/AmplitudesPhaseLesson";
+import BlochSphereLesson from "./modules/BlochSphereLesson";
+import QuantumGatesLesson from "./modules/QuantumGatesLesson";
+import QuantumCircuitsLesson from "./modules/QuantumCircuitsLesson";
+import SuperpositionLesson from "./modules/SuperpositionLesson";
+import MeasurementCollapseLesson from "./modules/MeasurementCollapseLesson";
+import EntanglementLesson from "./modules/EntanglementLesson";
+import BellStatesLesson from "./modules/BellStatesLesson";
+import TopicNavigator from "../../components/TopicNavigator/TopicNavigator";
 
 export default function MicroModuleViewerPage() {
   const { id } = useParams();
@@ -19,7 +37,9 @@ export default function MicroModuleViewerPage() {
   const [loading, setLoading] = useState(true);
   const [userStatus, setUserStatus] = useState("not_started");
   const [updating, setUpdating] = useState(false);
-  const [toastMessage, setToastMessage] = useState(null);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [bookmarkUpdating, setBookmarkUpdating] = useState(false);
+  const [toastInfo, setToastInfo] = useState(null);
 
   useEffect(() => {
     async function loadModule() {
@@ -35,6 +55,12 @@ export default function MicroModuleViewerPage() {
         setAllModules(Array.isArray(allMods) ? allMods : []);
 
         if (progData && progData.progress) {
+          // Check bookmark status
+          const isBm = (progData.progress.bookmarkedMicroModules || []).some(
+            (b) => b.moduleId === id
+          );
+          setIsBookmarked(isBm);
+
           const entry = (progData.progress.microModuleProgress || []).find((m) => m.moduleId === id);
           if (entry) {
             setUserStatus(entry.status);
@@ -53,9 +79,41 @@ export default function MicroModuleViewerPage() {
     loadModule();
   }, [id, isLoggedIn]);
 
-  const showToast = (msg) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
+  const showToast = (msg, isError = false) => {
+    setToastInfo({ message: msg, isError });
+    setTimeout(() => setToastInfo(null), 3500);
+  };
+
+  const handleToggleBookmark = async () => {
+    if (!isLoggedIn) {
+      showToast("Please log in to bookmark micro-modules", true);
+      return;
+    }
+    if (bookmarkUpdating) return;
+
+    const prevBookmarked = isBookmarked;
+    const nextBookmarked = !prevBookmarked;
+
+    // 1. Optimistic UI update
+    setIsBookmarked(nextBookmarked);
+    setBookmarkUpdating(true);
+    showToast(nextBookmarked ? "🔖 Added to bookmarks" : "Removed from bookmarks", false);
+
+    // 2. Persist to API
+    try {
+      if (nextBookmarked) {
+        await bookmarkMicroModule(id);
+      } else {
+        await unbookmarkMicroModule(id);
+      }
+    } catch (err) {
+      console.error("Failed to update bookmark:", err);
+      // Rollback on failure!
+      setIsBookmarked(prevBookmarked);
+      showToast("⚠️ Failed to update bookmark. Changes rolled back.", true);
+    } finally {
+      setBookmarkUpdating(false);
+    }
   };
 
   const handleMarkComplete = async () => {
@@ -92,15 +150,20 @@ export default function MicroModuleViewerPage() {
 
   const handleAskQuantiva = () => {
     if (!moduleItem) return;
-    openTutor(
-      `I am exploring the micro-module: "${moduleItem.title}". Could you give me an intuitive explanation of the core quantum concept and why it matters?`,
-      {
-        section: "micro-module",
-        moduleId: moduleItem.moduleId,
-        moduleTitle: moduleItem.title,
-        track: moduleItem.track,
-      }
-    );
+    openTutor(null, {
+      source: "micro-module",
+      topic: {
+        topicId: moduleItem.moduleId,
+        title: moduleItem.title,
+        category: `${moduleItem.track || "Foundations"} Track`,
+        description: moduleItem.description || null,
+      },
+      resource: {
+        type: "micro_module",
+        id: moduleItem.moduleId,
+        title: moduleItem.title,
+      },
+    });
   };
 
   if (loading) {
@@ -131,13 +194,17 @@ export default function MicroModuleViewerPage() {
   return (
     <div className="min-h-screen pt-20 pb-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
       {/* Toast Notification */}
-      {toastMessage && (
+      {toastInfo && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="fixed top-20 right-6 z-50 px-4 py-2.5 rounded-xl bg-black/90 border border-white/20 text-xs font-bold text-white shadow-2xl backdrop-blur-md"
+          className={`fixed top-20 right-6 z-50 px-4 py-2.5 rounded-xl border text-xs font-bold text-white shadow-2xl backdrop-blur-md ${
+            toastInfo.isError
+              ? "bg-red-950/90 border-red-500/40 text-red-200"
+              : "bg-black/90 border-white/20"
+          }`}
         >
-          {toastMessage}
+          {toastInfo.message}
         </motion.div>
       )}
 
@@ -186,18 +253,35 @@ export default function MicroModuleViewerPage() {
             </h1>
           </div>
 
-          {/* Action Hook: Ask Quantiva */}
-          <button
-            onClick={handleAskQuantiva}
-            className="px-4 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-2 shrink-0 self-start sm:self-center"
-            style={{
-              borderColor: "var(--color-app-accent)",
-              background: "rgba(99,102,241,0.1)",
-              color: "var(--color-app-accent)",
-            }}
-          >
-            <span>✨</span> Ask Quantiva
-          </button>
+          <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-center flex-wrap">
+            {/* Authoritative Bookmark Toggle */}
+            <button
+              onClick={handleToggleBookmark}
+              disabled={bookmarkUpdating}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer ${
+                isBookmarked
+                  ? "bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
+                  : "bg-white/5 text-[var(--color-app-text-muted)] border-white/10 hover:border-white/25 hover:text-white"
+              }`}
+              title={isBookmarked ? "Remove bookmark" : "Bookmark this module for later"}
+            >
+              <span>{isBookmarked ? "🔖" : "🏷️"}</span>
+              <span>{isBookmarked ? "Bookmarked" : "Bookmark"}</span>
+            </button>
+
+            {/* Action Hook: Ask Quantiva */}
+            <button
+              onClick={handleAskQuantiva}
+              className="px-4 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-2 shrink-0"
+              style={{
+                borderColor: "var(--color-app-accent)",
+                background: "rgba(99,102,241,0.1)",
+                color: "var(--color-app-accent)",
+              }}
+            >
+              <span>✨</span> Ask Quantiva
+            </button>
+          </div>
         </div>
 
         <p className="text-sm text-[var(--color-app-text-muted)] leading-relaxed mb-6">
@@ -262,6 +346,86 @@ export default function MicroModuleViewerPage() {
             onAskQuantiva={handleAskQuantiva}
           />
         </div>
+      ) : moduleItem.moduleId === "qubits-quantum-states" ? (
+        <div className="mb-10">
+          <QubitsQuantumStatesLesson
+            onComplete={handleMarkComplete}
+            isCompleted={userStatus === "completed"}
+            onAskQuantiva={handleAskQuantiva}
+          />
+        </div>
+      ) : moduleItem.moduleId === "dirac-notation" ? (
+        <div className="mb-10">
+          <DiracNotationLesson
+            onComplete={handleMarkComplete}
+            isCompleted={userStatus === "completed"}
+            onAskQuantiva={handleAskQuantiva}
+          />
+        </div>
+      ) : moduleItem.moduleId === "amplitudes-phase" ? (
+        <div className="mb-10">
+          <AmplitudesPhaseLesson
+            onComplete={handleMarkComplete}
+            isCompleted={userStatus === "completed"}
+            onAskQuantiva={handleAskQuantiva}
+          />
+        </div>
+      ) : moduleItem.moduleId === "bloch-sphere" ? (
+        <div className="mb-10">
+          <BlochSphereLesson
+            onComplete={handleMarkComplete}
+            isCompleted={userStatus === "completed"}
+            onAskQuantiva={handleAskQuantiva}
+          />
+        </div>
+      ) : moduleItem.moduleId === "quantum-gates" ? (
+        <div className="mb-10">
+          <QuantumGatesLesson
+            onComplete={handleMarkComplete}
+            isCompleted={userStatus === "completed"}
+            onAskQuantiva={handleAskQuantiva}
+          />
+        </div>
+      ) : moduleItem.moduleId === "quantum-circuits" ? (
+        <div className="mb-10">
+          <QuantumCircuitsLesson
+            onComplete={handleMarkComplete}
+            isCompleted={userStatus === "completed"}
+            onAskQuantiva={handleAskQuantiva}
+          />
+        </div>
+      ) : moduleItem.moduleId === "superposition" ? (
+        <div className="mb-10">
+          <SuperpositionLesson
+            onComplete={handleMarkComplete}
+            isCompleted={userStatus === "completed"}
+            onAskQuantiva={handleAskQuantiva}
+          />
+        </div>
+      ) : moduleItem.moduleId === "measurement-collapse" ? (
+        <div className="mb-10">
+          <MeasurementCollapseLesson
+            onComplete={handleMarkComplete}
+            isCompleted={userStatus === "completed"}
+            onAskQuantiva={handleAskQuantiva}
+          />
+        </div>
+      ) : moduleItem.moduleId === "entanglement" ? (
+        <div className="mb-10">
+          <EntanglementLesson
+            onComplete={handleMarkComplete}
+            isCompleted={userStatus === "completed"}
+            onAskQuantiva={handleAskQuantiva}
+          />
+        </div>
+      ) : moduleItem.moduleId === "bell-states" ? (
+        <div className="mb-10">
+          <BellStatesLesson
+            onComplete={handleMarkComplete}
+            isCompleted={userStatus === "completed"}
+            onAskQuantiva={handleAskQuantiva}
+          />
+        </div>
       ) : (
         <div className="rounded-2xl p-6 sm:p-8 app-glass border border-[var(--color-app-border)] mb-8">
           <h2 className="text-lg font-bold text-[var(--color-app-text-main)] mb-4">
@@ -287,6 +451,13 @@ export default function MicroModuleViewerPage() {
           </div>
         </div>
       )}
+
+      {/* Contextual Topic Navigator (Phase 7F) */}
+      <TopicNavigator
+        resourceType="micro_module"
+        resourceId={id}
+        titleOverride={moduleItem?.title}
+      />
 
       {/* Non-Gated Previous / Next Navigation */}
       <div className="flex items-center justify-between gap-4 pt-4 border-t border-[var(--color-app-border)]">

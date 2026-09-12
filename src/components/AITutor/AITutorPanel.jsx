@@ -1,31 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-
-import { useLocation } from "react-router-dom";
-
 import { marked } from "marked";
-
+import { useNavigate } from "react-router-dom";
 import { useAITutor } from "../../context/AITutorContext";
-
-import { chatWithTutor, getRecommendations } from "../../services/api";
-
 import MathHTMLContainer from "../MathHTMLContainer/MathHTMLContainer";
-
-const QUICK_ACTIONS = [
-  {
-    label: "Explain this page",
-    prompt:
-      "Explain the core quantum computing concept relevant to the page I'm currently on.",
-  },
-  {
-    label: "Review my circuit",
-    prompt:
-      "Review the circuit/code I currently have open — point out bugs and possible optimizations.",
-  },
-  {
-    label: "What should I learn next?",
-    prompt: "__RECOMMEND__",
-  },
-];
+import { getSuggestedQuestions } from "./tutorContextHelper";
+import { generatePersonalLesson } from "../../services/api";
 
 function cleanMath(math) {
   return math
@@ -34,7 +13,6 @@ function cleanMath(math) {
     .replace(/\\\*{(q\\?_?\d+)}/g, (_, qubit) => {
       return `\\_{${qubit.replace(/\\_/g, "_")}}`;
     })
-
     // Remove decorative semicolons around LaTeX operators:
     // ;\otimes; → \otimes
     // ;\longrightarrow; → \longrightarrow
@@ -51,13 +29,13 @@ function normalizeMathForMarkdown(text) {
 
   let normalized = text;
 
-  // Convert \[...\] → $$...$$
+  // Convert \\[...\\] → $$...$$
   normalized = normalized.replace(
     /\\\[([\s\S]*?)\\\]/g,
     (_, math) => `$$${cleanMath(math)}$$`
   );
 
-  // Convert \(...\) → $...$
+  // Convert \\(...\\) → $...$
   normalized = normalized.replace(
     /\\\(([\s\S]*?)\\\)/g,
     (_, math) => `$${cleanMath(math)}$`
@@ -78,27 +56,6 @@ function normalizeMathForMarkdown(text) {
   return normalized;
 }
 
-/*
- * Protect mathematical expressions before passing the text to marked.
- *
- * Why:
- *
- * LaTeX:
- *   $...\_{q\_0}...$
- *
- * can be interpreted by Markdown as:
- *   \_{...}
- *
- * Similarly:
- *   *{...}
- *   |
- *   _
- *
- * can interfere with Markdown parsing.
- *
- * We therefore replace each math expression with a temporary token,
- * let marked process the normal Markdown, and restore the math afterward.
- */
 function protectMathFromMarkdown(text) {
   const mathBlocks = [];
 
@@ -122,7 +79,6 @@ function restoreMathBlocks(html, mathBlocks) {
 
   mathBlocks.forEach((math, index) => {
     const token = `MATHBLOCK${index}END`;
-
     restored = restored.replace(token, escapeHtml(math));
   });
 
@@ -139,9 +95,6 @@ function escapeHtml(text) {
 function Bubble({ role, text }) {
   const isUser = role === "user";
 
-  /*
-   * User messages don't need Markdown/KaTeX rendering.
-   */
   if (isUser) {
     return (
       <div className="flex justify-end">
@@ -159,43 +112,11 @@ function Bubble({ role, text }) {
     );
   }
 
-  /*
-   * Assistant response pipeline:
-   *
-   * Groq response
-   *      ↓
-   * normalize LaTeX
-   *      ↓
-   * protect math from Markdown
-   *      ↓
-   * marked.parse()
-   *      ↓
-   * restore LaTeX
-   *      ↓
-   * MathHTMLContainer
-   *      ↓
-   * KaTeX
-   */
   const normalizedText = normalizeMathForMarkdown(text || "");
-
-  const { protectedText, mathBlocks } =
-    protectMathFromMarkdown(normalizedText);
+  const { protectedText, mathBlocks } = protectMathFromMarkdown(normalizedText);
 
   let html = marked.parse(protectedText);
-
   html = restoreMathBlocks(html, mathBlocks);
-
-  // Temporary debugging
-  console.log("=== TUTOR RAW ===");
-  console.log(text);
-  console.log("=== TUTOR NORMALIZED ===");
-  console.log(normalizedText);
-  console.log("=== TUTOR PROTECTED ===");
-  console.log(protectedText);
-  console.log("=== TUTOR MATH BLOCKS ===");
-  console.log(mathBlocks);
-  console.log("=== TUTOR MARKED HTML ===");
-  console.log(html);
 
   return (
     <div className="flex justify-start">
@@ -218,169 +139,105 @@ export default function AITutorPanel() {
     isOpen,
     closeTutor,
     toggleTutor,
-    pendingmessage,
-    clearPendingmessage,
-    pageContext,
+    activeContext,
+    clearContext,
+    messages,
+    loading,
+    error,
+    lastFailedMessage,
+    sendMessage,
+    retryLastMessage,
   } = useAITutor();
 
-  const location = useLocation();
-
-  const [messages, setmessages] = useState([
-    {
-      role: "assistant",
-      text: "Hi! I'm your **AI Tutor**. Ask me to explain a concept, debug your circuit, or suggest what to learn next.",
-    },
-  ]);
-
+  const navigate = useNavigate();
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
+  const [generatingLesson, setGeneratingLesson] = useState(false);
+  const [genLessonNotice, setGenLessonNotice] = useState(null);
   const scrollRef = useRef(null);
+  const inputRef = useRef(null);
 
+  const handleTeachInteractively = async () => {
+    if (!activeContext?.topic?.title || generatingLesson) return;
+    setGeneratingLesson(true);
+    setGenLessonNotice("✨ Generating your personal interactive lesson...");
+
+    try {
+      const res = await generatePersonalLesson({
+        topic: activeContext.topic.title,
+        topicDescription: activeContext.topic.description || "",
+        forceAlternative: false,
+      });
+
+      if (res.hasCurated && res.curatedResource) {
+        setGenLessonNotice(null);
+        sendMessage(`I want to learn ${activeContext.topic.title} interactively.`);
+        setGeneratingLesson(false);
+        return;
+      }
+
+      if (res.lesson && res.lesson.lessonId) {
+        setGenLessonNotice(null);
+        setGeneratingLesson(false);
+        navigate(`/generated-lessons/${res.lesson.lessonId}`);
+      }
+    } catch (err) {
+      console.error("Lesson generation from tutor failed:", err);
+      setGenLessonNotice("⚠️ Could not generate lesson. Please try again.");
+      setGeneratingLesson(false);
+      setTimeout(() => setGenLessonNotice(null), 4000);
+    }
+  };
+
+  // Auto scroll to bottom
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, loading, isOpen]);
 
-  /*
-   * Challenge Tutor gets its own conversation context.
-   *
-   * This prevents previous Simulator Tutor messages from being
-   * included in Challenge Tutor history.
-   *
-   * The challenge id is also included so switching between
-   * challenges starts a fresh tutoring conversation.
-   */
+  // Focus input on desktop
   useEffect(() => {
-    if (pageContext?.challengeMode) {
-      setmessages([
-        {
-          role: "assistant",
-          text: "Hi! I'm your **Challenge Tutor**. I'll help you reason through the challenge without giving away the solution.",
-        },
-      ]);
-
-      setInput("");
-      setError(null);
+    if (isOpen && window.innerWidth >= 768 && inputRef.current) {
+      inputRef.current.focus();
     }
-  }, [pageContext?.challengeMode, pageContext?.challenge?.id]);
+  }, [isOpen]);
 
+  // Esc key listener
   useEffect(() => {
-    if (pendingmessage && isOpen) {
-      send(pendingmessage);
-      clearPendingmessage();
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingmessage, isOpen]);
-
-  async function send(rawText) {
-    const text = (rawText ?? input).trim();
-
-    if (!text || loading) return;
-
-    setError(null);
-    setInput("");
-
-    if (text === "__RECOMMEND__") {
-      setmessages((prev) => [
-        ...prev,
-        {
-          role: "user",
-          text: "What should I learn next?",
-        },
-      ]);
-
-      setLoading(true);
-
-      try {
-        const data = await getRecommendations();
-
-        setmessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            text: data.recommendation,
-          },
-        ]);
-      } catch (err) {
-        setError(
-          err?.response?.data?.error ||
-            "Couldn't fetch recommendations right now."
-        );
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && isOpen) {
+        closeTutor();
       }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, closeTutor]);
 
-      setLoading(false);
-      return;
-    }
+  const handleSend = (textToSend = null) => {
+    const text = (textToSend ?? input).trim();
+    if (!text || loading) return;
+    setInput("");
+    sendMessage(text);
+  };
 
-    const nextmessages = [
-      ...messages,
-      {
-        role: "user",
-        text,
-      },
-    ];
-
-    setmessages(nextmessages);
-    setLoading(true);
-
-    try {
-      const history = nextmessages
-        .filter(
-          (m) => m.role === "user" || m.role === "assistant"
-        )
-        .slice(0, -1)
-        .map((m) => ({
-          role: m.role,
-          text: m.text,
-        }));
-
-      const context = {
-        page: location.pathname,
-        ...pageContext,
-      };
-
-      const data = await chatWithTutor(
-        text,
-        history,
-        context
-      );
-
-      setmessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          text: data.reply,
-        },
-      ]);
-    } catch (err) {
-      const msg =
-        err?.response?.data?.error ||
-        "AI Tutor is unavailable right now.";
-
-      setError(msg);
-    }
-
-    setLoading(false);
-  }
+  const suggestedQuestions = getSuggestedQuestions(activeContext);
+  const contextTitle = activeContext?.topic?.title || activeContext?.resource?.title || (activeContext?.query ? `"${activeContext.query}"` : null);
+  const contextSource = activeContext?.source || null;
 
   return (
     <>
-      {/* Floating Launcher */}
+      {/* Floating Launcher Button */}
       <button
         onClick={toggleTutor}
-        className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-2xl flex items-center justify-center transition-transform hover:scale-105 active:scale-95"
+        className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-2xl flex items-center justify-center transition-transform hover:scale-105 active:scale-95 cursor-pointer"
         style={{
           background:
             "linear-gradient(135deg, var(--color-app-primary), var(--color-app-accent))",
           boxShadow:
             "0 8px 30px var(--color-app-primary-glow)",
         }}
-        title="AI Tutor"
-        aria-label="Open AI Tutor"
+        aria-label={isOpen ? "Close AI Tutor" : "Open AI Tutor"}
+        title="Ask Quantiva Tutor"
       >
         {isOpen ? (
           <svg
@@ -415,27 +272,29 @@ export default function AITutorPanel() {
         )}
       </button>
 
-      {/* Panel */}
+      {/* Floating Panel */}
       {isOpen && (
         <div
-          className="fixed bottom-24 right-6 z-50 w-[25rem] max-w-[calc(100vw-3rem)] h-[34rem] max-h-[calc(100vh-8rem)] flex flex-col rounded-2xl overflow-hidden animate-fade-in"
+          className="fixed bottom-20 right-3 left-3 sm:left-auto sm:right-6 sm:bottom-24 z-50 w-auto sm:w-[26rem] max-w-full h-[calc(100vh-6.5rem)] sm:h-[36rem] max-h-[calc(100vh-7rem)] flex flex-col rounded-2xl overflow-hidden shadow-2xl border transition-all animate-fade-in"
           style={{
             background: "var(--color-app-surface)",
-            border: "1px solid var(--color-app-border)",
-            boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
+            borderColor: "var(--color-app-border)",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.45)",
           }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Quantiva AI Tutor"
         >
           {/* Header */}
           <div
             className="flex items-center justify-between px-4 py-3 shrink-0"
             style={{
-              borderBottom:
-                "1px solid var(--color-app-border)",
+              borderBottom: "1px solid var(--color-app-border)",
             }}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <div
-                className="h-8 w-8 rounded-lg flex items-center justify-center"
+                className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0"
                 style={{
                   background:
                     "linear-gradient(135deg, var(--color-app-primary), var(--color-app-accent))",
@@ -459,38 +318,29 @@ export default function AITutorPanel() {
 
               <div>
                 <div
-                  className="text-sm font-bold"
-                  style={{
-                    color:
-                      "var(--color-app-text-main)",
-                  }}
+                  className="text-sm font-extrabold flex items-center gap-1.5"
+                  style={{ color: "var(--color-app-text-main)" }}
                 >
-                  AI Tutor
+                  Ask Quantiva
                 </div>
-
                 <div
-                  className="text-[10px]"
-                  style={{
-                    color:
-                      "var(--color-app-text-muted)",
-                  }}
+                  className="text-[10px] font-medium"
+                  style={{ color: "var(--color-app-text-muted)" }}
                 >
-                  Powered by AI
+                  Contextual Quantum Tutor
                 </div>
               </div>
             </div>
 
             <button
               onClick={closeTutor}
-              className="p-1 rounded hover:opacity-70"
-              style={{
-                color:
-                  "var(--color-app-text-muted)",
-              }}
+              className="p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+              style={{ color: "var(--color-app-text-muted)" }}
+              aria-label="Close panel"
             >
               <svg
-                width="18"
-                height="18"
+                width="16"
+                height="16"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
@@ -505,125 +355,206 @@ export default function AITutorPanel() {
             </button>
           </div>
 
-          {/* messages */}
+          {/* Context Badge (When active context is present) */}
+          {contextTitle && (
+            <div
+              className="px-4 py-2 flex items-center justify-between border-b text-xs shrink-0"
+              style={{
+                background: "rgba(99, 102, 241, 0.08)",
+                borderColor: "var(--color-app-border)",
+              }}
+            >
+              <div className="flex items-center gap-2 overflow-hidden">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 shrink-0">
+                  {contextSource || "Context"}
+                </span>
+                <span
+                  className="font-semibold truncate text-[var(--color-app-text-main)]"
+                  title={contextTitle}
+                >
+                  {contextTitle}
+                </span>
+                {activeContext?.topic?.category && (
+                  <span className="text-[10px] text-[var(--color-app-text-muted)] shrink-0 hidden sm:inline">
+                    · {activeContext.topic.category}
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={clearContext}
+                title="Reset context to generic"
+                className="text-[11px] text-[var(--color-app-text-muted)] hover:text-white ml-2 shrink-0 px-1.5 py-0.5 rounded hover:bg-white/10 transition-colors cursor-pointer"
+                aria-label="Clear active context"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
+          {/* Messages Viewport */}
           <div
             ref={scrollRef}
-            className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3"
-            data-lenis-prevent="true"
+            className="flex-1 overflow-y-auto p-4 space-y-3"
+            style={{
+              scrollBehavior: "smooth",
+            }}
           >
-            {messages.map((m, i) => (
-              <Bubble
-                key={i}
-                role={m.role}
-                text={m.text}
-              />
+            {messages.map((m, idx) => (
+              <Bubble key={m.id || idx} role={m.role} text={m.text} />
             ))}
 
+            {/* Thinking / Loading Indicator */}
             {loading && (
               <div className="flex justify-start">
                 <div
-                  className="rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm flex gap-1"
+                  className="rounded-2xl rounded-bl-sm px-4 py-2.5 text-xs flex items-center gap-2"
                   style={{
-                    background:
-                      "var(--color-app-surface-hover)",
-                    border:
-                      "1px solid var(--color-app-border)",
+                    background: "var(--color-app-surface-hover)",
+                    border: "1px solid var(--color-app-border)",
+                    color: "var(--color-app-text-muted)",
                   }}
                 >
-                  <span className="ai-tutor-dot" />
-                  <span
-                    className="ai-tutor-dot"
-                    style={{
-                      animationDelay: "0.15s",
-                    }}
-                  />
-                  <span
-                    className="ai-tutor-dot"
-                    style={{
-                      animationDelay: "0.3s",
-                    }}
-                  />
+                  <div className="flex gap-1 items-center">
+                    <span className="ai-tutor-dot" />
+                    <span
+                      className="ai-tutor-dot"
+                      style={{ animationDelay: "0.15s" }}
+                    />
+                    <span
+                      className="ai-tutor-dot"
+                      style={{ animationDelay: "0.3s" }}
+                    />
+                  </div>
+                  <span className="font-medium text-[11px]">
+                    Tutor is thinking...
+                  </span>
                 </div>
               </div>
             )}
 
+            {/* Lesson Generation Indicator */}
+            {generatingLesson && (
+              <div className="flex justify-start">
+                <div
+                  className="rounded-2xl rounded-bl-sm px-4 py-2.5 text-xs flex items-center gap-2 border border-purple-500/30 bg-purple-500/10 text-purple-200"
+                >
+                  <span className="animate-spin text-sm">🌀</span>
+                  <span className="font-semibold text-[11px]">
+                    {genLessonNotice || "Generating your personal interactive lesson..."}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Error Banner with Retry */}
             {error && (
               <div
-                className="text-xs px-3 py-2 rounded-lg"
+                className="text-xs px-3.5 py-2.5 rounded-xl flex items-center justify-between gap-2"
                 style={{
-                  background:
-                    "rgba(239,68,68,0.1)",
-                  color: "#ef4444",
-                  border:
-                    "1px solid rgba(239,68,68,0.3)",
+                  background: "rgba(239, 68, 68, 0.12)",
+                  color: "#f87171",
+                  border: "1px solid rgba(239, 68, 68, 0.3)",
                 }}
               >
-                {error}
+                <div className="flex items-center gap-1.5 overflow-hidden">
+                  <span>⚠️</span>
+                  <span className="truncate">{error}</span>
+                </div>
+                {lastFailedMessage && (
+                  <button
+                    onClick={retryLastMessage}
+                    className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-red-500/20 hover:bg-red-500/30 text-red-200 border border-red-500/40 shrink-0 transition-colors cursor-pointer"
+                  >
+                    Retry ↻
+                  </button>
+                )}
               </div>
             )}
           </div>
 
-          {/* Quick Actions */}
+          {/* Suggested Starter Questions (when conversation has only initial greeting) */}
           {messages.length <= 1 && (
-            <div className="px-4 pb-2 flex flex-wrap gap-1.5 shrink-0">
-              {QUICK_ACTIONS.map((qa) => (
-                <button
-                  key={qa.label}
-                  onClick={() => send(qa.prompt)}
-                  className="text-[11px] px-2.5 py-1 rounded-full transition-colors"
-                  style={{
-                    border:
-                      "1px solid var(--color-app-border)",
-                    color:
-                      "var(--color-app-text-muted)",
-                    background:
-                      "var(--color-app-surface-hover)",
-                  }}
-                >
-                  {qa.label}
-                </button>
-              ))}
+            <div
+              className="px-4 pb-2 pt-1 flex flex-col gap-1.5 shrink-0 border-t"
+              style={{
+                borderColor: "var(--color-app-border)",
+                background: "var(--color-app-surface)",
+              }}
+            >
+              <div className="text-[11px] font-medium text-[var(--color-app-text-muted)] flex items-center gap-1">
+                <span>💡</span> Suggested questions:
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {activeContext?.topic?.title && (
+                  <button
+                    onClick={handleTeachInteractively}
+                    disabled={generatingLesson || loading}
+                    className="text-left text-[11px] font-bold px-2.5 py-1 rounded-lg border transition-all bg-purple-500/15 border-purple-500/40 text-purple-300 hover:bg-purple-500/25 active:scale-[0.98] disabled:opacity-50 cursor-pointer flex items-center gap-1"
+                  >
+                    <span>⚡</span> Teach me interactively
+                  </button>
+                )}
+                {suggestedQuestions.map((q, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleSend(q)}
+                    disabled={loading}
+                    className="text-left text-[11px] px-2.5 py-1 rounded-lg border transition-all hover:border-indigo-500/40 hover:bg-indigo-500/10 active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                    style={{
+                      borderColor: "var(--color-app-border)",
+                      background: "var(--color-app-surface-hover)",
+                      color: "var(--color-app-text-main)",
+                    }}
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
-          {/* Input */}
+          {/* Input Form */}
           <form
             className="flex items-center gap-2 p-3 shrink-0"
             style={{
-              borderTop:
-                "1px solid var(--color-app-border)",
+              borderTop: "1px solid var(--color-app-border)",
+              background: "var(--color-app-surface)",
             }}
             onSubmit={(e) => {
               e.preventDefault();
-              send();
+              handleSend();
             }}
           >
             <input
+              ref={inputRef}
               type="text"
               value={input}
-              onChange={(e) =>
-                setInput(e.target.value)
+              onChange={(e) => setInput(e.target.value)}
+              disabled={loading}
+              placeholder={
+                activeContext?.topic?.title
+                  ? `Ask about ${activeContext.topic.title}...`
+                  : "Ask about qubits, gates, algorithms..."
               }
-              placeholder="Ask about qubits, gates, algorithms..."
-              className="flex-1 px-3 py-2 rounded-lg text-sm outline-none"
+              aria-label="Ask AI Tutor"
+              className="flex-1 px-3.5 py-2 rounded-xl text-sm outline-none transition-colors disabled:opacity-60"
               style={{
-                background:
-                  "var(--color-app-surface-hover)",
-                border:
-                  "1px solid var(--color-app-border)",
-                color:
-                  "var(--color-app-text-main)",
+                background: "var(--color-app-surface-hover)",
+                border: "1px solid var(--color-app-border)",
+                color: "var(--color-app-text-main)",
               }}
             />
 
             <button
               type="submit"
               disabled={loading || !input.trim()}
-              className="h-9 w-9 shrink-0 rounded-lg flex items-center justify-center disabled:opacity-40"
+              aria-label="Send question"
+              className="h-9 w-9 shrink-0 rounded-xl flex items-center justify-center disabled:opacity-40 transition-transform active:scale-95 cursor-pointer"
               style={{
                 background:
-                  "var(--color-app-primary)",
+                  "linear-gradient(135deg, var(--color-app-primary), var(--color-app-accent))",
                 color: "#fff",
+                boxShadow: "0 2px 8px var(--color-app-primary-glow)",
               }}
             >
               <svg
@@ -647,21 +578,20 @@ export default function AITutorPanel() {
 
       <style>{`
         .ai-tutor-dot {
-          width: 6px;
-          height: 6px;
+          width: 5px;
+          height: 5px;
           border-radius: 50%;
-          background: var(--color-app-text-muted);
+          background: var(--color-app-primary);
           animation: ai-tutor-bounce 1.2s infinite ease-in-out;
         }
 
         @keyframes ai-tutor-bounce {
           0%, 80%, 100% {
             transform: scale(0.6);
-            opacity: 0.5;
+            opacity: 0.4;
           }
-
           40% {
-            transform: scale(1);
+            transform: scale(1.1);
             opacity: 1;
           }
         }

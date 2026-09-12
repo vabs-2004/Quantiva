@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getCourseById, getMyProgress, markLectureComplete, getCertificateForCourse, downloadCertificate } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
+import TopicNavigator from "../../components/TopicNavigator/TopicNavigator";
+import { useAITutor } from "../../context/AITutorContext";
 
 // Simple helper to extract YouTube embed URL from various YT link formats
 function getEmbedUrl(url) {
@@ -20,6 +22,7 @@ function getEmbedUrl(url) {
 export default function CourseViewerPage() {
   const { id } = useParams();
   const { isLoggedIn } = useAuth();
+  const { openTutor } = useAITutor();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentLectureIndex, setCurrentLectureIndex] = useState(0);
@@ -27,6 +30,25 @@ export default function CourseViewerPage() {
   const [marking, setMarking] = useState(false);
   const [certificate, setCertificate] = useState(null);
   const [downloading, setDownloading] = useState(false);
+
+  const handleAskQuantiva = () => {
+    if (!course) return;
+    const currentLecture = course.lectures?.[currentLectureIndex];
+    openTutor(null, {
+      source: "course",
+      topic: {
+        topicId: course.id,
+        title: course.title,
+        category: "Quantum Course",
+        description: currentLecture ? `Lecture: ${currentLecture.title}` : course.description,
+      },
+      resource: {
+        type: "course",
+        id: course.id,
+        title: course.title,
+      },
+    });
+  };
 
   useEffect(() => {
     async function loadCourse() {
@@ -97,7 +119,17 @@ export default function CourseViewerPage() {
         <Link to="/courses" className="text-sm font-semibold text-[var(--color-app-primary)] hover:underline mb-4 inline-block">
           &larr; Back to Courses
         </Link>
-        <h1 className="text-3xl font-extrabold text-[var(--color-app-text-main)] mb-2">{course.title}</h1>
+        <div className="flex items-start justify-between gap-4 mb-2 flex-wrap">
+          <h1 className="text-3xl font-extrabold text-[var(--color-app-text-main)]">{course.title}</h1>
+          <button
+            onClick={handleAskQuantiva}
+            className="px-3.5 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer bg-white/5 text-[var(--color-app-text-muted)] border-white/10 hover:border-indigo-500/40 hover:text-white hover:bg-indigo-500/10 shrink-0"
+            title="Ask Quantiva Tutor about this course"
+          >
+            <span className="text-sm">✨</span>
+            <span>Ask Quantiva</span>
+          </button>
+        </div>
         <p className="text-[var(--color-app-text-muted)] mb-6">{course.description}</p>
 
         {certificate && (
@@ -211,6 +243,12 @@ export default function CourseViewerPage() {
         </div>
       </div>
 
+      {/* Contextual Topic Navigator (Phase 7F) */}
+      <TopicNavigator
+        resourceType="course"
+        resourceId={id}
+        titleOverride={course?.title}
+      />
     </div>
   );
 }

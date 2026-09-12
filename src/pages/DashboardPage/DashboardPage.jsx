@@ -292,6 +292,7 @@ export default function DashboardPage() {
           <h2 className="text-sm font-bold mb-4" style={{ color: "var(--color-app-text-main)" }}>Quick Access</h2>
           <div className="grid gap-3 sm:grid-cols-3">
             {[
+              { label: "My Generated Lessons", desc: "Your personal AI-generated modules", path: "/my-learning/generated-lessons", icon: "✨", color: "from-purple-500 to-pink-600" },
               { label: "Quantum Sandbox", desc: "Write & run custom Qiskit code", path: "/sandbox", icon: "💻", color: "from-purple-500 to-indigo-600" },
               { label: "Circuit Simulator", desc: "Drag & drop quantum gates", path: "/circuit-simulator", icon: "🔧", color: "from-cyan-500 to-blue-600" },
               { label: "Bloch Sphere", desc: "3D interactive visualization", path: "/blochsphere", icon: "🌐", color: "from-emerald-500 to-teal-600" },

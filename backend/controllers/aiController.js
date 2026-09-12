@@ -181,6 +181,7 @@ async function chat(req, res) {
       })
       : 
       promptBuilder.buildChatPrompt({
+        context,
         circuitContext: context,
         userMessage: message,
       });

@@ -327,6 +327,36 @@ export async function updateMicroModuleProgress(moduleId, status) {
   return res.data;
 }
 
+export async function bookmarkMicroModule(moduleId) {
+  const res = await apiClient.post(`/progress/micro-module/${moduleId}/bookmark`);
+  return res.data;
+}
+
+export async function unbookmarkMicroModule(moduleId) {
+  const res = await apiClient.delete(`/progress/micro-module/${moduleId}/bookmark`);
+  return res.data;
+}
+
+export async function getBookmarkedMicroModules() {
+  const res = await apiClient.get("/progress/micro-modules/bookmarks");
+  return res.data;
+}
+
+export async function bookmarkAlgorithm(algorithmId) {
+  const res = await apiClient.post(`/progress/algorithm/${algorithmId}/bookmark`);
+  return res.data;
+}
+
+export async function unbookmarkAlgorithm(algorithmId) {
+  const res = await apiClient.delete(`/progress/algorithm/${algorithmId}/bookmark`);
+  return res.data;
+}
+
+export async function getBookmarkedAlgorithms() {
+  const res = await apiClient.get("/progress/algorithms/bookmarks");
+  return res.data;
+}
+
 export async function getMicroModules(track = "foundations") {
   const res = await apiClient.get(`/micro-modules?track=${track}`);
   return res.data;
@@ -460,5 +490,69 @@ export async function explainNoiseDivergence({ timelineId, noisyTimelineId, step
   return res.data;
 }
 
+// ═══════════════════════════════════════════════════════
+// TOPIC NAVIGATOR APIs (Phase 7F)
+// ═══════════════════════════════════════════════════════
+
+export async function getTopics() {
+  const res = await apiClient.get("/topics");
+  return res.data;
+}
+
+export async function getTopicById(topicId) {
+  const res = await apiClient.get(`/topics/${encodeURIComponent(topicId)}`);
+  return res.data;
+}
+
+export async function getTopicByResource(resourceType, resourceId) {
+  const res = await apiClient.get(`/topics/by-resource/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}`);
+  return res.data;
+}
+
+// ═══════════════════════════════════════════════════════
+// USER-GENERATED INTERACTIVE LESSONS (Phase 7H)
+// ═══════════════════════════════════════════════════════
+
+export async function generatePersonalLesson({ topic, topicDescription = "", learnerLevel = "intermediate", forceAlternative = false }) {
+  const res = await apiClient.post("/generated-lessons/generate", {
+    topic,
+    topicDescription,
+    learnerLevel,
+    forceAlternative,
+  });
+  return res.data;
+}
+
+export async function getMyGeneratedLessons() {
+  const res = await apiClient.get("/generated-lessons");
+  return res.data;
+}
+
+export async function getMyBookmarkedGeneratedLessons() {
+  const res = await apiClient.get("/generated-lessons/bookmarks");
+  return res.data;
+}
+
+export async function getGeneratedLessonById(lessonId) {
+  const res = await apiClient.get(`/generated-lessons/${encodeURIComponent(lessonId)}`);
+  return res.data;
+}
+
+export async function deleteGeneratedLesson(lessonId) {
+  const res = await apiClient.delete(`/generated-lessons/${encodeURIComponent(lessonId)}`);
+  return res.data;
+}
+
+export async function bookmarkGeneratedLesson(lessonId) {
+  const res = await apiClient.post(`/generated-lessons/${encodeURIComponent(lessonId)}/bookmark`);
+  return res.data;
+}
+
+export async function unbookmarkGeneratedLesson(lessonId) {
+  const res = await apiClient.delete(`/generated-lessons/${encodeURIComponent(lessonId)}/bookmark`);
+  return res.data;
+}
+
 export default apiClient;
+
 

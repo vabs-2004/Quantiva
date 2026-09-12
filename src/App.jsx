@@ -7,6 +7,8 @@ import AppRoutes from "./routes/AppRoutes";
 import useSmoothScroll from "./hooks/useSmoothScroll";
 import usePageTracking from "./hooks/usePageTracking";
 
+import AITutorPanel from "./components/AITutor/AITutorPanel";
+
 /**
  * Inner app component that uses the smooth scroll hook.
  * Must be inside BrowserRouter for hooks to work.
@@ -14,7 +16,12 @@ import usePageTracking from "./hooks/usePageTracking";
 function AppInner() {
   useSmoothScroll();
   usePageTracking();
-  return <AppRoutes />;
+  return (
+    <>
+      <AppRoutes />
+      <AITutorPanel />
+    </>
+  );
 }
 
 import { GoogleOAuthProvider } from "@react-oauth/google";

@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
-export default function ModuleListView({ modules, progressMap }) {
+export default function ModuleListView({ modules, progressMap, bookmarkMap = {}, onToggleBookmark }) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 py-6 max-w-6xl mx-auto">
       {modules.map((m, idx) => {
         const userStatus = progressMap[m.moduleId]?.status || "not_started";
+        const isBookmarked = !!bookmarkMap[m.moduleId];
 
         let statusBadge = {
           label: "Not Started",
@@ -50,9 +51,29 @@ export default function ModuleListView({ modules, progressMap }) {
                   <span className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full border border-white/10 text-[var(--color-app-text-muted)] bg-black/20">
                     #{String(m.sequenceOrder).padStart(2, "0")}
                   </span>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusBadge.badgeClass}`}>
-                    {statusBadge.label}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {onToggleBookmark && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onToggleBookmark(m.moduleId);
+                        }}
+                        className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+                          isBookmarked
+                            ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
+                            : "bg-white/5 text-zinc-500 border-white/10 hover:text-zinc-300 hover:border-white/20"
+                        }`}
+                        title={isBookmarked ? "Remove Bookmark" : "Bookmark module"}
+                      >
+                        <span className="text-xs">{isBookmarked ? "🔖" : "🏷️"}</span>
+                      </button>
+                    )}
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusBadge.badgeClass}`}>
+                      {statusBadge.label}
+                    </span>
+                  </div>
                 </div>
 
                 <h3 className="text-base font-bold text-[var(--color-app-text-main)] mb-2">

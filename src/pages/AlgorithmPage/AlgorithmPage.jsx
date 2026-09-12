@@ -14,9 +14,15 @@ import MeasurementTable from "../../components/MeasurementTable/MeasurementTable
 import Loading from "../../components/Loading/Loading";
 import EducationalTabs from "../../components/EducationalTabs/EducationalTabs";
 import BlochImageViewer from "../../components/BlochImageViewer/BlochImageViewer";
+import { bookmarkAlgorithm, unbookmarkAlgorithm, getMyProgress } from "../../services/api";
+import { useState } from "react";
+import { motion } from "framer-motion";
+import TopicNavigator from "../../components/TopicNavigator/TopicNavigator";
+import { useAITutor } from "../../context/AITutorContext";
 
 export default function AlgorithmPage() {
   const { id } = useParams();
+  const { openTutor } = useAITutor();
   const {
     selectedAlgorithm,
     selectAlgorithm,
@@ -27,12 +33,81 @@ export default function AlgorithmPage() {
     error,
   } = useAlgorithmContext();
   const { execute, isRunning } = useAlgorithm();
-  const { isAdmin } = useAuth();
+  const { isAdmin, isLoggedIn } = useAuth();
   const navigate = useNavigate();
+
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [bookmarkUpdating, setBookmarkUpdating] = useState(false);
+  const [toastInfo, setToastInfo] = useState(null);
+
+  const showToast = (msg, isError = false) => {
+    setToastInfo({ message: msg, isError });
+    setTimeout(() => setToastInfo(null), 3000);
+  };
 
   useEffect(() => {
     if (id) selectAlgorithm(id);
   }, [id, selectAlgorithm]);
+
+  // Load bookmark status for this algorithm
+  useEffect(() => {
+    if (isLoggedIn && id) {
+      getMyProgress()
+        .then((data) => {
+          if (data && data.progress && data.progress.bookmarkedAlgorithms) {
+            const hasBm = data.progress.bookmarkedAlgorithms.some((b) => b.algorithmId === id);
+            setIsBookmarked(hasBm);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [isLoggedIn, id]);
+
+  const handleToggleBookmark = async () => {
+    if (!isLoggedIn) {
+      showToast("Please log in to bookmark algorithms", true);
+      return;
+    }
+    if (bookmarkUpdating) return;
+
+    const nextState = !isBookmarked;
+    setIsBookmarked(nextState);
+    setBookmarkUpdating(true);
+
+    try {
+      if (nextState) {
+        await bookmarkAlgorithm(id);
+        showToast("🔖 Algorithm bookmarked");
+      } else {
+        await unbookmarkAlgorithm(id);
+        showToast("Removed from bookmarks");
+      }
+    } catch (err) {
+      console.error("Failed to toggle algorithm bookmark:", err);
+      setIsBookmarked(!nextState); // Rollback
+      showToast("Failed to update bookmark", true);
+    } finally {
+      setBookmarkUpdating(false);
+    }
+  };
+
+  const handleAskQuantiva = () => {
+    if (!selectedAlgorithm) return;
+    openTutor(null, {
+      source: "algorithm",
+      topic: {
+        topicId: selectedAlgorithm.id,
+        title: selectedAlgorithm.name,
+        category: selectedAlgorithm.category,
+        description: selectedAlgorithm.description,
+      },
+      resource: {
+        type: "algorithm",
+        id: selectedAlgorithm.id,
+        title: selectedAlgorithm.name,
+      },
+    });
+  };
 
   // Wait until the selectedAlgorithm in context matches the route ID
   if (!selectedAlgorithm || selectedAlgorithm.id !== id) {
@@ -44,12 +119,27 @@ export default function AlgorithmPage() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto bg-[var(--color-app-base)]" data-lenis-prevent="true">
+    <div className="flex-1 overflow-y-auto bg-[var(--color-app-base)] relative" data-lenis-prevent="true">
       <Loading visible={loading} />
+
+      {/* Toast Notification */}
+      {toastInfo && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`fixed top-20 right-6 z-50 px-4 py-2.5 rounded-xl border text-xs font-bold text-white shadow-2xl backdrop-blur-md ${
+            toastInfo.isError
+              ? "bg-red-950/90 border-red-500/40 text-red-200"
+              : "bg-black/90 border-white/20"
+          }`}
+        >
+          {toastInfo.message}
+        </motion.div>
+      )}
 
       <div className="mx-auto max-w-4xl px-6 py-8">
         {/* Header */}
-          <div className="flex items-start justify-between">
+          <div className="flex items-start justify-between gap-4">
             <div>
               <div className="mb-2 inline-flex items-center rounded-full border border-[var(--color-app-accent)]/30 bg-[var(--color-app-accent)]/10 px-3 py-0.5 text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-app-accent)]">
                 {selectedAlgorithm.category}
@@ -58,14 +148,41 @@ export default function AlgorithmPage() {
                 {selectedAlgorithm.name}
               </h1>
             </div>
-            {isAdmin && (
+            <div className="flex items-center gap-2">
+              {/* Ask Quantiva Action Button */}
               <button
-                onClick={() => navigate(`/admin/edit-algorithm/${selectedAlgorithm.id}`)}
-                className="rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 px-4 py-2 text-xs font-bold hover:bg-blue-500/30 transition-colors"
+                onClick={handleAskQuantiva}
+                className="px-3.5 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer bg-white/5 text-[var(--color-app-text-muted)] border-white/10 hover:border-indigo-500/40 hover:text-white hover:bg-indigo-500/10"
+                title="Ask Quantiva Tutor about this algorithm"
               >
-                ✏️ Edit Algorithm Data
+                <span className="text-sm">✨</span>
+                <span>Ask Quantiva</span>
               </button>
-            )}
+
+              {/* Algorithm Bookmark Toggle */}
+              <button
+                onClick={handleToggleBookmark}
+                disabled={bookmarkUpdating}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer ${
+                  isBookmarked
+                    ? "bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
+                    : "bg-white/5 text-[var(--color-app-text-muted)] border-white/10 hover:border-white/25 hover:text-white"
+                }`}
+                title={isBookmarked ? "Remove bookmark" : "Bookmark this algorithm for later"}
+              >
+                <span>{isBookmarked ? "🔖" : "🏷️"}</span>
+                <span>{isBookmarked ? "Bookmarked" : "Bookmark"}</span>
+              </button>
+
+              {isAdmin && (
+                <button
+                  onClick={() => navigate(`/admin/edit-algorithm/${selectedAlgorithm.id}`)}
+                  className="rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 px-4 py-2 text-xs font-bold hover:bg-blue-500/30 transition-colors"
+                >
+                  ✏️ Edit Algorithm Data
+                </button>
+              )}
+            </div>
           </div>
           <p className="mt-2 text-xs leading-relaxed text-[var(--color-app-text-light)] max-w-3xl">
             {selectedAlgorithm.description}
@@ -182,6 +299,13 @@ export default function AlgorithmPage() {
             <MeasurementTable measurements={result.measurements} />
           </section>
         )}
+
+        {/* Contextual Topic Navigator (Phase 7F) */}
+        <TopicNavigator
+          resourceType="algorithm"
+          resourceId={id}
+          titleOverride={selectedAlgorithm?.name}
+        />
       </div>
     </div>
   );
